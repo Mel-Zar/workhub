@@ -1,21 +1,27 @@
+// server/server.js
 const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-
-dotenv.config();
+const connectDB = require("./config/connectDB");
+const authRoutes = require("./routes/authRoutes");
+require("dotenv").config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB
+connectDB();
+
+// Middleware
 app.use(express.json());
 
-mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB connected"))
-    .catch(err => console.log(err));
+// Auth routes
+app.use("/api/auth", authRoutes);
 
+// Test route
 app.get("/", (req, res) => {
     res.send("WorkHub API running");
 });
 
-app.listen(5000, () => {
-    console.log("Server running on port 5000");
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
