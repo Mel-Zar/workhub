@@ -14,7 +14,7 @@ exports.getTasks = async (req, res) => {
 // CREATE a new task
 exports.createTask = async (req, res) => {
     try {
-        const { title, description } = req.body;
+        const { title, description, priority, deadline } = req.body;
 
         if (!title) {
             return res.status(400).json({ error: "Title is required" });
@@ -23,6 +23,8 @@ exports.createTask = async (req, res) => {
         const task = new Task({
             title,
             description,
+            priority,
+            deadline,
             user: req.user.id
         });
 
@@ -38,7 +40,7 @@ exports.createTask = async (req, res) => {
 exports.updateTask = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description } = req.body;
+        const { title, description, priority, deadline, completed } = req.body;
 
         const task = await Task.findById(id);
         if (!task) return res.status(404).json({ error: "Task not found" });
@@ -47,8 +49,11 @@ exports.updateTask = async (req, res) => {
             return res.status(401).json({ error: "Not authorized" });
         }
 
-        if (title) task.title = title;
-        if (description) task.description = description;
+        if (title !== undefined) task.title = title;
+        if (description !== undefined) task.description = description;
+        if (priority !== undefined) task.priority = priority;
+        if (deadline !== undefined) task.deadline = deadline;
+        if (completed !== undefined) task.completed = completed;
 
         await task.save();
         res.json(task);
@@ -78,14 +83,12 @@ exports.deleteTask = async (req, res) => {
     }
 };
 
-// ✅ TOGGLE COMPLETE (LIGGER ENSAM LÄNGST NER)
+// TOGGLE COMPLETE
 exports.toggleComplete = async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
 
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
-        }
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         if (task.user.toString() !== req.user.id) {
             return res.status(401).json({ error: "Not authorized" });
