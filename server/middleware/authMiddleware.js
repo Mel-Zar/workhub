@@ -1,15 +1,24 @@
-// server/config/connectDB.js
-const mongoose = require("mongoose");
-require("dotenv").config();
+const jwt = require("jsonwebtoken");
 
-const connectDB = async () => {
+const auth = (req, res, next) => {
     try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log("MongoDB connected");
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({ error: "No token provided" });
+        }
+
+        const token = authHeader.split(" ")[1]; // "Bearer <token>"
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret");
+
+        // Lagra användarens ID på requesten
+        req.user = { id: decoded.id };
+
+        next();
     } catch (err) {
-        console.error("MongoDB connection failed:", err.message);
-        process.exit(1);
+        console.error("Auth middleware error:", err);
+        res.status(401).json({ error: "Token not valid" });
     }
 };
 
-module.exports = connectDB;
+module.exports = auth;

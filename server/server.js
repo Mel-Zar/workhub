@@ -1,7 +1,8 @@
-// server/server.js
 const express = require("express");
 const connectDB = require("./config/connectDB");
 const authRoutes = require("./routes/authRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+
 require("dotenv").config();
 
 const app = express();
@@ -13,8 +14,9 @@ connectDB();
 // Middleware
 app.use(express.json());
 
-// Auth routes
+// Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes); // Korrekt route utan mellanslag
 
 // Test route
 app.get("/", (req, res) => {
