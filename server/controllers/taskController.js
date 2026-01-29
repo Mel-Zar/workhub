@@ -1,10 +1,20 @@
 const Task = require("../models/Task");
 
 
-// Helper functions
-const buildQuery = (userId, search, priority, completed, category, fromDate, toDate) => {
+// HELPERS
+
+const buildQuery = (
+    userId,
+    search,
+    priority,
+    completed,
+    category,
+    fromDate,
+    toDate
+) => {
     const query = { user: userId };
 
+    // 🔍 Search
     if (search) {
         query.$or = [
             { title: { $regex: search, $options: "i" } },
@@ -13,22 +23,32 @@ const buildQuery = (userId, search, priority, completed, category, fromDate, toD
         ];
     }
 
+    // 🎯 Priority filter
     if (priority) {
         query.priority = priority;
     }
 
+    // 🗂 Category filter (case-insensitive)
     if (category) {
-        query.category = category;
+        query.category = { $regex: `^${category}$`, $options: "i" };
     }
 
+    // ✅ Completed filter
     if (completed !== undefined) {
-        query.completed = completed === true || completed === "true";
+        query.completed = String(completed) === "true";
     }
 
+    // 📅 Deadline range
     if (fromDate || toDate) {
         query.deadline = {};
-        if (fromDate) query.deadline.$gte = new Date(fromDate);
-        if (toDate) query.deadline.$lte = new Date(toDate);
+
+        if (fromDate) {
+            query.deadline.$gte = new Date(fromDate);
+        }
+
+        if (toDate) {
+            query.deadline.$lte = new Date(toDate);
+        }
     }
 
     return query;
@@ -36,7 +56,6 @@ const buildQuery = (userId, search, priority, completed, category, fromDate, toD
 
 
 const buildSortOptions = (sortBy, order) => {
-
     const allowedFields = ["title", "priority", "deadline", "createdAt"];
 
     // Default sort
@@ -59,17 +78,31 @@ const buildPagination = (page, limit) => {
 };
 
 
-// GET all tasks 
+// GET ALL TASKS
+
 exports.getTasks = async (req, res) => {
     try {
-        const { search, priority, category, completed, sortBy, order, page, limit } = req.query;
+        const {
+            search,
+            priority,
+            category,
+            completed,
+            sortBy,
+            order,
+            page,
+            limit,
+            fromDate,
+            toDate
+        } = req.query;
 
         const query = buildQuery(
             req.user.id,
             search,
             priority,
             completed,
-            category
+            category,
+            fromDate,
+            toDate
         );
 
         const sortOptions = buildSortOptions(sortBy, order);
@@ -97,8 +130,8 @@ exports.getTasks = async (req, res) => {
 };
 
 
+// CREATE TASK
 
-// CREATE task
 exports.createTask = async (req, res) => {
     try {
         const { title, description, priority, deadline, category } = req.body;
@@ -118,6 +151,7 @@ exports.createTask = async (req, res) => {
 
         await task.save();
         res.status(201).json(task);
+
     } catch (err) {
         console.error("Error creating task:", err);
         res.status(500).json({ error: "Server error" });
@@ -125,27 +159,31 @@ exports.createTask = async (req, res) => {
 };
 
 
-// UPDATE task
+// UPDATE TASK
+
 exports.updateTask = async (req, res) => {
     try {
         const { id } = req.params;
         const { title, description, priority, deadline, category } = req.body;
 
         const task = await Task.findById(id);
-        if (!task) return res.status(404).json({ error: "Task not found" });
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
+        }
 
         if (task.user.toString() !== req.user.id) {
             return res.status(401).json({ error: "Not authorized" });
         }
 
-        if (title) task.title = title;
-        if (description) task.description = description;
-        if (priority) task.priority = priority;
-        if (deadline) task.deadline = deadline;
-        if (category) task.category = category;
+        if (title !== undefined) task.title = title;
+        if (description !== undefined) task.description = description;
+        if (priority !== undefined) task.priority = priority;
+        if (deadline !== undefined) task.deadline = deadline;
+        if (category !== undefined) task.category = category;
 
         await task.save();
         res.json(task);
+
     } catch (err) {
         console.error("Error updating task:", err);
         res.status(500).json({ error: "Server error" });
@@ -153,13 +191,16 @@ exports.updateTask = async (req, res) => {
 };
 
 
-// DELETE task
+// DELETE TASK
+
 exports.deleteTask = async (req, res) => {
     try {
         const { id } = req.params;
 
         const task = await Task.findById(id);
-        if (!task) return res.status(404).json({ error: "Task not found" });
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
+        }
 
         if (task.user.toString() !== req.user.id) {
             return res.status(401).json({ error: "Not authorized" });
@@ -167,6 +208,7 @@ exports.deleteTask = async (req, res) => {
 
         await task.deleteOne();
         res.json({ message: "Task deleted successfully" });
+
     } catch (err) {
         console.error("Error deleting task:", err);
         res.status(500).json({ error: "Server error" });
@@ -174,7 +216,8 @@ exports.deleteTask = async (req, res) => {
 };
 
 
-// TOGGLE complete
+// TOGGLE COMPLETE
+
 exports.toggleComplete = async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
@@ -191,6 +234,7 @@ exports.toggleComplete = async (req, res) => {
         await task.save();
 
         res.json(task);
+
     } catch (err) {
         console.error("Error toggling task:", err);
         res.status(500).json({ error: "Server error" });
