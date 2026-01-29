@@ -1,42 +1,79 @@
 const Task = require("../models/Task");
 
-// GET all tasks with search, filtering, sorting and pagination
+
+// Helper functions
+const buildQuery = (userId, search, priority, completed, category, fromDate, toDate) => {
+    const query = { user: userId };
+
+    if (search) {
+        query.$or = [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+            { category: { $regex: search, $options: "i" } }
+        ];
+    }
+
+    if (priority) {
+        query.priority = priority;
+    }
+
+    if (category) {
+        query.category = category;
+    }
+
+    if (completed !== undefined) {
+        query.completed = completed === true || completed === "true";
+    }
+
+    if (fromDate || toDate) {
+        query.deadline = {};
+        if (fromDate) query.deadline.$gte = new Date(fromDate);
+        if (toDate) query.deadline.$lte = new Date(toDate);
+    }
+
+    return query;
+};
+
+
+const buildSortOptions = (sortBy, order) => {
+
+    const allowedFields = ["title", "priority", "deadline", "createdAt"];
+
+    // Default sort
+    if (!sortBy || !allowedFields.includes(sortBy)) {
+        return { createdAt: -1 };
+    }
+
+    return {
+        [sortBy]: order === "asc" ? 1 : -1
+    };
+};
+
+
+const buildPagination = (page, limit) => {
+    const pageNumber = parseInt(page) || 1;
+    const limitNumber = parseInt(limit) || 5;
+    const skip = (pageNumber - 1) * limitNumber;
+
+    return { pageNumber, limitNumber, skip };
+};
+
+
+// GET all tasks 
 exports.getTasks = async (req, res) => {
     try {
-        const { search, priority, completed, sortBy, order, page, limit } = req.query;
+        const { search, priority, category, completed, sortBy, order, page, limit } = req.query;
 
-        const query = { user: req.user.id };
+        const query = buildQuery(
+            req.user.id,
+            search,
+            priority,
+            completed,
+            category
+        );
 
-        // 🔍 SEARCH
-        if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: "i" } },
-                { description: { $regex: search, $options: "i" } }
-            ];
-        }
-
-        // 🎯 FILTER PRIORITY
-        if (priority) {
-            query.priority = priority;
-        }
-
-        // ✅ FILTER COMPLETED
-        if (completed !== undefined) {
-            query.completed = completed === "true";
-        }
-
-        // 🔃 SORTING
-        let sortOptions = {};
-        if (sortBy) {
-            sortOptions[sortBy] = order === "asc" ? 1 : -1;
-        } else {
-            sortOptions.createdAt = -1;
-        }
-
-        // 📄 PAGINATION
-        const pageNumber = parseInt(page) || 1;
-        const limitNumber = parseInt(limit) || 5;
-        const skip = (pageNumber - 1) * limitNumber;
+        const sortOptions = buildSortOptions(sortBy, order);
+        const { pageNumber, limitNumber, skip } = buildPagination(page, limit);
 
         const tasks = await Task.find(query)
             .sort(sortOptions)
@@ -58,6 +95,7 @@ exports.getTasks = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
+
 
 
 // CREATE task
@@ -86,6 +124,7 @@ exports.createTask = async (req, res) => {
     }
 };
 
+
 // UPDATE task
 exports.updateTask = async (req, res) => {
     try {
@@ -113,6 +152,7 @@ exports.updateTask = async (req, res) => {
     }
 };
 
+
 // DELETE task
 exports.deleteTask = async (req, res) => {
     try {
@@ -133,7 +173,8 @@ exports.deleteTask = async (req, res) => {
     }
 };
 
-// TOGGLE COMPLETE
+
+// TOGGLE complete
 exports.toggleComplete = async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
