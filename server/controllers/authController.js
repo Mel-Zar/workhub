@@ -3,6 +3,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+
 // REGISTER
 exports.registerUser = async (req, res) => {
     try {
@@ -37,6 +38,7 @@ exports.registerUser = async (req, res) => {
         res.status(500).json({ error: "Server error, please try again later" });
     }
 };
+
 
 // LOGIN
 exports.loginUser = async (req, res) => {
@@ -78,6 +80,7 @@ exports.loginUser = async (req, res) => {
     }
 };
 
+
 // REFRESH TOKEN ENDPOINT
 exports.refreshToken = async (req, res) => {
     const { token } = req.body;
@@ -102,5 +105,37 @@ exports.refreshToken = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(403).json({ error: "Refresh token expired or invalid" });
+    }
+};
+
+
+//LOGOUT
+
+exports.logout = async (req, res) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ message: "Refresh token required" });
+        }
+
+        const user = await User.findOne({
+            refreshTokens: token
+        });
+
+        if (!user) {
+            return res.json({ message: "Logged out" });
+        }
+
+        user.refreshTokens = user.refreshTokens.filter(
+            t => t !== token
+        );
+
+        await user.save();
+
+        res.json({ message: "Logged out successfully" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
     }
 };
