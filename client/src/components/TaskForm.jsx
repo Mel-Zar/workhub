@@ -4,7 +4,7 @@ function TaskForm({ onCreate }) {
 
     const [title, setTitle] = useState("");
     const [priority, setPriority] = useState("medium");
-    const [category, setCategory] = useState("");
+    const [category, setCategory] = useState("work");
     const [deadline, setDeadline] = useState("");
 
     async function handleSubmit(e) {
@@ -30,7 +30,7 @@ function TaskForm({ onCreate }) {
         onCreate(data);
 
         setTitle("");
-        setCategory("");
+        setCategory("work");
         setDeadline("");
         setPriority("medium");
     }
@@ -38,12 +38,15 @@ function TaskForm({ onCreate }) {
     return (
         <form onSubmit={handleSubmit}>
 
+            {/* TITEL */}
             <input
                 placeholder="Titel"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
+                required
             />
 
+            {/* PRIORITY */}
             <select
                 value={priority}
                 onChange={e => setPriority(e.target.value)}
@@ -53,12 +56,18 @@ function TaskForm({ onCreate }) {
                 <option value="high">High</option>
             </select>
 
-            <input
-                placeholder="Kategori"
+            {/* KATEGORI */}
+            <select
                 value={category}
                 onChange={e => setCategory(e.target.value)}
-            />
+            >
+                <option value="work">Work</option>
+                <option value="school">School</option>
+                <option value="personal">Personal</option>
+                <option value="shopping">Shopping</option>
+            </select>
 
+            {/* DEADLINE */}
             <input
                 type="date"
                 value={deadline}

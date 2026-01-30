@@ -4,15 +4,18 @@ import {
     getTasks,
     updateTask,
     deleteTask,
-    toggleComplete
+    toggleComplete,
+    getCategories
 } from "../controllers/taskController.js";
 
 import auth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", auth, createTask);
+// ORDER ÄR VIKTIG
 router.get("/", auth, getTasks);
+router.get("/categories", auth, getCategories);
+router.post("/", auth, createTask);
 router.put("/:id", auth, updateTask);
 router.delete("/:id", auth, deleteTask);
 router.patch("/:id/toggle", auth, toggleComplete);

@@ -14,7 +14,7 @@ const buildQuery = (
 
     const query = { user: userId };
 
-    // 🔍 TEXT SEARCH
+    // 🔍 SEARCH
     if (search && search.trim() !== "") {
         query.$or = [
             { title: { $regex: search, $options: "i" } },
@@ -23,66 +23,45 @@ const buildQuery = (
         ];
     }
 
-    // 🎯 PRIORITY DROPDOWN
+    // 🎯 PRIORITY
     if (priority && priority !== "all") {
         query.priority = priority;
     }
 
-    // 📂 CATEGORY INPUT
-    if (category && category.trim() !== "") {
+    // 📂 CATEGORY
+    if (category && category !== "all") {
         query.category = category;
     }
 
-    // ✅ COMPLETED CHECKBOX
-    if (completed === "true") {
-        query.completed = true;
-    }
+    // ✅ COMPLETED
+    if (completed === "true") query.completed = true;
+    if (completed === "false") query.completed = false;
 
-    if (completed === "false") {
-        query.completed = false;
-    }
-
-    // 📅 DATE RANGE
+    // 📅 DATE
     if (fromDate || toDate) {
         query.deadline = {};
-
-        if (fromDate) {
-            query.deadline.$gte = new Date(fromDate);
-        }
-
-        if (toDate) {
-            query.deadline.$lte = new Date(toDate);
-        }
+        if (fromDate) query.deadline.$gte = new Date(fromDate);
+        if (toDate) query.deadline.$lte = new Date(toDate);
     }
 
     return query;
 };
 
-
 const buildSortOptions = (sortBy, order) => {
+
     const allowedFields = ["title", "priority", "deadline", "createdAt"];
 
-    if (!allowedFields.includes(sortBy)) {
+    if (!sortBy || !allowedFields.includes(sortBy)) {
         return { createdAt: -1 };
     }
 
     return { [sortBy]: order === "asc" ? 1 : -1 };
 };
 
-const buildPagination = (page, limit) => {
-    const pageNumber = parseInt(page) || 1;
-    const limitNumber = parseInt(limit) || 20;
-    const skip = (pageNumber - 1) * limitNumber;
-    return { pageNumber, limitNumber, skip };
-};
-
 /* ================= GET TASKS ================= */
 
 const getTasks = async (req, res) => {
     try {
-        if (!req.user?.id) {
-            return res.status(401).json({ error: "Not authenticated" });
-        }
 
         const {
             search,
@@ -91,8 +70,6 @@ const getTasks = async (req, res) => {
             completed,
             sortBy,
             order,
-            page,
-            limit,
             fromDate,
             toDate
         } = req.query;
@@ -108,12 +85,8 @@ const getTasks = async (req, res) => {
         );
 
         const sortOptions = buildSortOptions(sortBy, order);
-        const { limitNumber, skip } = buildPagination(page, limit);
 
-        const tasks = await Task.find(query)
-            .sort(sortOptions)
-            .skip(skip)
-            .limit(limitNumber);
+        const tasks = await Task.find(query).sort(sortOptions);
 
         res.json({ tasks });
 
@@ -123,10 +96,29 @@ const getTasks = async (req, res) => {
     }
 };
 
-/* ================= CREATE TASK ================= */
+/* ================= GET CATEGORIES ================= */
+
+const getCategories = async (req, res) => {
+    try {
+
+        const categories = await Task.distinct("category", {
+            user: req.user.id,
+            category: { $ne: "" }
+        });
+
+        res.json(categories);
+
+    } catch (err) {
+        console.error("GET CATEGORIES ERROR:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+/* ================= CREATE ================= */
 
 const createTask = async (req, res) => {
     try {
+
         const { title, description, priority, deadline, category } = req.body;
 
         if (!title) {
@@ -150,18 +142,17 @@ const createTask = async (req, res) => {
     }
 };
 
-/* ================= UPDATE TASK ================= */
+/* ================= UPDATE ================= */
 
 const updateTask = async (req, res) => {
     try {
+
         const task = await Task.findOne({
             _id: req.params.id,
             user: req.user.id
         });
 
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
-        }
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         Object.assign(task, req.body);
         await task.save();
@@ -174,18 +165,17 @@ const updateTask = async (req, res) => {
     }
 };
 
-/* ================= DELETE TASK ================= */
+/* ================= DELETE ================= */
 
 const deleteTask = async (req, res) => {
     try {
+
         const task = await Task.findOneAndDelete({
             _id: req.params.id,
             user: req.user.id
         });
 
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
-        }
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         res.json({ message: "Task deleted" });
 
@@ -195,18 +185,17 @@ const deleteTask = async (req, res) => {
     }
 };
 
-/* ================= TOGGLE COMPLETE ================= */
+/* ================= TOGGLE ================= */
 
 const toggleComplete = async (req, res) => {
     try {
+
         const task = await Task.findOne({
             _id: req.params.id,
             user: req.user.id
         });
 
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
-        }
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         task.completed = !task.completed;
         await task.save();
@@ -221,6 +210,7 @@ const toggleComplete = async (req, res) => {
 
 export {
     getTasks,
+    getCategories,
     createTask,
     updateTask,
     deleteTask,
