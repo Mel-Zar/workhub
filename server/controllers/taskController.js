@@ -1,17 +1,14 @@
 import Task from "../models/Task.js";
 
 /* ================= HELPERS ================= */
-
 const buildQuery = (
     userId,
     search,
     priority,
     completed,
     category,
-    fromDate,
-    toDate
+    dateRange
 ) => {
-
     const query = { user: userId };
 
     // 🔍 SEARCH
@@ -24,45 +21,42 @@ const buildQuery = (
     }
 
     // 🎯 PRIORITY
-    if (priority && priority !== "all") {
-        query.priority = priority;
-    }
+    if (priority && priority !== "") query.priority = priority;
 
     // 📂 CATEGORY
-    if (category && category !== "all") {
-        query.category = category;
-    }
+    if (category && category !== "") query.category = category;
 
     // ✅ COMPLETED
     if (completed === "true") query.completed = true;
     if (completed === "false") query.completed = false;
 
-    // 📅 DATE
-    if (fromDate || toDate) {
-        query.deadline = {};
-        if (fromDate) query.deadline.$gte = new Date(fromDate);
-        if (toDate) query.deadline.$lte = new Date(toDate);
+    // 📅 DATE RANGE (single or interval)
+    if (dateRange && dateRange.trim() !== "") {
+        const parts = dateRange.split(",");
+        const from = parts[0] ? new Date(parts[0]) : null;
+        const to = parts[1] ? new Date(parts[1]) : null;
+
+        // Lägg till datum endast om giltigt
+        if ((from && !isNaN(from)) || (to && !isNaN(to))) {
+            query.deadline = {};
+            if (from && !isNaN(from)) query.deadline.$gte = from;
+            if (to && !isNaN(to)) query.deadline.$lte = to;
+        }
     }
 
     return query;
 };
 
+/* ================= SORT ================= */
 const buildSortOptions = (sortBy, order) => {
-
     const allowedFields = ["title", "priority", "deadline", "createdAt"];
-
-    if (!sortBy || !allowedFields.includes(sortBy)) {
-        return { createdAt: -1 };
-    }
-
+    if (!sortBy || !allowedFields.includes(sortBy)) return { createdAt: -1 };
     return { [sortBy]: order === "asc" ? 1 : -1 };
 };
 
 /* ================= GET TASKS ================= */
-
 const getTasks = async (req, res) => {
     try {
-
         const {
             search,
             priority,
@@ -70,8 +64,7 @@ const getTasks = async (req, res) => {
             completed,
             sortBy,
             order,
-            fromDate,
-            toDate
+            dateRange
         } = req.query;
 
         const query = buildQuery(
@@ -80,8 +73,7 @@ const getTasks = async (req, res) => {
             priority,
             completed,
             category,
-            fromDate,
-            toDate
+            dateRange
         );
 
         const sortOptions = buildSortOptions(sortBy, order);
@@ -89,7 +81,6 @@ const getTasks = async (req, res) => {
         const tasks = await Task.find(query).sort(sortOptions);
 
         res.json({ tasks });
-
     } catch (err) {
         console.error("GET TASKS ERROR:", err);
         res.status(500).json({ error: "Server error" });
@@ -97,33 +88,25 @@ const getTasks = async (req, res) => {
 };
 
 /* ================= GET CATEGORIES ================= */
-
 const getCategories = async (req, res) => {
     try {
-
         const categories = await Task.distinct("category", {
             user: req.user.id,
             category: { $ne: "" }
         });
-
         res.json(categories);
-
     } catch (err) {
         console.error("GET CATEGORIES ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ================= CREATE ================= */
-
+/* ================= CREATE TASK ================= */
 const createTask = async (req, res) => {
     try {
-
         const { title, description, priority, deadline, category } = req.body;
 
-        if (!title) {
-            return res.status(400).json({ error: "Title is required" });
-        }
+        if (!title) return res.status(400).json({ error: "Title is required" });
 
         const task = await Task.create({
             title,
@@ -135,18 +118,15 @@ const createTask = async (req, res) => {
         });
 
         res.status(201).json(task);
-
     } catch (err) {
         console.error("CREATE TASK ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ================= UPDATE ================= */
-
+/* ================= UPDATE TASK ================= */
 const updateTask = async (req, res) => {
     try {
-
         const task = await Task.findOne({
             _id: req.params.id,
             user: req.user.id
@@ -158,18 +138,15 @@ const updateTask = async (req, res) => {
         await task.save();
 
         res.json(task);
-
     } catch (err) {
         console.error("UPDATE TASK ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ================= DELETE ================= */
-
+/* ================= DELETE TASK ================= */
 const deleteTask = async (req, res) => {
     try {
-
         const task = await Task.findOneAndDelete({
             _id: req.params.id,
             user: req.user.id
@@ -178,18 +155,15 @@ const deleteTask = async (req, res) => {
         if (!task) return res.status(404).json({ error: "Task not found" });
 
         res.json({ message: "Task deleted" });
-
     } catch (err) {
         console.error("DELETE TASK ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ================= TOGGLE ================= */
-
+/* ================= TOGGLE COMPLETE ================= */
 const toggleComplete = async (req, res) => {
     try {
-
         const task = await Task.findOne({
             _id: req.params.id,
             user: req.user.id
@@ -201,7 +175,6 @@ const toggleComplete = async (req, res) => {
         await task.save();
 
         res.json(task);
-
     } catch (err) {
         console.error("TOGGLE TASK ERROR:", err);
         res.status(500).json({ error: "Server error" });
