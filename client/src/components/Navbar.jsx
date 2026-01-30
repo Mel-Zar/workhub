@@ -17,7 +17,7 @@ function Navbar() {
                 {isLoggedIn ? (
                     <>
                         <Link to="/">Home</Link> |{" "}
-                        <Link to="/dashboard">Dashboard</Link> |{" "}
+                        <Link to="/tasks">Tasks</Link> |{" "}
                         <button onClick={handleLogout} style={{ cursor: "pointer" }}>
                             Logga ut
                         </button>

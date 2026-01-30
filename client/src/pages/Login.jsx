@@ -41,7 +41,7 @@ function Login() {
 
       if (data.accessToken) {
         login(data.accessToken); // sparar token i Context + localStorage
-        navigate("/dashboard");           // navigerar direkt till Home
+        navigate("/tasks");           // navigerar direkt till tasks
       }
     } catch (err) {
       console.log("Network error:", err);

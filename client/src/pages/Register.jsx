@@ -34,7 +34,7 @@ function Register() {
 
       if (data.accessToken) {
         login(data.accessToken); // logga in direkt
-        navigate("/dashboard");           // navigera till dashoard
+        navigate("/tasks");           // navigera till tasks
       } else {
         navigate("/login");      // annars till login
       }
