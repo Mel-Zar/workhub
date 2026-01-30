@@ -1,6 +1,6 @@
 import Task from "../models/Task.js";
 
-// HELPERS
+/* ================= HELPERS ================= */
 
 const buildQuery = (
     userId,
@@ -11,9 +11,11 @@ const buildQuery = (
     fromDate,
     toDate
 ) => {
+
     const query = { user: userId };
 
-    if (search) {
+    // 🔍 TEXT SEARCH
+    if (search && search.trim() !== "") {
         query.$or = [
             { title: { $regex: search, $options: "i" } },
             { description: { $regex: search, $options: "i" } },
@@ -21,29 +23,46 @@ const buildQuery = (
         ];
     }
 
-    if (priority) query.priority = priority;
-
-    if (category) {
-        query.category = { $regex: `^${category}$`, $options: "i" };
+    // 🎯 PRIORITY DROPDOWN
+    if (priority && priority !== "all") {
+        query.priority = priority;
     }
 
-    if (completed !== undefined) {
-        query.completed = String(completed) === "true";
+    // 📂 CATEGORY INPUT
+    if (category && category.trim() !== "") {
+        query.category = category;
     }
 
+    // ✅ COMPLETED CHECKBOX
+    if (completed === "true") {
+        query.completed = true;
+    }
+
+    if (completed === "false") {
+        query.completed = false;
+    }
+
+    // 📅 DATE RANGE
     if (fromDate || toDate) {
         query.deadline = {};
-        if (fromDate) query.deadline.$gte = new Date(fromDate);
-        if (toDate) query.deadline.$lte = new Date(toDate);
+
+        if (fromDate) {
+            query.deadline.$gte = new Date(fromDate);
+        }
+
+        if (toDate) {
+            query.deadline.$lte = new Date(toDate);
+        }
     }
 
     return query;
 };
 
+
 const buildSortOptions = (sortBy, order) => {
     const allowedFields = ["title", "priority", "deadline", "createdAt"];
 
-    if (!sortBy || !allowedFields.includes(sortBy)) {
+    if (!allowedFields.includes(sortBy)) {
         return { createdAt: -1 };
     }
 
@@ -52,14 +71,19 @@ const buildSortOptions = (sortBy, order) => {
 
 const buildPagination = (page, limit) => {
     const pageNumber = parseInt(page) || 1;
-    const limitNumber = parseInt(limit) || 5;
+    const limitNumber = parseInt(limit) || 20;
     const skip = (pageNumber - 1) * limitNumber;
     return { pageNumber, limitNumber, skip };
 };
 
-// GET TASKS
+/* ================= GET TASKS ================= */
+
 const getTasks = async (req, res) => {
     try {
+        if (!req.user?.id) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
         const {
             search,
             priority,
@@ -84,29 +108,23 @@ const getTasks = async (req, res) => {
         );
 
         const sortOptions = buildSortOptions(sortBy, order);
-        const { pageNumber, limitNumber, skip } = buildPagination(page, limit);
+        const { limitNumber, skip } = buildPagination(page, limit);
 
         const tasks = await Task.find(query)
             .sort(sortOptions)
             .skip(skip)
             .limit(limitNumber);
 
-        const total = await Task.countDocuments(query);
+        res.json({ tasks });
 
-        res.json({
-            page: pageNumber,
-            limit: limitNumber,
-            totalTasks: total,
-            totalPages: Math.ceil(total / limitNumber),
-            tasks
-        });
     } catch (err) {
-        console.error(err);
+        console.error("GET TASKS ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-// CREATE
+/* ================= CREATE TASK ================= */
+
 const createTask = async (req, res) => {
     try {
         const { title, description, priority, deadline, category } = req.body;
@@ -115,7 +133,7 @@ const createTask = async (req, res) => {
             return res.status(400).json({ error: "Title is required" });
         }
 
-        const task = new Task({
+        const task = await Task.create({
             title,
             description,
             priority,
@@ -124,71 +142,79 @@ const createTask = async (req, res) => {
             user: req.user.id
         });
 
-        await task.save();
         res.status(201).json(task);
+
     } catch (err) {
-        console.error(err);
+        console.error("CREATE TASK ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-// UPDATE
+/* ================= UPDATE TASK ================= */
+
 const updateTask = async (req, res) => {
     try {
-        const task = await Task.findById(req.params.id);
+        const task = await Task.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
 
-        if (!task) return res.status(404).json({ error: "Task not found" });
-
-        if (task.user.toString() !== req.user.id) {
-            return res.status(401).json({ error: "Not authorized" });
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
         }
 
         Object.assign(task, req.body);
         await task.save();
 
         res.json(task);
+
     } catch (err) {
-        console.error(err);
+        console.error("UPDATE TASK ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-// DELETE
+/* ================= DELETE TASK ================= */
+
 const deleteTask = async (req, res) => {
     try {
-        const task = await Task.findById(req.params.id);
+        const task = await Task.findOneAndDelete({
+            _id: req.params.id,
+            user: req.user.id
+        });
 
-        if (!task) return res.status(404).json({ error: "Task not found" });
-
-        if (task.user.toString() !== req.user.id) {
-            return res.status(401).json({ error: "Not authorized" });
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
         }
 
-        await task.deleteOne();
         res.json({ message: "Task deleted" });
+
     } catch (err) {
-        console.error(err);
+        console.error("DELETE TASK ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-// TOGGLE COMPLETE
+/* ================= TOGGLE COMPLETE ================= */
+
 const toggleComplete = async (req, res) => {
     try {
-        const task = await Task.findById(req.params.id);
+        const task = await Task.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
 
-        if (!task) return res.status(404).json({ error: "Task not found" });
-
-        if (task.user.toString() !== req.user.id) {
-            return res.status(401).json({ error: "Not authorized" });
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
         }
 
         task.completed = !task.completed;
         await task.save();
 
         res.json(task);
+
     } catch (err) {
-        console.error(err);
+        console.error("TOGGLE TASK ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };

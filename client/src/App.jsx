@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PrivateRoute from "./components/PrivateRoute";
 import Tasks from "./pages/Tasks";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         {/* Home är skyddad av PrivateRoute */}
         <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/tasks" element={<PrivateRoute><Tasks /></PrivateRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
