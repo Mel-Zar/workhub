@@ -1,4 +1,4 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 const auth = (req, res, next) => {
     try {
@@ -8,12 +8,10 @@ const auth = (req, res, next) => {
             return res.status(401).json({ error: "No token provided" });
         }
 
-        const token = authHeader.split(" ")[1]; // "Bearer <token>"
+        const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret");
 
-        // Lagra användarens ID på requesten
         req.user = { id: decoded.id };
-
         next();
     } catch (err) {
         console.error("Auth middleware error:", err);
@@ -21,4 +19,4 @@ const auth = (req, res, next) => {
     }
 };
 
-module.exports = auth;
+export default auth;

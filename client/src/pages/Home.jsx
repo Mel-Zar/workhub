@@ -1,7 +1,11 @@
-import React from "react";
-
 function Home() {
-  return <div>Home</div>;
+  return (
+    <div>
+      <h2>Home</h2>
+      <p>Välkommen! Du är inloggad.</p>
+    </div>
+  );
 }
 
 export default Home;
+

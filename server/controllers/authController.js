@@ -1,11 +1,9 @@
-// controllers/authController.js
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 // REGISTER
-exports.registerUser = async (req, res) => {
+const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
@@ -19,7 +17,9 @@ exports.registerUser = async (req, res) => {
         }
 
         if (password.length < 6) {
-            return res.status(400).json({ error: "Password must be at least 6 characters" });
+            return res
+                .status(400)
+                .json({ error: "Password must be at least 6 characters" });
         }
 
         const existingUser = await User.findOne({ email });
@@ -35,13 +35,12 @@ exports.registerUser = async (req, res) => {
         res.status(201).json({ message: "User registered successfully" });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Server error, please try again later" });
+        res.status(500).json({ error: "Server error" });
     }
 };
 
-
 // LOGIN
-exports.loginUser = async (req, res) => {
+const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -53,44 +52,45 @@ exports.loginUser = async (req, res) => {
         if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+        if (!isMatch)
+            return res.status(400).json({ error: "Invalid credentials" });
 
-        // ✅ ACCESS TOKEN
         const accessToken = jwt.sign(
             { id: user._id },
             process.env.JWT_SECRET || "secret",
-            { expiresIn: "15m" } // kort access token
+            { expiresIn: "15m" }
         );
 
-        // ✅ REFRESH TOKEN
         const refreshToken = jwt.sign(
             { id: user._id },
             process.env.JWT_REFRESH_SECRET || "refreshsecret",
-            { expiresIn: "7d" } // längre livstid
+            { expiresIn: "7d" }
         );
 
-        // Spara refresh token i databasen
         user.refreshToken = refreshToken;
         await user.save();
 
         res.json({ accessToken, refreshToken });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Server error, please try again later" });
+        res.status(500).json({ error: "Server error" });
     }
 };
 
-
-// REFRESH TOKEN ENDPOINT
-exports.refreshToken = async (req, res) => {
+// REFRESH TOKEN
+const refreshAccessToken = async (req, res) => {
     const { token } = req.body;
 
     if (!token) return res.status(401).json({ error: "Refresh token required" });
 
     try {
-        const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET || "refreshsecret");
+        const payload = jwt.verify(
+            token,
+            process.env.JWT_REFRESH_SECRET || "refreshsecret"
+        );
 
         const user = await User.findById(payload.id);
+
         if (!user || user.refreshToken !== token) {
             return res.status(403).json({ error: "Invalid refresh token" });
         }
@@ -104,14 +104,12 @@ exports.refreshToken = async (req, res) => {
         res.json({ accessToken: newAccessToken });
     } catch (err) {
         console.error(err);
-        res.status(403).json({ error: "Refresh token expired or invalid" });
+        res.status(403).json({ error: "Invalid refresh token" });
     }
 };
 
-
-//LOGOUT
-
-exports.logout = async (req, res) => {
+// LOGOUT
+const logout = async (req, res) => {
     try {
         const { token } = req.body;
 
@@ -119,18 +117,13 @@ exports.logout = async (req, res) => {
             return res.status(400).json({ message: "Refresh token required" });
         }
 
-        const user = await User.findOne({
-            refreshTokens: token
-        });
+        const user = await User.findOne({ refreshToken: token });
 
         if (!user) {
             return res.json({ message: "Logged out" });
         }
 
-        user.refreshTokens = user.refreshTokens.filter(
-            t => t !== token
-        );
-
+        user.refreshToken = null;
         await user.save();
 
         res.json({ message: "Logged out successfully" });
@@ -138,4 +131,11 @@ exports.logout = async (req, res) => {
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
+};
+
+export {
+    registerUser,
+    loginUser,
+    refreshAccessToken,
+    logout
 };

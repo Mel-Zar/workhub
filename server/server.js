@@ -1,29 +1,31 @@
-const express = require("express");
-const connectDB = require("./config/connectDB");
-const authRoutes = require("./routes/authRoutes");
-const taskRoutes = require("./routes/taskRoutes");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import connectDB from "./config/connectDB.js";
+import authRoutes from "./routes/authRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js";
 
-require("dotenv").config();
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 5001;
 
-// Connect to MongoDB
-connectDB();
-
-// Middleware
+// MIDDLEWARE
+app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/tasks", taskRoutes); // Korrekt route utan mellanslag
+// DB
+connectDB();
 
-// Test route
+// ROUTES
+app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
+
+// TEST
 app.get("/", (req, res) => {
-    res.send("WorkHub API running");
+    res.send("API OK");
 });
 
-// Start server
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log("Server running on port 5001");
 });

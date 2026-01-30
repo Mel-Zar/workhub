@@ -1,5 +1,4 @@
-const Task = require("../models/Task");
-
+import Task from "../models/Task.js";
 
 // HELPERS
 
@@ -14,7 +13,6 @@ const buildQuery = (
 ) => {
     const query = { user: userId };
 
-    // 🔍 Search
     if (search) {
         query.$or = [
             { title: { $regex: search, $options: "i" } },
@@ -23,64 +21,44 @@ const buildQuery = (
         ];
     }
 
-    // 🎯 Priority filter
-    if (priority) {
-        query.priority = priority;
-    }
+    if (priority) query.priority = priority;
 
-    // 🗂 Category filter (case-insensitive)
     if (category) {
         query.category = { $regex: `^${category}$`, $options: "i" };
     }
 
-    // ✅ Completed filter
     if (completed !== undefined) {
         query.completed = String(completed) === "true";
     }
 
-    // 📅 Deadline range
     if (fromDate || toDate) {
         query.deadline = {};
-
-        if (fromDate) {
-            query.deadline.$gte = new Date(fromDate);
-        }
-
-        if (toDate) {
-            query.deadline.$lte = new Date(toDate);
-        }
+        if (fromDate) query.deadline.$gte = new Date(fromDate);
+        if (toDate) query.deadline.$lte = new Date(toDate);
     }
 
     return query;
 };
 
-
 const buildSortOptions = (sortBy, order) => {
     const allowedFields = ["title", "priority", "deadline", "createdAt"];
 
-    // Default sort
     if (!sortBy || !allowedFields.includes(sortBy)) {
         return { createdAt: -1 };
     }
 
-    return {
-        [sortBy]: order === "asc" ? 1 : -1
-    };
+    return { [sortBy]: order === "asc" ? 1 : -1 };
 };
-
 
 const buildPagination = (page, limit) => {
     const pageNumber = parseInt(page) || 1;
     const limitNumber = parseInt(limit) || 5;
     const skip = (pageNumber - 1) * limitNumber;
-
     return { pageNumber, limitNumber, skip };
 };
 
-
-// GET ALL TASKS
-
-exports.getTasks = async (req, res) => {
+// GET TASKS
+const getTasks = async (req, res) => {
     try {
         const {
             search,
@@ -122,17 +100,14 @@ exports.getTasks = async (req, res) => {
             totalPages: Math.ceil(total / limitNumber),
             tasks
         });
-
     } catch (err) {
-        console.error("Error getting tasks:", err);
+        console.error(err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-
-// CREATE TASK
-
-exports.createTask = async (req, res) => {
+// CREATE
+const createTask = async (req, res) => {
     try {
         const { title, description, priority, deadline, category } = req.body;
 
@@ -151,80 +126,58 @@ exports.createTask = async (req, res) => {
 
         await task.save();
         res.status(201).json(task);
-
     } catch (err) {
-        console.error("Error creating task:", err);
+        console.error(err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-
-// UPDATE TASK
-
-exports.updateTask = async (req, res) => {
+// UPDATE
+const updateTask = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { title, description, priority, deadline, category } = req.body;
+        const task = await Task.findById(req.params.id);
 
-        const task = await Task.findById(id);
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
-        }
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         if (task.user.toString() !== req.user.id) {
             return res.status(401).json({ error: "Not authorized" });
         }
 
-        if (title !== undefined) task.title = title;
-        if (description !== undefined) task.description = description;
-        if (priority !== undefined) task.priority = priority;
-        if (deadline !== undefined) task.deadline = deadline;
-        if (category !== undefined) task.category = category;
-
+        Object.assign(task, req.body);
         await task.save();
-        res.json(task);
 
+        res.json(task);
     } catch (err) {
-        console.error("Error updating task:", err);
+        console.error(err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-
-// DELETE TASK
-
-exports.deleteTask = async (req, res) => {
+// DELETE
+const deleteTask = async (req, res) => {
     try {
-        const { id } = req.params;
+        const task = await Task.findById(req.params.id);
 
-        const task = await Task.findById(id);
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
-        }
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         if (task.user.toString() !== req.user.id) {
             return res.status(401).json({ error: "Not authorized" });
         }
 
         await task.deleteOne();
-        res.json({ message: "Task deleted successfully" });
-
+        res.json({ message: "Task deleted" });
     } catch (err) {
-        console.error("Error deleting task:", err);
+        console.error(err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-
 // TOGGLE COMPLETE
-
-exports.toggleComplete = async (req, res) => {
+const toggleComplete = async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
 
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
-        }
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         if (task.user.toString() !== req.user.id) {
             return res.status(401).json({ error: "Not authorized" });
@@ -234,9 +187,16 @@ exports.toggleComplete = async (req, res) => {
         await task.save();
 
         res.json(task);
-
     } catch (err) {
-        console.error("Error toggling task:", err);
+        console.error(err);
         res.status(500).json({ error: "Server error" });
     }
+};
+
+export {
+    getTasks,
+    createTask,
+    updateTask,
+    deleteTask,
+    toggleComplete
 };

@@ -1,5 +1,7 @@
-const mongoose = require("mongoose");
-require("dotenv").config();
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const connectDB = async () => {
     try {
@@ -7,12 +9,12 @@ const connectDB = async () => {
             throw new Error("MONGO_URI is not defined in .env");
         }
 
-        await mongoose.connect(process.env.MONGO_URI); // Mongoose 6+ behöver inga options längre
+        await mongoose.connect(process.env.MONGO_URI);
         console.log("✅ MongoDB connected successfully");
     } catch (err) {
         console.error("❌ MongoDB connection failed:", err.message);
-        process.exit(1); // stoppa servern om DB inte kopplar
+        process.exit(1);
     }
 };
 
-module.exports = connectDB;
+export default connectDB;

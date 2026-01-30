@@ -1,7 +1,13 @@
-const express = require("express");
-const { createTask, getTasks, updateTask, deleteTask, toggleComplete } = require("../controllers/taskController");
+import express from "express";
+import {
+    createTask,
+    getTasks,
+    updateTask,
+    deleteTask,
+    toggleComplete
+} from "../controllers/taskController.js";
 
-const auth = require("../middleware/authMiddleware");
+import auth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -11,4 +17,4 @@ router.put("/:id", auth, updateTask);
 router.delete("/:id", auth, deleteTask);
 router.patch("/:id/toggle", auth, toggleComplete);
 
-module.exports = router;
+export default router;
