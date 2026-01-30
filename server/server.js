@@ -23,7 +23,7 @@ app.use("/api/tasks", taskRoutes);
 
 // TEST
 app.get("/", (req, res) => {
-    res.send("API OK");
+    res.send("Welcome to Workhub!");
 });
 
 app.listen(PORT, () => {

@@ -17,12 +17,14 @@ function Navbar() {
                 {isLoggedIn ? (
                     <>
                         <Link to="/">Home</Link> |{" "}
+                        <Link to="/dashboard">Dashboard</Link> |{" "}
                         <button onClick={handleLogout} style={{ cursor: "pointer" }}>
                             Logga ut
                         </button>
                     </>
                 ) : (
                     <>
+                        <Link to="/">Home</Link> |{" "}
                         <Link to="/register">Register</Link> |{" "}
                         <Link to="/login">Login</Link>
                     </>

@@ -14,7 +14,7 @@ function Login() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     console.log("useEffect, token:", token);
-    if (token) navigate("/");
+    if (token) navigate("/dashboard");
   }, [navigate]);
 
   async function handleSubmit(e) {
@@ -41,7 +41,7 @@ function Login() {
 
       if (data.accessToken) {
         login(data.accessToken); // sparar token i Context + localStorage
-        navigate("/");           // navigerar direkt till Home
+        navigate("/dashboard");           // navigerar direkt till Home
       }
     } catch (err) {
       console.log("Network error:", err);
