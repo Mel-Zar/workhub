@@ -7,7 +7,7 @@ export function AuthProvider({ children }) {
     const [refreshToken, setRefreshToken] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // ================= LOAD TOKENS FROM LOCALSTORAGE =================
+    // ================= LOAD TOKENS =================
     useEffect(() => {
         const a = localStorage.getItem("accessToken");
         const r = localStorage.getItem("refreshToken");
@@ -53,7 +53,6 @@ export function AuthProvider({ children }) {
             const data = await res.json();
             localStorage.setItem("accessToken", data.accessToken);
             setAccessToken(data.accessToken);
-
             return data.accessToken;
         } catch (err) {
             console.log("Refresh token expired");
@@ -64,14 +63,9 @@ export function AuthProvider({ children }) {
 
     // ================= GET VALID ACCESS TOKEN =================
     const getValidAccessToken = async () => {
-        // 1️⃣ state
         if (accessToken) return accessToken;
-
-        // 2️⃣ localStorage fallback
         const storedAccess = localStorage.getItem("accessToken");
         if (storedAccess) return storedAccess;
-
-        // 3️⃣ refresh
         return await refreshAccessToken();
     };
 
@@ -81,7 +75,8 @@ export function AuthProvider({ children }) {
             accessToken,
             login,
             logout,
-            getValidAccessToken
+            getValidAccessToken,
+            refreshAccessToken
         }}>
             {children}
         </AuthContext.Provider>

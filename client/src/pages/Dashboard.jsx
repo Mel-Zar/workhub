@@ -14,7 +14,6 @@ function Dashboard() {
     const [error, setError] = useState("");
     const [sortBy, setSortBy] = useState("deadline");
 
-    // ================= FETCH TASKS =================
     const fetchTasks = async () => {
         try {
             const token = await getValidAccessToken();
@@ -25,19 +24,11 @@ function Dashboard() {
             });
 
             const data = await res.json();
-            if (!res.ok) {
-                setError(data.error || "Kunde inte hämta tasks");
-                return;
-            }
+            if (!res.ok) { setError(data.error || "Kunde inte hämta tasks"); return; }
 
-            const tasksData = data.tasks || [];
-            setTasks(tasksData);
-
-            const uniqueCategories = [...new Set(tasksData.map(t => t.category).filter(Boolean))];
-            setCategories(uniqueCategories);
-
-            applyFiltersAndSort(tasksData, filters, sortBy);
-
+            setTasks(data.tasks || []);
+            setCategories([...new Set((data.tasks || []).map(t => t.category).filter(Boolean))]);
+            applyFiltersAndSort(data.tasks || [], filters, sortBy);
         } catch (err) {
             console.error(err);
             setError("Serverfel");
@@ -46,13 +37,12 @@ function Dashboard() {
 
     useEffect(() => { fetchTasks(); }, []);
 
-    // ================= FILTER + SORT =================
-    const applyFiltersAndSort = (taskList = tasks, filterData = filters, sort = sortBy) => {
+    const applyFiltersAndSort = (taskList, filterData, sort) => {
         let result = [...taskList];
 
         if (filterData.category) result = result.filter(t => t.category === filterData.category);
-        if (filterData.completed === true || filterData.completed === false) result = result.filter(t => t.completed === filterData.completed);
         if (filterData.priority) result = result.filter(t => t.priority === filterData.priority);
+        if (filterData.completed !== undefined) result = result.filter(t => t.completed === filterData.completed);
         if (filterData.search) result = result.filter(t => t.title.toLowerCase().includes(filterData.search.toLowerCase()));
         if (filterData.dateRange) {
             const from = filterData.dateRange.from ? new Date(filterData.dateRange.from) : null;
@@ -66,7 +56,7 @@ function Dashboard() {
             });
         }
 
-        // Sortering
+        // Sort
         if (sort === "title") result.sort((a, b) => a.title.localeCompare(b.title));
         else if (sort === "deadline") result.sort((a, b) => new Date(a.deadline || 0) - new Date(b.deadline || 0));
         else if (sort === "priority") {
@@ -77,47 +67,19 @@ function Dashboard() {
         setFilteredTasks(result);
     };
 
-    const handleSortChange = (e) => {
-        const sort = e.target.value;
-        setSortBy(sort);
-        applyFiltersAndSort(tasks, filters, sort);
-    };
+    const handleSortChange = e => { setSortBy(e.target.value); applyFiltersAndSort(tasks, filters, e.target.value); };
+    const handleFilter = filterData => { setFilters(filterData); applyFiltersAndSort(tasks, filterData, sortBy); };
+    const resetFilters = () => { setFilters({}); applyFiltersAndSort(tasks, {}, sortBy); };
 
-    const handleFilter = (filterData) => {
-        setFilters(filterData);
-        applyFiltersAndSort(tasks, filterData, sortBy);
-    };
-
-    const resetFilters = () => {
-        setFilters({});
-        applyFiltersAndSort(tasks, {}, sortBy);
-    };
-
-    // ================= CRUD =================
-    const addTask = (task) => {
-        const updatedTasks = [task, ...tasks];
-        setTasks(updatedTasks);
-        applyFiltersAndSort(updatedTasks, filters, sortBy);
-    };
-
-    const updateTask = (updated) => {
-        const updatedTasks = tasks.map(t => t._id === updated._id ? updated : t);
-        setTasks(updatedTasks);
-        applyFiltersAndSort(updatedTasks, filters, sortBy);
-    };
-
-    const deleteTask = (id) => {
-        const updatedTasks = tasks.filter(t => t._id !== id);
-        setTasks(updatedTasks);
-        applyFiltersAndSort(updatedTasks, filters, sortBy);
-    };
+    const addTask = task => { const updated = [task, ...tasks]; setTasks(updated); applyFiltersAndSort(updated, filters, sortBy); };
+    const updateTask = updated => { const updatedTasks = tasks.map(t => t._id === updated._id ? updated : t); setTasks(updatedTasks); applyFiltersAndSort(updatedTasks, filters, sortBy); };
+    const deleteTask = id => { const updatedTasks = tasks.filter(t => t._id !== id); setTasks(updatedTasks); applyFiltersAndSort(updatedTasks, filters, sortBy); };
 
     return (
         <div>
             <h2>Dashboard</h2>
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            {/* SORT */}
             <div style={{ marginBottom: "10px" }}>
                 <label>Sortera efter: </label>
                 <select value={sortBy} onChange={handleSortChange}>
@@ -127,29 +89,12 @@ function Dashboard() {
                 </select>
             </div>
 
-            {/* CREATE FORM */}
             <TaskForm onCreate={addTask} />
+            <TaskFilters categories={categories} onFilter={handleFilter} />
 
-            {/* FILTER */}
-            <TaskFilters
-                categories={categories}
-                onFilter={handleFilter}
-                onReset={resetFilters}
-            />
-
-            {/* TASK LIST */}
-            {filteredTasks.length === 0 ? (
-                <p>Inga tasks ännu</p>
-            ) : (
-                filteredTasks.map(task => (
-                    <TaskItem
-                        key={task._id}
-                        task={task}
-                        onUpdate={updateTask}
-                        onDelete={deleteTask}
-                    />
-                ))
-            )}
+            {filteredTasks.length === 0 ? <p>Inga tasks ännu</p> : filteredTasks.map(task => (
+                <TaskItem key={task._id} task={task} onUpdate={updateTask} onDelete={deleteTask} />
+            ))}
         </div>
     );
 }
