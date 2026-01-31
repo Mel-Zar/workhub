@@ -2,17 +2,15 @@ import { createContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext();
 
-function AuthProvider({ children }) {
-
+export function AuthProvider({ children }) {
     const [accessToken, setAccessToken] = useState(null);
     const [refreshToken, setRefreshToken] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // ================= LOAD TOKENS =================
+    // ================= LOAD TOKENS FROM LOCALSTORAGE =================
     useEffect(() => {
         const a = localStorage.getItem("accessToken");
         const r = localStorage.getItem("refreshToken");
-
         if (a && r) {
             setAccessToken(a);
             setRefreshToken(r);
@@ -24,7 +22,6 @@ function AuthProvider({ children }) {
     const login = (access, refresh) => {
         localStorage.setItem("accessToken", access);
         localStorage.setItem("refreshToken", refresh);
-
         setAccessToken(access);
         setRefreshToken(refresh);
         setIsLoggedIn(true);
@@ -34,17 +31,15 @@ function AuthProvider({ children }) {
     const logout = () => {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-
         setAccessToken(null);
         setRefreshToken(null);
         setIsLoggedIn(false);
     };
 
-    // ================= REFRESH ACCESS TOKEN =================
+    // ================= REFRESH TOKEN =================
     const refreshAccessToken = async () => {
         try {
             const r = localStorage.getItem("refreshToken");
-
             if (!r) throw new Error("No refresh token");
 
             const res = await fetch("http://localhost:5001/api/auth/refresh", {
@@ -56,8 +51,6 @@ function AuthProvider({ children }) {
             if (!res.ok) throw new Error("Refresh failed");
 
             const data = await res.json();
-
-            // ✅ VIKTIGT
             localStorage.setItem("accessToken", data.accessToken);
             setAccessToken(data.accessToken);
 
@@ -69,13 +62,12 @@ function AuthProvider({ children }) {
         }
     };
 
-    // ================= GET VALID TOKEN =================
+    // ================= GET VALID ACCESS TOKEN =================
     const getValidAccessToken = async () => {
-
         // 1️⃣ state
         if (accessToken) return accessToken;
 
-        // 2️⃣ localStorage
+        // 2️⃣ localStorage fallback
         const storedAccess = localStorage.getItem("accessToken");
         if (storedAccess) return storedAccess;
 
@@ -84,18 +76,14 @@ function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider
-            value={{
-                isLoggedIn,
-                accessToken,
-                login,
-                logout,
-                getValidAccessToken
-            }}
-        >
+        <AuthContext.Provider value={{
+            isLoggedIn,
+            accessToken,
+            login,
+            logout,
+            getValidAccessToken
+        }}>
             {children}
         </AuthContext.Provider>
     );
 }
-
-export { AuthProvider };

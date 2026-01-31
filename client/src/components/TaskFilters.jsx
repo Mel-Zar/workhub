@@ -1,7 +1,6 @@
 import { useState } from "react";
 
-function TaskFilters({ onFilter, categories }) {
-
+function TaskFilters({ onFilter, categories, onReset }) {
     const [search, setSearch] = useState("");
     const [priority, setPriority] = useState("");
     const [category, setCategory] = useState("");
@@ -9,8 +8,7 @@ function TaskFilters({ onFilter, categories }) {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
 
-    // Kör direkt när något ändras
-    const triggerFilter = (changes) => {
+    const triggerFilter = (changes = {}) => {
         const updated = {
             search,
             priority,
@@ -21,24 +19,45 @@ function TaskFilters({ onFilter, categories }) {
             ...changes
         };
 
+        // completed till boolean eller undefined
+        let completedValue;
+        if (updated.completed === "true") completedValue = true;
+        else if (updated.completed === "false") completedValue = false;
+        else completedValue = undefined;
+
+        // priority till undefined om tomt
+        const priorityValue = updated.priority || undefined;
+
+        // category till undefined om tomt
+        const categoryValue = updated.category || undefined;
+
+        // dateRange
         const dateRange =
             updated.fromDate || updated.toDate
-                ? `${updated.fromDate || ""},${updated.toDate || ""}`
-                : "";
+                ? { from: updated.fromDate || null, to: updated.toDate || null }
+                : null;
 
         onFilter({
-            search: updated.search,
-            priority: updated.priority,
-            category: updated.category,
-            completed: updated.completed,
+            search: updated.search || undefined,
+            priority: priorityValue,
+            category: categoryValue,
+            completed: completedValue,
             dateRange
         });
     };
 
-    return (
-        <div style={{ marginBottom: "20px" }}>
+    const handleReset = () => {
+        setSearch("");
+        setPriority("");
+        setCategory("");
+        setCompleted("");
+        setFromDate("");
+        setToDate("");
+        onReset();
+    };
 
-            {/* SEARCH */}
+    return (
+        <div style={{ marginBottom: "20px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
             <input
                 placeholder="Sök..."
                 value={search}
@@ -48,7 +67,6 @@ function TaskFilters({ onFilter, categories }) {
                 }}
             />
 
-            {/* PRIORITY */}
             <select
                 value={priority}
                 onChange={e => {
@@ -62,7 +80,6 @@ function TaskFilters({ onFilter, categories }) {
                 <option value="high">High</option>
             </select>
 
-            {/* CATEGORY */}
             <select
                 value={category}
                 onChange={e => {
@@ -76,7 +93,6 @@ function TaskFilters({ onFilter, categories }) {
                 ))}
             </select>
 
-            {/* COMPLETED */}
             <select
                 value={completed}
                 onChange={e => {
@@ -89,7 +105,6 @@ function TaskFilters({ onFilter, categories }) {
                 <option value="false">Ej klara</option>
             </select>
 
-            {/* FROM DATE */}
             <input
                 type="date"
                 value={fromDate}
@@ -99,7 +114,6 @@ function TaskFilters({ onFilter, categories }) {
                 }}
             />
 
-            {/* TO DATE */}
             <input
                 type="date"
                 value={toDate}
@@ -109,6 +123,7 @@ function TaskFilters({ onFilter, categories }) {
                 }}
             />
 
+            <button onClick={handleReset}>Nollställ filter</button>
         </div>
     );
 }
