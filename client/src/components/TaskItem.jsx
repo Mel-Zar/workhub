@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext } from "../AuthContext";
 
 function TaskItem({ task, onUpdate, onDelete }) {
+
+    const { getValidAccessToken, logout } = useContext(AuthContext);
 
     const [editing, setEditing] = useState(false);
 
@@ -11,60 +14,100 @@ function TaskItem({ task, onUpdate, onDelete }) {
         task.deadline ? task.deadline.slice(0, 10) : ""
     );
 
-    // SAVE ALL FIELDS
+    // ================= SAVE =================
     const save = async () => {
-
-        const res = await fetch(
-            `http://localhost:5001/api/tasks/${task._id}`,
-            {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                },
-                body: JSON.stringify({
-                    title,
-                    priority,
-                    category,
-                    deadline
-                })
+        try {
+            const token = await getValidAccessToken();
+            if (!token) {
+                logout();
+                return;
             }
-        );
 
-        const data = await res.json();
-        onUpdate(data);
-        setEditing(false);
+            const res = await fetch(
+                `http://localhost:5001/api/tasks/${task._id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        priority,
+                        category,
+                        deadline
+                    })
+                }
+            );
+
+            const data = await res.json();
+
+            if (res.ok) {
+                onUpdate(data);
+                setEditing(false);
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
     };
 
-    // TOGGLE COMPLETE
+    // ================= TOGGLE COMPLETE =================
     const toggleComplete = async () => {
-        const res = await fetch(
-            `http://localhost:5001/api/tasks/${task._id}/toggle`,
-            {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                }
+        try {
+            const token = await getValidAccessToken();
+            if (!token) {
+                logout();
+                return;
             }
-        );
 
-        const data = await res.json();
-        onUpdate(data);
+            const res = await fetch(
+                `http://localhost:5001/api/tasks/${task._id}/toggle`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            const data = await res.json();
+
+            if (res.ok) {
+                onUpdate(data);
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
     };
 
-    // DELETE
+    // ================= DELETE =================
     const remove = async () => {
-        await fetch(
-            `http://localhost:5001/api/tasks/${task._id}`,
-            {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                }
+        try {
+            const token = await getValidAccessToken();
+            if (!token) {
+                logout();
+                return;
             }
-        );
 
-        onDelete(task._id);
+            const res = await fetch(
+                `http://localhost:5001/api/tasks/${task._id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (res.ok) {
+                onDelete(task._id);
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
     };
 
     return (

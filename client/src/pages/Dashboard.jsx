@@ -15,12 +15,10 @@ function Dashboard() {
 
     // ================= FETCH TASKS =================
     const fetchTasks = async (filterData = {}) => {
-
         try {
             setFilters(filterData);
 
             const token = await getValidAccessToken();
-
             if (!token) {
                 logout();
                 return;
@@ -29,7 +27,7 @@ function Dashboard() {
             const params = new URLSearchParams(filterData);
 
             const res = await fetch(
-                `http://localhost:5001/api/tasks?${params}`,
+                `http://localhost:5001/api/tasks?${params.toString()}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -77,6 +75,11 @@ function Dashboard() {
         );
     };
 
+    // ================= DELETE =================
+    const deleteTask = (id) => {
+        setTasks(prev => prev.filter(t => t._id !== id));
+    };
+
     return (
         <div>
 
@@ -98,6 +101,7 @@ function Dashboard() {
                     key={task._id}
                     task={task}
                     onUpdate={updateTask}
+                    onDelete={deleteTask}
                 />
             ))}
 
