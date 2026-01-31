@@ -1,40 +1,71 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../AuthContext";
 
 function Tasks() {
 
+    const { accessToken, refreshAccessToken, logout } = useContext(AuthContext);
+
     const [tasks, setTasks] = useState([]);
+    const [error, setError] = useState("");
+
+    const fetchTasks = async () => {
+        try {
+            let token = accessToken;
+
+            let res = await fetch("http://localhost:5001/api/tasks", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            // 🔁 om token gått ut → refresh
+            if (res.status === 401) {
+                token = await refreshAccessToken();
+
+                if (!token) {
+                    logout();
+                    return;
+                }
+
+                res = await fetch("http://localhost:5001/api/tasks", {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+            }
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || "Kunde inte hämta tasks");
+                return;
+            }
+
+            setTasks(data.tasks || []);
+
+        } catch (err) {
+            console.error(err);
+            setError("Serverfel");
+        }
+    };
 
     useEffect(() => {
-
-        const token = localStorage.getItem("token");
-        console.log("TOKEN I TASKS:", token);
-
-        fetch("http://localhost:5001/api/tasks", {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`
-            }
-        })
-            .then(res => res.json())
-            .then(data => {
-                console.log("Tasks from backend:", data);
-                setTasks(data.tasks);   // 👈 viktiga raden
-
-            })
-            .catch(err => console.log("Error fetching tasks:", err));
-    }, []);
+        if (accessToken) {
+            fetchTasks();
+        }
+    }, [accessToken]);
 
     return (
         <div>
-            <h3>Tasks</h3>
-            <p>Välkommen! Du är inloggad.</p>
-
             <h2>Mina Tasks</h2>
+
+            {error && <p style={{ color: "red" }}>{error}</p>}
 
             {tasks.length === 0 && <p>Inga tasks ännu</p>}
 
             {tasks.map(task => (
                 <div key={task._id}>
-                    <p>{task.title}</p>
+                    {task.title}
                 </div>
             ))}
         </div>

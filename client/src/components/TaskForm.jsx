@@ -6,37 +6,60 @@ function TaskForm({ onCreate }) {
     const [priority, setPriority] = useState("medium");
     const [category, setCategory] = useState("work");
     const [deadline, setDeadline] = useState("");
+    const [error, setError] = useState("");
 
     async function handleSubmit(e) {
         e.preventDefault();
+        setError("");
 
         if (!title.trim()) return;
 
-        const res = await fetch("http://localhost:5001/api/tasks", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`
-            },
-            body: JSON.stringify({
-                title,
-                priority,
-                category,
-                deadline
-            })
-        });
+        const token = localStorage.getItem("token");
 
-        const data = await res.json();
-        onCreate(data);
+        if (!token) {
+            setError("Du är inte inloggad");
+            return;
+        }
 
-        setTitle("");
-        setCategory("work");
-        setDeadline("");
-        setPriority("medium");
+        try {
+            const res = await fetch("http://localhost:5001/api/tasks", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title,
+                    priority,
+                    category,
+                    deadline
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || "Kunde inte skapa task");
+                return;
+            }
+
+            onCreate(data);
+
+            setTitle("");
+            setCategory("work");
+            setDeadline("");
+            setPriority("medium");
+
+        } catch (err) {
+            console.error(err);
+            setError("Serverfel");
+        }
     }
 
     return (
         <form onSubmit={handleSubmit}>
+
+            {error && <p style={{ color: "red" }}>{error}</p>}
 
             {/* TITEL */}
             <input

@@ -1,45 +1,45 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
 
 function Register() {
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-
-    console.log("Skickar register till backend:", { name, email, password });
+    setSuccess("");
 
     try {
       const res = await fetch("http://localhost:5001/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password })
       });
 
       const data = await res.json();
-      console.log("Register response från backend:", data);
 
       if (!res.ok) {
-        setError(data.message || data.error || "Registrering misslyckades");
+        setError(data.error || "Registrering misslyckades");
         return;
       }
 
-      if (data.accessToken) {
-        login(data.accessToken); // logga in direkt
-        navigate("/tasks");           // navigera till tasks
-      } else {
-        navigate("/login");      // annars till login
-      }
+      // ✅ Registrering lyckades
+      setSuccess("Konto skapat! Skickar dig till inloggning...");
+
+      // Vänta 1 sekund → login
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
+
     } catch (err) {
-      console.log("Network error:", err);
+      console.error("Register error:", err);
       setError("Kan inte kontakta servern");
     }
   }
@@ -47,27 +47,40 @@ function Register() {
   return (
     <div>
       <h2>Registrera</h2>
+
       {error && <p style={{ color: "red" }}>{error}</p>}
+      {success && <p style={{ color: "green" }}>{success}</p>}
+
       <form onSubmit={handleSubmit}>
+
         <input
           type="text"
           placeholder="Namn"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
+          required
         />
+
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
+          autoComplete="email"
+          required
         />
+
         <input
           type="password"
           placeholder="Lösenord"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={e => setPassword(e.target.value)}
+          autoComplete="new-password"
+          required
         />
+
         <button type="submit">Registrera</button>
+
       </form>
     </div>
   );

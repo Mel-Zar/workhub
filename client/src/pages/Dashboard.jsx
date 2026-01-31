@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import TaskForm from "../components/TaskForm";
 import TaskItem from "../components/TaskItem";
 import TaskFilters from "../components/TaskFilters";
+import { AuthContext } from "../AuthContext";
 
 function Dashboard() {
+
+    const { accessToken, getValidAccessToken, logout } = useContext(AuthContext);
 
     const [tasks, setTasks] = useState([]);
     const [filters, setFilters] = useState({});
@@ -15,13 +18,20 @@ function Dashboard() {
         try {
             setFilters(filterData);
 
+            const token = await getValidAccessToken();   // 🔥
+
+            if (!token) {
+                logout();
+                return;
+            }
+
             const params = new URLSearchParams(filterData);
 
             const res = await fetch(
                 `http://localhost:5001/api/tasks?${params.toString()}`,
                 {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                        Authorization: `Bearer ${token}`
                     }
                 }
             );
@@ -33,11 +43,10 @@ function Dashboard() {
                 return;
             }
 
-            setTasks(data.tasks);
+            setTasks(data.tasks || []);
 
-            // Skapa kategori-lista från tasks
             const uniqueCategories = [
-                ...new Set(data.tasks.map(t => t.category).filter(Boolean))
+                ...new Set((data.tasks || []).map(t => t.category).filter(Boolean))
             ];
 
             setCategories(uniqueCategories);
@@ -48,18 +57,12 @@ function Dashboard() {
         }
     };
 
-    // ================= ERROR TIMEOUT =================
-    useEffect(() => {
-        if (error) {
-            const timer = setTimeout(() => setError(""), 3000); // försvinner efter 3 sek
-            return () => clearTimeout(timer); // städa upp
-        }
-    }, [error]);
-
     // ================= LOAD FIRST TIME =================
     useEffect(() => {
-        fetchTasks();
-    }, []);
+        if (accessToken) {
+            fetchTasks();
+        }
+    }, [accessToken]);
 
     // ================= CREATE =================
     const addTask = (task) => {
@@ -78,7 +81,7 @@ function Dashboard() {
         <div>
             <h2>Dashboard</h2>
 
-            {error && <p style={{ color: "red", transition: "opacity 0.3s" }}>{error}</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
 
             <TaskForm onCreate={addTask} />
 
