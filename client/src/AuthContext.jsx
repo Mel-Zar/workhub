@@ -47,13 +47,13 @@ function AuthProvider({ children }) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    refreshToken: refreshToken
+                    refreshToken
                 })
             });
 
-            const data = await res.json();
-
             if (!res.ok) throw new Error("Refresh failed");
+
+            const data = await res.json();
 
             localStorage.setItem("accessToken", data.accessToken);
             setAccessToken(data.accessToken);
@@ -85,8 +85,7 @@ function AuthProvider({ children }) {
                 accessToken,
                 login,
                 logout,
-                refreshAccessToken,
-                getValidAccessToken   // 👈 VIKTIG
+                getValidAccessToken
             }}
         >
             {children}

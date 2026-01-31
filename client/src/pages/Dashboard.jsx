@@ -6,7 +6,7 @@ import { AuthContext } from "../AuthContext";
 
 function Dashboard() {
 
-    const { accessToken, getValidAccessToken, logout } = useContext(AuthContext);
+    const { getValidAccessToken, logout } = useContext(AuthContext);
 
     const [tasks, setTasks] = useState([]);
     const [filters, setFilters] = useState({});
@@ -15,10 +15,11 @@ function Dashboard() {
 
     // ================= FETCH TASKS =================
     const fetchTasks = async (filterData = {}) => {
+
         try {
             setFilters(filterData);
 
-            const token = await getValidAccessToken();   // 🔥
+            const token = await getValidAccessToken();
 
             if (!token) {
                 logout();
@@ -28,7 +29,7 @@ function Dashboard() {
             const params = new URLSearchParams(filterData);
 
             const res = await fetch(
-                `http://localhost:5001/api/tasks?${params.toString()}`,
+                `http://localhost:5001/api/tasks?${params}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -46,7 +47,9 @@ function Dashboard() {
             setTasks(data.tasks || []);
 
             const uniqueCategories = [
-                ...new Set((data.tasks || []).map(t => t.category).filter(Boolean))
+                ...new Set((data.tasks || [])
+                    .map(t => t.category)
+                    .filter(Boolean))
             ];
 
             setCategories(uniqueCategories);
@@ -57,17 +60,14 @@ function Dashboard() {
         }
     };
 
-    // ================= LOAD FIRST TIME =================
+    // ================= FIRST LOAD =================
     useEffect(() => {
-        if (accessToken) {
-            fetchTasks();
-        }
-    }, [accessToken]);
+        fetchTasks();
+    }, []);
 
     // ================= CREATE =================
     const addTask = (task) => {
         setTasks(prev => [task, ...prev]);
-        fetchTasks(filters);
     };
 
     // ================= UPDATE =================
@@ -79,6 +79,7 @@ function Dashboard() {
 
     return (
         <div>
+
             <h2>Dashboard</h2>
 
             {error && <p style={{ color: "red" }}>{error}</p>}
@@ -99,6 +100,7 @@ function Dashboard() {
                     onUpdate={updateTask}
                 />
             ))}
+
         </div>
     );
 }
