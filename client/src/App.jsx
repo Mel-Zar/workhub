@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import PrivateRoute from "./components/PrivateRoute";
 import Tasks from "./pages/Tasks";
 import Dashboard from "./pages/Dashboard";
+import Task from "./pages/Task";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/tasks" element={<PrivateRoute><Tasks /></PrivateRoute>} />
+        <Route path="/task/:id" element={<Task />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         {/* Alla andra routes skickas till login */}

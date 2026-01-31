@@ -2,6 +2,7 @@ import express from "express";
 import {
     createTask,
     getTasks,
+    getTask,
     updateTask,
     deleteTask,
     toggleComplete,
@@ -15,6 +16,7 @@ const router = express.Router();
 // ORDER ÄR VIKTIG
 router.get("/", auth, getTasks);
 router.get("/categories", auth, getCategories);
+router.get("/:id", auth, getTask); // ✅ single task
 router.post("/", auth, createTask);
 router.put("/:id", auth, updateTask);
 router.delete("/:id", auth, deleteTask);
