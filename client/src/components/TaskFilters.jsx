@@ -1,7 +1,6 @@
 import { useState } from "react";
 
-function TaskFilters({ onFilter, categories = [] }) { // Lägg till categories prop
-    const [search, setSearch] = useState("");
+function TaskFilters({ onFilter, categories = [] }) {
     const [priority, setPriority] = useState("");
     const [category, setCategory] = useState("");
     const [completed, setCompleted] = useState("");
@@ -9,12 +8,11 @@ function TaskFilters({ onFilter, categories = [] }) { // Lägg till categories p
     const [toDate, setToDate] = useState("");
 
     const triggerFilter = (changes = {}) => {
-        const updated = { search, priority, category, completed, fromDate, toDate, ...changes };
+        const updated = { priority, category, completed, fromDate, toDate, ...changes };
 
         const completedValue =
             updated.completed === "true" ? true :
-                updated.completed === "false" ? false :
-                    undefined;
+                updated.completed === "false" ? false : undefined;
 
         const dateRange =
             updated.fromDate || updated.toDate
@@ -22,7 +20,6 @@ function TaskFilters({ onFilter, categories = [] }) { // Lägg till categories p
                 : null;
 
         onFilter({
-            search: updated.search || undefined,
             priority: updated.priority || undefined,
             category: updated.category || undefined,
             completed: completedValue,
@@ -32,12 +29,6 @@ function TaskFilters({ onFilter, categories = [] }) { // Lägg till categories p
 
     return (
         <div style={{ marginBottom: "20px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
-            <input
-                placeholder="Sök..."
-                value={search}
-                onChange={e => { setSearch(e.target.value); triggerFilter({ search: e.target.value }); }}
-            />
-
             <select value={priority} onChange={e => { setPriority(e.target.value); triggerFilter({ priority: e.target.value }); }}>
                 <option value="">Alla prioriteter</option>
                 <option value="low">Low</option>
@@ -65,5 +56,3 @@ function TaskFilters({ onFilter, categories = [] }) { // Lägg till categories p
 }
 
 export default TaskFilters;
-
-

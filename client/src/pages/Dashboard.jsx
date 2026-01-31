@@ -2,6 +2,8 @@ import { useEffect, useState, useContext } from "react";
 import TaskForm from "../components/TaskForm";
 import TaskItem from "../components/TaskItem";
 import TaskFilters from "../components/TaskFilters";
+import TaskSearch from "../components/TaskSearch";
+import TaskSort from "../components/TaskSort";
 import { AuthContext } from "../AuthContext";
 
 function Dashboard() {
@@ -40,10 +42,10 @@ function Dashboard() {
     const applyFiltersAndSort = (taskList, filterData, sort) => {
         let result = [...taskList];
 
+        if (filterData.search) result = result.filter(t => t.title.toLowerCase().includes(filterData.search.toLowerCase()));
         if (filterData.category) result = result.filter(t => t.category === filterData.category);
         if (filterData.priority) result = result.filter(t => t.priority === filterData.priority);
         if (filterData.completed !== undefined) result = result.filter(t => t.completed === filterData.completed);
-        if (filterData.search) result = result.filter(t => t.title.toLowerCase().includes(filterData.search.toLowerCase()));
         if (filterData.dateRange) {
             const from = filterData.dateRange.from ? new Date(filterData.dateRange.from) : null;
             const to = filterData.dateRange.to ? new Date(filterData.dateRange.to) : null;
@@ -56,7 +58,6 @@ function Dashboard() {
             });
         }
 
-        // Sort
         if (sort === "title") result.sort((a, b) => a.title.localeCompare(b.title));
         else if (sort === "deadline") result.sort((a, b) => new Date(a.deadline || 0) - new Date(b.deadline || 0));
         else if (sort === "priority") {
@@ -67,8 +68,10 @@ function Dashboard() {
         setFilteredTasks(result);
     };
 
-    const handleSortChange = e => { setSortBy(e.target.value); applyFiltersAndSort(tasks, filters, e.target.value); };
-    const handleFilter = filterData => { setFilters(filterData); applyFiltersAndSort(tasks, filterData, sortBy); };
+    const handleSortChange = sort => { setSortBy(sort); applyFiltersAndSort(tasks, filters, sort); };
+    const handleFilter = filterData => { setFilters(prev => ({ ...prev, ...filterData })); applyFiltersAndSort(tasks, { ...filters, ...filterData }, sortBy); };
+    const handleSearch = search => { setFilters(prev => ({ ...prev, search })); applyFiltersAndSort(tasks, { ...filters, search }, sortBy); };
+
     const resetFilters = () => { setFilters({}); applyFiltersAndSort(tasks, {}, sortBy); };
 
     const addTask = task => { const updated = [task, ...tasks]; setTasks(updated); applyFiltersAndSort(updated, filters, sortBy); };
@@ -80,17 +83,17 @@ function Dashboard() {
             <h2>Dashboard</h2>
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            <div style={{ marginBottom: "10px" }}>
-                <label>Sortera efter: </label>
-                <select value={sortBy} onChange={handleSortChange}>
-                    <option value="deadline">Deadline</option>
-                    <option value="priority">Priority</option>
-                    <option value="title">Titel</option>
-                </select>
-            </div>
+            {/* Sort */}
+            <TaskSort sortBy={sortBy} onSortChange={handleSortChange} />
 
-            <TaskForm onCreate={addTask} />
+            {/* Search */}
+            <TaskSearch onSearch={handleSearch} />
+
+            {/* Filter */}
             <TaskFilters categories={categories} onFilter={handleFilter} />
+
+            {/* Task Form */}
+            <TaskForm onCreate={addTask} />
 
             {filteredTasks.length === 0 ? <p>Inga tasks ännu</p> : filteredTasks.map(task => (
                 <TaskItem key={task._id} task={task} onUpdate={updateTask} onDelete={deleteTask} />
