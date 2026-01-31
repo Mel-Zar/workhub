@@ -14,8 +14,33 @@ function TaskItem({ task, onUpdate, onDelete }) {
         task.deadline ? task.deadline.slice(0, 10) : ""
     );
 
+    // ================= HELPERS =================
+
+    const formatText = (value) => {
+        return value
+            .replace(/\s+/g, " ")
+            .trim()
+            .split(" ")
+            .map(word =>
+                word.charAt(0).toUpperCase() +
+                word.slice(1).toLowerCase()
+            )
+            .join(" ");
+    };
+
+    const formatCategory = (value) => {
+        return value
+            .replace(/[^a-zA-ZåäöÅÄÖ]/g, "")
+            .toLowerCase()
+            .replace(/\s+/g, "")
+            .replace(/^./, char => char.toUpperCase());
+    };
+
     // ================= SAVE =================
     const save = async () => {
+
+        if (!title.trim()) return;
+
         try {
             const token = await getValidAccessToken();
             if (!token) {
@@ -32,9 +57,9 @@ function TaskItem({ task, onUpdate, onDelete }) {
                         Authorization: `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        title,
+                        title: formatText(title),
                         priority,
-                        category,
+                        category: formatCategory(category),
                         deadline
                     })
                 }
@@ -122,12 +147,15 @@ function TaskItem({ task, onUpdate, onDelete }) {
             {editing ? (
                 <div>
 
+                    {/* TITLE */}
                     <input
                         value={title}
-                        onChange={e => setTitle(e.target.value)}
+                        maxLength={50}
+                        onChange={e => setTitle(formatText(e.target.value))}
                         placeholder="Titel"
                     />
 
+                    {/* PRIORITY */}
                     <select
                         value={priority}
                         onChange={e => setPriority(e.target.value)}
@@ -137,15 +165,18 @@ function TaskItem({ task, onUpdate, onDelete }) {
                         <option value="high">High</option>
                     </select>
 
+                    {/* CATEGORY */}
                     <input
                         value={category}
-                        onChange={e => setCategory(e.target.value)}
+                        onChange={e => setCategory(formatCategory(e.target.value))}
                         placeholder="Kategori"
                     />
 
+                    {/* DEADLINE */}
                     <input
                         type="date"
                         value={deadline}
+                        min={new Date().toISOString().split("T")[0]}
                         onChange={e => setDeadline(e.target.value)}
                     />
 

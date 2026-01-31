@@ -43,18 +43,21 @@ function AuthProvider({ children }) {
     // ================= REFRESH ACCESS TOKEN =================
     const refreshAccessToken = async () => {
         try {
+            const r = localStorage.getItem("refreshToken");
+
+            if (!r) throw new Error("No refresh token");
+
             const res = await fetch("http://localhost:5001/api/auth/refresh", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    refreshToken
-                })
+                body: JSON.stringify({ refreshToken: r })
             });
 
             if (!res.ok) throw new Error("Refresh failed");
 
             const data = await res.json();
 
+            // ✅ VIKTIGT
             localStorage.setItem("accessToken", data.accessToken);
             setAccessToken(data.accessToken);
 
@@ -69,13 +72,15 @@ function AuthProvider({ children }) {
     // ================= GET VALID TOKEN =================
     const getValidAccessToken = async () => {
 
+        // 1️⃣ state
         if (accessToken) return accessToken;
 
-        if (refreshToken) {
-            return await refreshAccessToken();
-        }
+        // 2️⃣ localStorage
+        const storedAccess = localStorage.getItem("accessToken");
+        if (storedAccess) return storedAccess;
 
-        return null;
+        // 3️⃣ refresh
+        return await refreshAccessToken();
     };
 
     return (
