@@ -9,7 +9,11 @@ function TaskForm({ onCreate }) {
     const [deadline, setDeadline] = useState("");
     const [error, setError] = useState("");
 
+    const [images, setImages] = useState([]);
+    const [preview, setPreview] = useState([]);
+
     // ================= FORMAT INPUT =================
+
     function formatInput(value, maxLength = 40) {
         let v = value.replace(/[^a-zA-ZåäöÅÄÖ0-9 ]/g, "");
         v = v.replace(/\s+/g, " ");
@@ -29,44 +33,59 @@ function TaskForm({ onCreate }) {
         return v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
     }
 
+    // ================= IMAGES =================
+
+    function handleImages(e) {
+        const files = Array.from(e.target.files);
+        setImages(files);
+
+        const previews = files.map(file =>
+            URL.createObjectURL(file)
+        );
+        setPreview(previews);
+    }
+
     // ================= SUBMIT =================
     async function handleSubmit(e) {
         e.preventDefault();
         setError("");
 
-        if (!title.trim()) return;
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("priority", priority);
+        formData.append("category", category);
+        formData.append("deadline", deadline);
 
-        try {
+        images.forEach(img => {
+            formData.append("images", img);
+        });
 
-            const res = await apiFetch("http://localhost:5001/api/tasks", {
+        const res = await apiFetch(
+            "http://localhost:5001/api/tasks",
+            {
                 method: "POST",
-                body: JSON.stringify({
-                    title,
-                    priority,
-                    category,
-                    deadline
-                })
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                setError(data.error || "Kunde inte skapa task");
-                return;
+                body: formData
             }
+        );
 
-            onCreate(); // hämta tasks på nytt
+        const data = await res.json();
 
-            setTitle("");
-            setCategory("");
-            setDeadline("");
-            setPriority("medium");
-
-        } catch (err) {
-            console.error(err);
-            setError("Serverfel");
+        if (!res.ok) {
+            setError(data.error || "Kunde inte skapa task");
+            return;
         }
+
+        onCreate();
+
+        setTitle("");
+        setCategory("");
+        setDeadline("");
+        setImages([]);
+        setPreview([]);
     }
+
+
+    // ================= UI =================
 
     return (
         <form onSubmit={handleSubmit}>
@@ -101,6 +120,28 @@ function TaskForm({ onCreate }) {
                 min={new Date().toISOString().split("T")[0]}
                 onChange={e => setDeadline(e.target.value)}
             />
+
+            {/* PREVIEW */}
+            <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                {preview.map((img, i) => (
+                    <img
+                        key={i}
+                        src={img}
+                        width="80"
+                        style={{ borderRadius: "5px" }}
+                    />
+                ))}
+            </div>
+
+            {/* IMAGE INPUT */}
+            <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImages}
+            />
+
+
 
             <button>Skapa</button>
 

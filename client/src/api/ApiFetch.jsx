@@ -3,9 +3,13 @@ export async function apiFetch(url, options = {}) {
     let accessToken = localStorage.getItem("accessToken");
 
     let headers = {
-        "Content-Type": "application/json",
         ...(options.headers || {})
     };
+
+    // ✅ Sätt bara Content-Type om det INTE är FormData
+    if (!(options.body instanceof FormData)) {
+        headers["Content-Type"] = "application/json";
+    }
 
     if (accessToken) {
         headers.Authorization = `Bearer ${accessToken}`;

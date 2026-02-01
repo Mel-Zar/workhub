@@ -18,8 +18,7 @@ function Dashboard() {
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
 
-    /* ================= FETCH TASKS ================= */
-
+    // ================= FETCH TASKS =================
     async function fetchTasks() {
         try {
             const params = new URLSearchParams({
@@ -34,13 +33,6 @@ function Dashboard() {
             if (filters.completed !== undefined)
                 params.append("completed", filters.completed);
 
-            if (filters.dateRange?.from || filters.dateRange?.to) {
-                params.append(
-                    "dateRange",
-                    `${filters.dateRange?.from || ""},${filters.dateRange?.to || ""}`
-                );
-            }
-
             const res = await apiFetch(
                 `http://localhost:5001/api/tasks?${params}`
             );
@@ -51,9 +43,11 @@ function Dashboard() {
             setPages(data.pages || 1);
 
             setCategories([
-                ...new Set((data.tasks || [])
-                    .map(t => t.category)
-                    .filter(Boolean))
+                ...new Set(
+                    (data.tasks || [])
+                        .map(t => t.category)
+                        .filter(Boolean)
+                )
             ]);
 
         } catch (err) {
@@ -65,8 +59,7 @@ function Dashboard() {
         fetchTasks();
     }, [page, filters, sortBy]);
 
-    /* ================= CALLBACKS ================= */
-
+    // ================= CALLBACKS =================
     function handleUpdate(updatedTask) {
         setTasks(prev =>
             prev.map(t =>
@@ -81,8 +74,7 @@ function Dashboard() {
         );
     }
 
-    /* ================= RENDER ================= */
-
+    // ================= RENDER =================
     return (
         <div>
 
@@ -121,11 +113,11 @@ function Dashboard() {
                     task={task}
                     onUpdate={handleUpdate}
                     onDelete={handleDelete}
+                    showActions={true}
                 />
             ))}
 
-            {/* ================= PAGINATION ================= */}
-
+            {/* PAGINATION */}
             <div style={{ marginTop: "20px" }}>
 
                 <button

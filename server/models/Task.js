@@ -31,7 +31,14 @@ const taskSchema = new mongoose.Schema(
         completed: {
             type: Boolean,
             default: false
-        }
+        },
+
+        images: [
+            {
+                type: String
+            }
+        ]
+
     },
     { timestamps: true }
 );

@@ -1,25 +1,39 @@
 import express from "express";
+import auth from "../middleware/authMiddleware.js";
+import { upload } from "../middleware/uploadMiddleware.js";
+
 import {
-    createTask,
     getTasks,
     getTask,
+    createTask,
     updateTask,
     deleteTask,
-    toggleComplete,
-    getCategories
+    toggleComplete
 } from "../controllers/taskController.js";
-
-import auth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// ORDER ÄR VIKTIG
+// GET all tasks
 router.get("/", auth, getTasks);
-router.get("/categories", auth, getCategories);
-router.get("/:id", auth, getTask); // ✅ single task
-router.post("/", auth, createTask);
+
+// GET single task
+router.get("/:id", auth, getTask);
+
+// CREATE task + upload images
+router.post(
+    "/",
+    auth,
+    upload.array("images", 5),   // max 5 images
+    createTask
+);
+
+// UPDATE task
 router.put("/:id", auth, updateTask);
+
+// DELETE task
 router.delete("/:id", auth, deleteTask);
+
+// TOGGLE completed
 router.patch("/:id/toggle", auth, toggleComplete);
 
 export default router;

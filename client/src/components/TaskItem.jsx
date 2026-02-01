@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { apiFetch } from "../api/ApiFetch";
 
-function TaskItem({ task, onUpdate, onDelete }) {
+function TaskItem({
+    task,
+    onUpdate,
+    onDelete,
+    showActions = true,
+    clickable = false,
+    onClick
+}) {
 
     const [editing, setEditing] = useState(false);
     const [title, setTitle] = useState(task.title);
@@ -29,14 +36,13 @@ function TaskItem({ task, onUpdate, onDelete }) {
         const data = await res.json();
 
         if (res.ok) {
-            onUpdate(data);
+            onUpdate?.(data);
             setEditing(false);
         }
     }
 
     // ================= TOGGLE =================
     async function toggleComplete() {
-
         const res = await apiFetch(
             `http://localhost:5001/api/tasks/${task._id}/toggle`,
             { method: "PATCH" }
@@ -45,33 +51,46 @@ function TaskItem({ task, onUpdate, onDelete }) {
         const data = await res.json();
 
         if (res.ok) {
-            onUpdate(data);
+            onUpdate?.(data);
         }
     }
 
     // ================= DELETE =================
     async function remove() {
-
         const res = await apiFetch(
             `http://localhost:5001/api/tasks/${task._id}`,
             { method: "DELETE" }
         );
 
         if (res.ok) {
-            onDelete(task._id);
+            onDelete?.(task._id);
         }
     }
 
     // ================= UI =================
     return (
-        <div style={{ marginBottom: "12px" }}>
+        <div
+            onClick={clickable ? onClick : undefined}
+            style={{
+                border: "1px solid #ccc",
+                padding: "12px",
+                borderRadius: "6px",
+                marginBottom: "10px",
+                cursor: clickable ? "pointer" : "default"
+            }}
+        >
 
-            <input
-                type="checkbox"
-                checked={task.completed}
-                onChange={toggleComplete}
-            />
+            {/* CHECKBOX */}
+            {showActions && (
+                <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={toggleComplete}
+                    onClick={e => e.stopPropagation()}
+                />
+            )}
 
+            {/* CONTENT */}
             {editing ? (
                 <>
                     <input
@@ -104,23 +123,52 @@ function TaskItem({ task, onUpdate, onDelete }) {
                 </>
             ) : (
                 <>
-                    <span
-                        style={{
-                            textDecoration: task.completed
-                                ? "line-through"
-                                : "none"
-                        }}
-                    >
-                        {task.title} ({task.priority})
-                    </span>
+                    <h4 style={{
+                        textDecoration: task.completed
+                            ? "line-through"
+                            : "none"
+                    }}>
+                        {task.title}
+                    </h4>
 
-                    <button onClick={() => setEditing(true)}>
-                        Ändra
-                    </button>
+                    <p>{task.priority}</p>
 
-                    <button onClick={remove}>
-                        Ta bort
-                    </button>
+                    {/* IMAGES */}
+                    {task.images?.length > 0 && (
+                        <div style={{ display: "flex", gap: "6px" }}>
+                            {task.images.map((img, i) => (
+                                <img
+                                    key={i}
+                                    src={`http://localhost:5001${img}`}
+                                    width="70"
+                                    style={{ borderRadius: "5px" }}
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* ACTIONS */}
+                    {showActions && (
+                        <div style={{ marginTop: "8px" }}>
+                            <button
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                            >
+                                Ändra
+                            </button>
+
+                            <button
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    remove();
+                                }}
+                            >
+                                Ta bort
+                            </button>
+                        </div>
+                    )}
                 </>
             )}
 
