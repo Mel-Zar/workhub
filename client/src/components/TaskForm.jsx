@@ -7,50 +7,32 @@ function TaskForm({ onCreate }) {
     const [priority, setPriority] = useState("medium");
     const [category, setCategory] = useState("");
     const [deadline, setDeadline] = useState("");
-    const [error, setError] = useState("");
 
+    // ✅ alla bilder sparas här
     const [images, setImages] = useState([]);
-    const [preview, setPreview] = useState([]);
 
-    // ================= FORMAT INPUT =================
+    // ================= ADD IMAGES =================
+    function handleSelectImages(e) {
 
-    function formatInput(value, maxLength = 40) {
-        let v = value.replace(/[^a-zA-ZåäöÅÄÖ0-9 ]/g, "");
-        v = v.replace(/\s+/g, " ");
-        v = v.trimStart();
+        const selected = Array.from(e.target.files);
 
-        if (v.length > 0)
-            v = v.charAt(0).toUpperCase() + v.slice(1);
+        setImages(prev => [...prev, ...selected]);
 
-        return v.slice(0, maxLength);
+        // reset input så man kan välja samma fil igen
+        e.target.value = null;
     }
 
-    function formatCategory(value) {
-        let v = value.replace(/[^A-Za-zÅÄÖåäö]/g, "");
-        v = v.slice(0, 20);
-
-        if (v.length === 0) return "";
-        return v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
-    }
-
-    // ================= IMAGES =================
-
-    function handleImages(e) {
-        const files = Array.from(e.target.files);
-        setImages(files);
-
-        const previews = files.map(file =>
-            URL.createObjectURL(file)
-        );
-        setPreview(previews);
+    // ================= REMOVE IMAGE =================
+    function removeImage(index) {
+        setImages(prev => prev.filter((_, i) => i !== index));
     }
 
     // ================= SUBMIT =================
     async function handleSubmit(e) {
         e.preventDefault();
-        setError("");
 
         const formData = new FormData();
+
         formData.append("title", title);
         formData.append("priority", priority);
         formData.append("category", category);
@@ -64,40 +46,34 @@ function TaskForm({ onCreate }) {
             "http://localhost:5001/api/tasks",
             {
                 method: "POST",
-                body: formData
+                body: formData,
+                headers: {}
             }
         );
 
-        const data = await res.json();
-
-        if (!res.ok) {
-            setError(data.error || "Kunde inte skapa task");
-            return;
+        if (res.ok) {
+            setTitle("");
+            setCategory("");
+            setDeadline("");
+            setImages([]);
+            onCreate();
         }
-
-        onCreate();
-
-        setTitle("");
-        setCategory("");
-        setDeadline("");
-        setImages([]);
-        setPreview([]);
     }
 
-
-    // ================= UI =================
-
+    // ================= RENDER =================
     return (
         <form onSubmit={handleSubmit}>
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            <h3>Skapa Task</h3>
 
             <input
                 placeholder="Titel"
                 value={title}
-                onChange={e => setTitle(formatInput(e.target.value))}
+                onChange={e => setTitle(e.target.value)}
                 required
             />
+
+            <br />
 
             <select
                 value={priority}
@@ -108,42 +84,54 @@ function TaskForm({ onCreate }) {
                 <option value="high">High</option>
             </select>
 
+            <br />
+
             <input
                 placeholder="Kategori"
                 value={category}
-                onChange={e => setCategory(formatCategory(e.target.value))}
+                onChange={e => setCategory(e.target.value)}
             />
+
+            <br />
 
             <input
                 type="date"
                 value={deadline}
-                min={new Date().toISOString().split("T")[0]}
                 onChange={e => setDeadline(e.target.value)}
             />
 
-            {/* PREVIEW */}
-            <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                {preview.map((img, i) => (
-                    <img
-                        key={i}
-                        src={img}
-                        width="80"
-                        style={{ borderRadius: "5px" }}
-                    />
-                ))}
-            </div>
+            <br />
 
-            {/* IMAGE INPUT */}
+            {/* ✅ välj bilder hur många gånger du vill */}
             <input
                 type="file"
                 multiple
-                accept="image/*"
-                onChange={handleImages}
+                onChange={handleSelectImages}
             />
 
+            {/* PREVIEW */}
+            <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+                {images.map((img, i) => (
+                    <div key={i}>
+                        <img
+                            src={URL.createObjectURL(img)}
+                            width="70"
+                            style={{ borderRadius: "6px" }}
+                        />
+                        <br />
+                        <button
+                            type="button"
+                            onClick={() => removeImage(i)}
+                        >
+                            ❌
+                        </button>
+                    </div>
+                ))}
+            </div>
 
+            <br />
 
-            <button>Skapa</button>
+            <button>Skapa Task</button>
 
         </form>
     );

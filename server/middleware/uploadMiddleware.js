@@ -14,21 +14,20 @@ const storage = multer.diskStorage({
     },
     filename(req, file, cb) {
         const ext = path.extname(file.originalname);
-        const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, unique + ext);
+        cb(null, `${Date.now()}-${Math.random()}${ext}`);
     }
 });
 
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) {
+function fileFilter(req, file, cb) {
+    if (file.mimetype.startsWith("image")) {
         cb(null, true);
     } else {
-        cb(new Error("Only images allowed"), false);
+        cb(new Error("Only images allowed"));
     }
-};
+}
 
 export const upload = multer({
     storage,
     fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB
+    limits: { fileSize: 5 * 1024 * 1024 }
 });
