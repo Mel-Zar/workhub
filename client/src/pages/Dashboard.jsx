@@ -10,90 +10,63 @@ import TaskSort from "../components/TaskSort";
 function Dashboard() {
 
     const [tasks, setTasks] = useState([]);
-    const [filtered, setFiltered] = useState([]);
     const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState("deadline");
+
     const [categories, setCategories] = useState([]);
 
-    // ================= FETCH =================
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+
+    /* ================= FETCH TASKS ================= */
+
     async function fetchTasks() {
         try {
-            const res = await apiFetch("http://localhost:5001/api/tasks");
+            const params = new URLSearchParams({
+                page,
+                limit: 5,
+                sortBy
+            });
+
+            if (filters.search) params.append("search", filters.search);
+            if (filters.priority) params.append("priority", filters.priority);
+            if (filters.category) params.append("category", filters.category);
+            if (filters.completed !== undefined)
+                params.append("completed", filters.completed);
+
+            if (filters.dateRange?.from || filters.dateRange?.to) {
+                params.append(
+                    "dateRange",
+                    `${filters.dateRange?.from || ""},${filters.dateRange?.to || ""}`
+                );
+            }
+
+            const res = await apiFetch(
+                `http://localhost:5001/api/tasks?${params}`
+            );
+
             const data = await res.json();
 
-            const list = data.tasks || [];
-
-            setTasks(list);
-            setFiltered(list);
+            setTasks(data.tasks || []);
+            setPages(data.pages || 1);
 
             setCategories([
-                ...new Set(list.map(t => t.category).filter(Boolean))
+                ...new Set((data.tasks || [])
+                    .map(t => t.category)
+                    .filter(Boolean))
             ]);
 
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
     useEffect(() => {
         fetchTasks();
-    }, []);
+    }, [page, filters, sortBy]);
 
-    // ================= FILTER + SORT =================
-    useEffect(() => {
+    /* ================= CALLBACKS ================= */
 
-        let list = [...tasks];
-
-        if (filters.search)
-            list = list.filter(t =>
-                t.title.toLowerCase().includes(filters.search.toLowerCase())
-            );
-
-        if (filters.priority)
-            list = list.filter(t => t.priority === filters.priority);
-
-        if (filters.category)
-            list = list.filter(t => t.category === filters.category);
-
-        if (filters.completed !== undefined)
-            list = list.filter(t => t.completed === filters.completed);
-
-        if (filters.dateRange) {
-            const from = filters.dateRange.from
-                ? new Date(filters.dateRange.from)
-                : null;
-
-            const to = filters.dateRange.to
-                ? new Date(filters.dateRange.to)
-                : null;
-
-            list = list.filter(t => {
-                if (!t.deadline) return false;
-                const d = new Date(t.deadline);
-                if (from && d < from) return false;
-                if (to && d > to) return false;
-                return true;
-            });
-        }
-
-        if (sortBy === "title")
-            list.sort((a, b) => a.title.localeCompare(b.title));
-
-        if (sortBy === "deadline")
-            list.sort((a, b) =>
-                new Date(a.deadline || 0) - new Date(b.deadline || 0)
-            );
-
-        if (sortBy === "priority") {
-            const order = { high: 1, medium: 2, low: 3 };
-            list.sort((a, b) => order[a.priority] - order[b.priority]);
-        }
-
-        setFiltered(list);
-
-    }, [tasks, filters, sortBy]);
-
-    // ================= CALLBACKS =================
     function handleUpdate(updatedTask) {
         setTasks(prev =>
             prev.map(t =>
@@ -108,7 +81,8 @@ function Dashboard() {
         );
     }
 
-    // ================= RENDER =================
+    /* ================= RENDER ================= */
+
     return (
         <div>
 
@@ -116,27 +90,32 @@ function Dashboard() {
 
             <TaskSort
                 sortBy={sortBy}
-                onSortChange={setSortBy}
+                onSortChange={(value) => {
+                    setPage(1);
+                    setSortBy(value);
+                }}
             />
 
             <TaskSearch
-                onSearch={search =>
-                    setFilters(prev => ({ ...prev, search }))
-                }
+                onSearch={(search) => {
+                    setPage(1);
+                    setFilters(prev => ({ ...prev, search }));
+                }}
             />
 
             <TaskFilters
                 categories={categories}
-                onFilter={data =>
-                    setFilters(prev => ({ ...prev, ...data }))
-                }
+                onFilter={(data) => {
+                    setPage(1);
+                    setFilters(prev => ({ ...prev, ...data }));
+                }}
             />
 
             <TaskForm onCreate={fetchTasks} />
 
-            {filtered.length === 0 && <p>Inga tasks</p>}
+            {tasks.length === 0 && <p>Inga tasks</p>}
 
-            {filtered.map(task => (
+            {tasks.map(task => (
                 <TaskItem
                     key={task._id}
                     task={task}
@@ -144,6 +123,30 @@ function Dashboard() {
                     onDelete={handleDelete}
                 />
             ))}
+
+            {/* ================= PAGINATION ================= */}
+
+            <div style={{ marginTop: "20px" }}>
+
+                <button
+                    disabled={page === 1}
+                    onClick={() => setPage(p => p - 1)}
+                >
+                    ⬅ Föregående
+                </button>
+
+                <span style={{ margin: "0 10px" }}>
+                    Sida {page} av {pages}
+                </span>
+
+                <button
+                    disabled={page === pages}
+                    onClick={() => setPage(p => p + 1)}
+                >
+                    Nästa ➡
+                </button>
+
+            </div>
 
         </div>
     );
