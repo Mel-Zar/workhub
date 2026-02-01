@@ -4,15 +4,28 @@ export async function apiFetch(url, options = {}) {
 
     let headers = {
         "Content-Type": "application/json",
-        ...(options.headers || {}),
-        Authorization: `Bearer ${accessToken}`
+        ...(options.headers || {})
     };
 
-    let response = await fetch(url, { ...options, headers });
+    if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+    }
 
+    let response = await fetch(url, {
+        ...options,
+        headers
+    });
+
+    // ================= REFRESH =================
     if (response.status === 401) {
 
         const refreshToken = localStorage.getItem("refreshToken");
+
+        if (!refreshToken) {
+            localStorage.clear();
+            window.location.href = "/login";
+            throw new Error("No refresh token");
+        }
 
         const refreshRes = await fetch(
             "http://localhost:5001/api/auth/refresh",
@@ -26,7 +39,7 @@ export async function apiFetch(url, options = {}) {
         if (!refreshRes.ok) {
             localStorage.clear();
             window.location.href = "/login";
-            return;
+            throw new Error("Refresh failed");
         }
 
         const data = await refreshRes.json();
@@ -34,7 +47,11 @@ export async function apiFetch(url, options = {}) {
 
         headers.Authorization = `Bearer ${data.accessToken}`;
 
-        response = await fetch(url, { ...options, headers });
+        // 🔁 kör original request igen
+        response = await fetch(url, {
+            ...options,
+            headers
+        });
     }
 
     return response;

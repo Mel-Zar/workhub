@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
+import { AuthContext } from "../context/AuthContext";
 
 function Tasks() {
     const { accessToken, refreshAccessToken, logout } = useContext(AuthContext);

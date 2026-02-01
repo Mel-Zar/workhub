@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AuthContext } from "../AuthContext";
+import { AuthContext } from "../context/AuthContext";
 
 function Task() {
     const { id } = useParams(); // task-id från URL

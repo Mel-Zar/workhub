@@ -5,27 +5,38 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const a = localStorage.getItem("accessToken");
         const r = localStorage.getItem("refreshToken");
-        if (a && r) setIsLoggedIn(true);
+
+        if (a && r) {
+            setIsLoggedIn(true);
+        }
+
+        setLoading(false);
     }, []);
 
-    const login = (access, refresh) => {
+    function login(access, refresh) {
         localStorage.setItem("accessToken", access);
         localStorage.setItem("refreshToken", refresh);
         setIsLoggedIn(true);
-    };
+    }
 
-    const logout = () => {
+    function logout() {
         localStorage.clear();
         setIsLoggedIn(false);
         window.location.href = "/login";
-    };
+    }
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+        <AuthContext.Provider value={{
+            isLoggedIn,
+            loading,
+            login,
+            logout
+        }}>
             {children}
         </AuthContext.Provider>
     );

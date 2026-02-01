@@ -1,9 +1,7 @@
-import { useState, useContext } from "react";
-import { AuthContext } from "../AuthContext";
+import { useState } from "react";
+import { apiFetch } from "../api/ApiFetch";
 
 function TaskForm({ onCreate }) {
-
-    const { getValidAccessToken, logout } = useContext(AuthContext);
 
     const [title, setTitle] = useState("");
     const [priority, setPriority] = useState("medium");
@@ -13,33 +11,21 @@ function TaskForm({ onCreate }) {
 
     // ================= FORMAT INPUT =================
     function formatInput(value, maxLength = 40) {
-        let v = value;
-
-        // Ta bort specialtecken
-        v = v.replace(/[^a-zA-ZåäöÅÄÖ0-9 ]/g, "");
-
-        // Ta bort dubbla mellanslag
+        let v = value.replace(/[^a-zA-ZåäöÅÄÖ0-9 ]/g, "");
         v = v.replace(/\s+/g, " ");
-
-        // Trimma
         v = v.trimStart();
 
-        // Första bokstaven stor
-        if (v.length > 0) {
+        if (v.length > 0)
             v = v.charAt(0).toUpperCase() + v.slice(1);
-        }
 
-        // Maxlängd
         return v.slice(0, maxLength);
     }
 
-    // helper
     function formatCategory(value) {
-        let v = value.replace(/[^A-Za-zÅÄÖåäö]/g, ""); // bara bokstäver
-        v = v.slice(0, 20); // max 20 tecken
+        let v = value.replace(/[^A-Za-zÅÄÖåäö]/g, "");
+        v = v.slice(0, 20);
 
         if (v.length === 0) return "";
-
         return v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
     }
 
@@ -51,18 +37,9 @@ function TaskForm({ onCreate }) {
         if (!title.trim()) return;
 
         try {
-            const token = await getValidAccessToken();
-            if (!token) {
-                logout();
-                return;
-            }
 
-            const res = await fetch("http://localhost:5001/api/tasks", {
+            const res = await apiFetch("http://localhost:5001/api/tasks", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
                 body: JSON.stringify({
                     title,
                     priority,
@@ -78,7 +55,7 @@ function TaskForm({ onCreate }) {
                 return;
             }
 
-            onCreate(data);
+            onCreate(); // hämta tasks på nytt
 
             setTitle("");
             setCategory("");
@@ -96,16 +73,13 @@ function TaskForm({ onCreate }) {
 
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            {/* TITEL */}
             <input
                 placeholder="Titel"
                 value={title}
-                maxLength={40}
-                onChange={e => setTitle(formatInput(e.target.value, 40))}
+                onChange={e => setTitle(formatInput(e.target.value))}
                 required
             />
 
-            {/* PRIORITY */}
             <select
                 value={priority}
                 onChange={e => setPriority(e.target.value)}
@@ -115,16 +89,12 @@ function TaskForm({ onCreate }) {
                 <option value="high">High</option>
             </select>
 
-            {/* KATEGORI */}
             <input
                 placeholder="Kategori"
                 value={category}
-                onChange={(e) => setCategory(formatCategory(e.target.value))}
-                maxLength={20}
+                onChange={e => setCategory(formatCategory(e.target.value))}
             />
 
-
-            {/* DEADLINE */}
             <input
                 type="date"
                 value={deadline}

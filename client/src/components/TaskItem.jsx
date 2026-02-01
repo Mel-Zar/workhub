@@ -1,142 +1,70 @@
-import { useState, useContext } from "react";
-import { AuthContext } from "../AuthContext";
+import { useState } from "react";
+import { apiFetch } from "../api/ApiFetch";
 
 function TaskItem({ task, onUpdate, onDelete }) {
 
-    const { getValidAccessToken, logout } = useContext(AuthContext);
-
     const [editing, setEditing] = useState(false);
-
     const [title, setTitle] = useState(task.title);
-    const [priority, setPriority] = useState(task.priority || "medium");
+    const [priority, setPriority] = useState(task.priority);
     const [category, setCategory] = useState(task.category || "");
     const [deadline, setDeadline] = useState(
         task.deadline ? task.deadline.slice(0, 10) : ""
     );
 
-    // ================= HELPERS =================
-
-    const formatText = (value) => {
-        return value
-            .replace(/\s+/g, " ")
-            .trim()
-            .split(" ")
-            .map(word =>
-                word.charAt(0).toUpperCase() +
-                word.slice(1).toLowerCase()
-            )
-            .join(" ");
-    };
-
-    const formatCategory = (value) => {
-        return value
-            .replace(/[^a-zA-ZåäöÅÄÖ]/g, "")
-            .toLowerCase()
-            .replace(/\s+/g, "")
-            .replace(/^./, char => char.toUpperCase());
-    };
-
-    // ================= SAVE =================
-    const save = async () => {
-
-        if (!title.trim()) return;
-
-        try {
-            const token = await getValidAccessToken();
-            if (!token) {
-                logout();
-                return;
+    // ================= UPDATE =================
+    async function save() {
+        const res = await apiFetch(
+            `http://localhost:5001/api/tasks/${task._id}`,
+            {
+                method: "PUT",
+                body: JSON.stringify({
+                    title,
+                    priority,
+                    category,
+                    deadline
+                })
             }
+        );
 
-            const res = await fetch(
-                `http://localhost:5001/api/tasks/${task._id}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        title: formatText(title),
-                        priority,
-                        category: formatCategory(category),
-                        deadline
-                    })
-                }
-            );
+        const data = await res.json();
 
-            const data = await res.json();
-
-            if (res.ok) {
-                onUpdate(data);
-                setEditing(false);
-            }
-
-        } catch (err) {
-            console.log(err);
+        if (res.ok) {
+            onUpdate(data);
+            setEditing(false);
         }
-    };
+    }
 
-    // ================= TOGGLE COMPLETE =================
-    const toggleComplete = async () => {
-        try {
-            const token = await getValidAccessToken();
-            if (!token) {
-                logout();
-                return;
-            }
+    // ================= TOGGLE =================
+    async function toggleComplete() {
 
-            const res = await fetch(
-                `http://localhost:5001/api/tasks/${task._id}/toggle`,
-                {
-                    method: "PATCH",
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
+        const res = await apiFetch(
+            `http://localhost:5001/api/tasks/${task._id}/toggle`,
+            { method: "PATCH" }
+        );
 
-            const data = await res.json();
+        const data = await res.json();
 
-            if (res.ok) {
-                onUpdate(data);
-            }
-
-        } catch (err) {
-            console.log(err);
+        if (res.ok) {
+            onUpdate(data);
         }
-    };
+    }
 
     // ================= DELETE =================
-    const remove = async () => {
-        try {
-            const token = await getValidAccessToken();
-            if (!token) {
-                logout();
-                return;
-            }
+    async function remove() {
 
-            const res = await fetch(
-                `http://localhost:5001/api/tasks/${task._id}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
+        const res = await apiFetch(
+            `http://localhost:5001/api/tasks/${task._id}`,
+            { method: "DELETE" }
+        );
 
-            if (res.ok) {
-                onDelete(task._id);
-            }
-
-        } catch (err) {
-            console.log(err);
+        if (res.ok) {
+            onDelete(task._id);
         }
-    };
+    }
 
+    // ================= UI =================
     return (
-        <div style={{ marginBottom: "15px" }}>
+        <div style={{ marginBottom: "12px" }}>
 
             <input
                 type="checkbox"
@@ -145,17 +73,12 @@ function TaskItem({ task, onUpdate, onDelete }) {
             />
 
             {editing ? (
-                <div>
-
-                    {/* TITLE */}
+                <>
                     <input
                         value={title}
-                        maxLength={50}
-                        onChange={e => setTitle(formatText(e.target.value))}
-                        placeholder="Titel"
+                        onChange={e => setTitle(e.target.value)}
                     />
 
-                    {/* PRIORITY */}
                     <select
                         value={priority}
                         onChange={e => setPriority(e.target.value)}
@@ -165,39 +88,39 @@ function TaskItem({ task, onUpdate, onDelete }) {
                         <option value="high">High</option>
                     </select>
 
-                    {/* CATEGORY */}
                     <input
                         value={category}
-                        onChange={e => setCategory(formatCategory(e.target.value))}
-                        placeholder="Kategori"
+                        onChange={e => setCategory(e.target.value)}
                     />
 
-                    {/* DEADLINE */}
                     <input
                         type="date"
                         value={deadline}
-                        min={new Date().toISOString().split("T")[0]}
                         onChange={e => setDeadline(e.target.value)}
                     />
 
                     <button onClick={save}>Spara</button>
                     <button onClick={() => setEditing(false)}>Avbryt</button>
-
-                </div>
+                </>
             ) : (
-                <span
-                    style={{
-                        textDecoration: task.completed ? "line-through" : "none"
-                    }}
-                >
-                    {task.title} ({task.priority})
-                </span>
-            )}
-
-            {!editing && (
                 <>
-                    <button onClick={() => setEditing(true)}>Ändra</button>
-                    <button onClick={remove}>Ta bort</button>
+                    <span
+                        style={{
+                            textDecoration: task.completed
+                                ? "line-through"
+                                : "none"
+                        }}
+                    >
+                        {task.title} ({task.priority})
+                    </span>
+
+                    <button onClick={() => setEditing(true)}>
+                        Ändra
+                    </button>
+
+                    <button onClick={remove}>
+                        Ta bort
+                    </button>
                 </>
             )}
 
