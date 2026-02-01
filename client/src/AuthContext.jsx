@@ -1,83 +1,31 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-    const [accessToken, setAccessToken] = useState(null);
-    const [refreshToken, setRefreshToken] = useState(null);
+
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // ================= LOAD TOKENS =================
     useEffect(() => {
         const a = localStorage.getItem("accessToken");
         const r = localStorage.getItem("refreshToken");
-        if (a && r) {
-            setAccessToken(a);
-            setRefreshToken(r);
-            setIsLoggedIn(true);
-        }
+        if (a && r) setIsLoggedIn(true);
     }, []);
 
-    // ================= LOGIN =================
     const login = (access, refresh) => {
         localStorage.setItem("accessToken", access);
         localStorage.setItem("refreshToken", refresh);
-        setAccessToken(access);
-        setRefreshToken(refresh);
         setIsLoggedIn(true);
     };
 
-    // ================= LOGOUT =================
     const logout = () => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        setAccessToken(null);
-        setRefreshToken(null);
+        localStorage.clear();
         setIsLoggedIn(false);
-    };
-
-    // ================= REFRESH TOKEN =================
-    const refreshAccessToken = async () => {
-        try {
-            const r = localStorage.getItem("refreshToken");
-            if (!r) throw new Error("No refresh token");
-
-            const res = await fetch("http://localhost:5001/api/auth/refresh", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ refreshToken: r })
-            });
-
-            if (!res.ok) throw new Error("Refresh failed");
-
-            const data = await res.json();
-            localStorage.setItem("accessToken", data.accessToken);
-            setAccessToken(data.accessToken);
-            return data.accessToken;
-        } catch (err) {
-            console.log("Refresh token expired");
-            logout();
-            return null;
-        }
-    };
-
-    // ================= GET VALID ACCESS TOKEN =================
-    const getValidAccessToken = async () => {
-        if (accessToken) return accessToken;
-        const storedAccess = localStorage.getItem("accessToken");
-        if (storedAccess) return storedAccess;
-        return await refreshAccessToken();
+        window.location.href = "/login";
     };
 
     return (
-        <AuthContext.Provider value={{
-            isLoggedIn,
-            accessToken,
-            login,
-            logout,
-            getValidAccessToken,
-            refreshAccessToken
-        }}>
+        <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

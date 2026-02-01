@@ -4,9 +4,9 @@ import { AuthContext } from "../AuthContext";
 
 function PrivateRoute({ children }) {
 
-    const { accessToken } = useContext(AuthContext);
+    const { isLoggedIn } = useContext(AuthContext);
 
-    if (!accessToken) {
+    if (!isLoggedIn) {
         return <Navigate to="/login" replace />;
     }
 

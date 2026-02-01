@@ -5,7 +5,7 @@ import { AuthProvider } from "./AuthContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import PrivateRoute from "./components/PrivateRoute";
+import PrivateRoute from "./routes/PrivateRoute";
 import Tasks from "./pages/Tasks";
 import Dashboard from "./pages/Dashboard";
 import Task from "./pages/Task";
