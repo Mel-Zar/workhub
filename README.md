@@ -36,10 +36,13 @@ workhub/
 ⚙️ Installation
 
 1. Klona projektet
+
    git clone https://github.com/Mel-Zar/workhub.git
+
    cd workhub
 
 2. Installera backend
+
    cd server
    npm install
 
