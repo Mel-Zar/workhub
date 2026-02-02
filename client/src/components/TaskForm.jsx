@@ -2,14 +2,13 @@ import { useState } from "react";
 import { apiFetch } from "../api/ApiFetch";
 
 function TaskForm({ onCreate }) {
-
     const [title, setTitle] = useState("");
     const [priority, setPriority] = useState("medium");
     const [category, setCategory] = useState("");
     const [deadline, setDeadline] = useState("");
     const [images, setImages] = useState([]);
 
-    // ================= CAPITALIZE FUNCTION =================
+    // ================= CAPITALIZE FUNCTIONS =================
     function formatText(str) {
         if (!str) return "";
         return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -17,7 +16,6 @@ function TaskForm({ onCreate }) {
 
     function formatCategory(str) {
         if (!str) return "";
-        // tar bara första ordet + första bokstav stor
         const firstWord = str.split(/\s+/)[0] || "";
         return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
     }
@@ -39,15 +37,16 @@ function TaskForm({ onCreate }) {
 
         const formData = new FormData();
         formData.append("title", formatText(title));
-        formData.append("priority", priority);
+        formData.append("priority", formatText(priority));
         formData.append("category", formatCategory(category));
         formData.append("deadline", deadline);
         images.forEach(img => formData.append("images", img));
 
-        const res = await apiFetch(
-            "http://localhost:5001/api/tasks",
-            { method: "POST", body: formData, headers: {} }
-        );
+        const res = await apiFetch("http://localhost:5001/api/tasks", {
+            method: "POST",
+            body: formData,
+            headers: {}
+        });
 
         if (res.ok) {
             setTitle("");
@@ -57,6 +56,9 @@ function TaskForm({ onCreate }) {
             onCreate();
         }
     }
+
+    // ================= MIN DATE =================
+    const today = new Date().toISOString().split("T")[0];
 
     return (
         <form onSubmit={handleSubmit}>
@@ -88,6 +90,7 @@ function TaskForm({ onCreate }) {
                 type="date"
                 value={deadline}
                 onChange={e => setDeadline(e.target.value)}
+                min={today} // kan ej välja gamla datum
             />
             <br />
 
@@ -96,7 +99,11 @@ function TaskForm({ onCreate }) {
             <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
                 {images.map((img, i) => (
                     <div key={i}>
-                        <img src={URL.createObjectURL(img)} width="70" style={{ borderRadius: "6px" }} />
+                        <img
+                            src={URL.createObjectURL(img)}
+                            width="70"
+                            style={{ borderRadius: "6px" }}
+                        />
                         <br />
                         <button type="button" onClick={() => removeImage(i)}>❌</button>
                     </div>

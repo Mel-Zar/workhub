@@ -17,16 +17,16 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
 
     const [editing, setEditing] = useState(false);
 
-    // ======= TEXT STATES =======
     const [title, setTitle] = useState(formatText(task.title));
     const [priority, setPriority] = useState(task.priority);
     const [category, setCategory] = useState(formatCategory(task.category));
     const [deadline, setDeadline] = useState(task.deadline ? task.deadline.slice(0, 10) : "");
 
-    // ======= IMAGE STATES =======
     const [localImages, setLocalImages] = useState(task.images ? [...task.images] : []);
     const [newImages, setNewImages] = useState([]);
     const [removedImages, setRemovedImages] = useState([]);
+
+    const today = new Date().toISOString().split("T")[0];
 
     // ================= SAVE CHANGES =================
     async function save() {
@@ -37,7 +37,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
             method: "PUT",
             body: JSON.stringify({
                 title: processedTitle,
-                priority,
+                priority: formatText(priority),
                 category: processedCategory,
                 deadline
             })
@@ -146,6 +146,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
                         type="date"
                         value={deadline}
                         onChange={e => setDeadline(e.target.value)}
+                        min={today}
                     />
 
                     <h4>Bilder</h4>
@@ -172,20 +173,17 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
                         ))}
                     </div>
 
-                    <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleSelectImages}
-                    />
+                    <input type="file" multiple accept="image/*" onChange={handleSelectImages} />
 
                     <button onClick={save}>Spara ändringar</button>
                     <button onClick={() => setEditing(false)}>Avbryt</button>
                 </>
             ) : (
                 <>
-                    <h4 style={{ textDecoration: task.completed ? "line-through" : "none" }}>{task.title}</h4>
-                    <p>{task.priority.charAt(0).toUpperCase() + task.priority.slice(1).toLowerCase()}</p>
+                    <h4 style={{ textDecoration: task.completed ? "line-through" : "none" }}>
+                        {formatText(task.title)}
+                    </h4>
+                    <p>{formatText(task.priority)}</p>
                     {task.images?.length > 0 && (
                         <div style={{ display: "flex", gap: "6px" }}>
                             {task.images.map((img, i) => (
