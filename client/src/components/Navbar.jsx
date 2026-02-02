@@ -3,7 +3,8 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 function Navbar() {
-    const { isLoggedIn, logout } = useContext(AuthContext);
+
+    const { isLoggedIn, userName, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -14,6 +15,11 @@ function Navbar() {
     return (
         <nav style={{ marginBottom: "20px" }}>
             <div>
+
+                {isLoggedIn && (
+                    <p>Hej, välkommen <strong>{userName}</strong> 👋</p>
+                )}
+
                 {isLoggedIn ? (
                     <>
                         <Link to="/">Home</Link> |{" "}
@@ -30,6 +36,7 @@ function Navbar() {
                         <Link to="/login">Login</Link>
                     </>
                 )}
+
             </div>
         </nav>
     );

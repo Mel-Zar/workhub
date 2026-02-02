@@ -40,13 +40,13 @@ function Login() {
         return;
       }
 
-      if (!data.accessToken || !data.refreshToken) {
-        setError("Servern skickade inte tokens korrekt");
+      if (!data.accessToken || !data.refreshToken || !data.name) {
+        setError("Servern skickade inte rätt data");
         return;
       }
 
-      // Spara tokens
-      login(data.accessToken, data.refreshToken);
+      // ✅ Spara tokens + namn
+      login(data.accessToken, data.refreshToken, data.name);
 
       // Gå till dashboard
       navigate("/dashboard");

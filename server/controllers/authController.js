@@ -60,7 +60,12 @@ export const loginUser = async (req, res) => {
         user.refreshToken = refreshToken;
         await user.save();
 
-        res.json({ accessToken, refreshToken });
+        // ✅ ENDA TILLÄGGET
+        res.json({
+            accessToken,
+            refreshToken,
+            name: user.name
+        });
 
     } catch (err) {
         console.error(err);

@@ -2,36 +2,51 @@ import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 
 export function AuthProvider({ children }) {
+
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userName, setUserName] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+
         const initializeAuth = () => {
+
             const a = localStorage.getItem("accessToken");
             const r = localStorage.getItem("refreshToken");
+            const n = localStorage.getItem("userName");
 
-            if (a && r) setIsLoggedIn(true);
+            if (a && r && n) {
+                setUserName(n);
+                setIsLoggedIn(true);
+            }
+
             setLoading(false);
         };
 
-        // Kör efter mount för att undvika cascading renders
         setTimeout(initializeAuth, 0);
+
     }, []);
 
-    function login(access, refresh) {
+    // ✅ TAR EMOT name
+    function login(access, refresh, name) {
+
         localStorage.setItem("accessToken", access);
         localStorage.setItem("refreshToken", refresh);
+        localStorage.setItem("userName", name);
+
+        setUserName(name);
         setIsLoggedIn(true);
     }
 
     function logout() {
         localStorage.clear();
         setIsLoggedIn(false);
+        setUserName(null);
         window.location.href = "/login";
     }
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, loading, login, logout }}>
+        <AuthContext.Provider value={{ isLoggedIn, userName, loading, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
