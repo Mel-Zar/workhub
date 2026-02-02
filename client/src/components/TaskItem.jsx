@@ -3,6 +3,18 @@ import { apiFetch } from "../api/ApiFetch";
 
 function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = false, onClick }) {
 
+    // ================= CAPITALIZE FUNCTIONS =================
+    function formatText(str) {
+        if (!str) return "";
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+
+    function formatCategory(str) {
+        if (!str) return "";
+        const firstWord = str.split(/\s+/)[0] || "";
+        return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+    }
+
     const [editing, setEditing] = useState(false);
 
     // ======= TEXT STATES =======
@@ -16,24 +28,11 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
     const [newImages, setNewImages] = useState([]);
     const [removedImages, setRemovedImages] = useState([]);
 
-    // ================= CAPITALIZE FUNCTIONS =================
-    function formatText(str) {
-        if (!str) return "";
-        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-    }
-
-    function formatCategory(str) {
-        if (!str) return "";
-        const firstWord = str.split(/\s+/)[0] || "";
-        return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
-    }
-
     // ================= SAVE CHANGES =================
     async function save() {
         const processedTitle = formatText(title);
         const processedCategory = formatCategory(category);
 
-        // 1️⃣ Update task text
         const textRes = await apiFetch(`http://localhost:5001/api/tasks/${task._id}`, {
             method: "PUT",
             body: JSON.stringify({
@@ -45,7 +44,6 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
         });
         if (!textRes.ok) return;
 
-        // 2️⃣ Remove images marked for deletion
         for (let img of removedImages) {
             await apiFetch(`http://localhost:5001/api/tasks/${task._id}/images`, {
                 method: "DELETE",
@@ -54,7 +52,6 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
             });
         }
 
-        // 3️⃣ Upload new images
         if (newImages.length > 0) {
             const formData = new FormData();
             newImages.forEach(img => formData.append("images", img));
@@ -65,12 +62,10 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
             });
         }
 
-        // 4️⃣ Refresh task from server
         const finalRes = await apiFetch(`http://localhost:5001/api/tasks/${task._id}`);
         const finalData = await finalRes.json();
         if (finalRes.ok) onUpdate?.(finalData);
 
-        // 5️⃣ Reset local states
         setNewImages([]);
         setRemovedImages([]);
         setEditing(false);
@@ -93,7 +88,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
     function handleSelectImages(e) {
         const selected = Array.from(e.target.files);
         setNewImages(prev => [...prev, ...selected]);
-        e.target.value = null; // reset input så man kan välja samma fil igen
+        e.target.value = null;
     }
 
     function removeLocalImage(index, isNew) {
@@ -190,7 +185,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
             ) : (
                 <>
                     <h4 style={{ textDecoration: task.completed ? "line-through" : "none" }}>{task.title}</h4>
-                    <p>{task.priority}</p>
+                    <p>{task.priority.charAt(0).toUpperCase() + task.priority.slice(1).toLowerCase()}</p>
                     {task.images?.length > 0 && (
                         <div style={{ display: "flex", gap: "6px" }}>
                             {task.images.map((img, i) => (
