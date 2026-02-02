@@ -19,14 +19,6 @@ const __dirname = path.dirname(__filename);
 
 /* ================= MIDDLEWARE ================= */
 app.use(cors());
-
-/*
-  ⚠️ VIKTIGT:
-  Task-routes använder multer → måste ligga före json()
-*/
-app.use("/api/tasks", taskRoutes);
-
-/* JSON först EFTER multer-routes */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -38,6 +30,7 @@ connectDB();
 
 /* ================= ROUTES ================= */
 app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes); // task routes after json parser
 
 /* ================= TEST ================= */
 app.get("/", (req, res) => {

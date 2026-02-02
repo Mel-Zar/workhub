@@ -18,7 +18,9 @@ function TaskItem({
         task.deadline ? task.deadline.slice(0, 10) : ""
     );
 
-    // ================= UPDATE =================
+    const [newImages, setNewImages] = useState([]);
+
+    // ================= UPDATE TEXT =================
     async function save() {
         const res = await apiFetch(
             `http://localhost:5001/api/tasks/${task._id}`,
@@ -41,11 +43,42 @@ function TaskItem({
         }
     }
 
-    // ================= TOGGLE =================
-    async function toggleComplete() {
+    // ================= ADD IMAGES =================
+    async function uploadImages() {
+
+        if (newImages.length === 0) return;
+
+        const formData = new FormData();
+        newImages.forEach(img =>
+            formData.append("images", img)
+        );
+
         const res = await apiFetch(
-            `http://localhost:5001/api/tasks/${task._id}/toggle`,
-            { method: "PATCH" }
+            `http://localhost:5001/api/tasks/${task._id}/images`,
+            {
+                method: "POST",
+                body: formData,
+                headers: {}
+            }
+        );
+
+        const data = await res.json();
+
+        if (res.ok) {
+            onUpdate?.(data);
+            setNewImages([]);
+        }
+    }
+
+    // ================= REMOVE IMAGE =================
+    async function deleteImage(image) {
+        const res = await apiFetch(
+            `http://localhost:5001/api/tasks/${task._id}/images`,
+            {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image })
+            }
         );
 
         const data = await res.json();
@@ -55,16 +88,26 @@ function TaskItem({
         }
     }
 
-    // ================= DELETE =================
+
+    // ================= TOGGLE =================
+    async function toggleComplete() {
+        const res = await apiFetch(
+            `http://localhost:5001/api/tasks/${task._id}/toggle`,
+            { method: "PATCH" }
+        );
+
+        const data = await res.json();
+        if (res.ok) onUpdate?.(data);
+    }
+
+    // ================= DELETE TASK =================
     async function remove() {
         const res = await apiFetch(
             `http://localhost:5001/api/tasks/${task._id}`,
             { method: "DELETE" }
         );
 
-        if (res.ok) {
-            onDelete?.(task._id);
-        }
+        if (res.ok) onDelete?.(task._id);
     }
 
     // ================= UI =================
@@ -90,36 +133,54 @@ function TaskItem({
                 />
             )}
 
-            {/* CONTENT */}
             {editing ? (
                 <>
-                    <input
-                        value={title}
-                        onChange={e => setTitle(e.target.value)}
-                    />
+                    <input value={title} onChange={e => setTitle(e.target.value)} />
 
-                    <select
-                        value={priority}
-                        onChange={e => setPriority(e.target.value)}
-                    >
+                    <select value={priority} onChange={e => setPriority(e.target.value)}>
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
                         <option value="high">High</option>
                     </select>
 
+                    <input value={category} onChange={e => setCategory(e.target.value)} />
+                    <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
+
+                    <button onClick={save}>Spara text</button>
+                    <button onClick={() => setEditing(false)}>Klar</button>
+
+                    {/* EXISTING IMAGES */}
+                    <h4>Bilder</h4>
+
+                    <div style={{ display: "flex", gap: "6px" }}>
+                        {task.images?.map((img, i) => (
+                            <div key={i}>
+                                <img
+                                    src={`http://localhost:5001${img}`}
+                                    width="80"
+                                    style={{ borderRadius: "6px" }}
+                                />
+                                <button onClick={() => deleteImage(img)}>X</button>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* ADD NEW */}
                     <input
-                        value={category}
-                        onChange={e => setCategory(e.target.value)}
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={e =>
+                            setNewImages(prev => [
+                                ...prev,
+                                ...Array.from(e.target.files)
+                            ])
+                        }
                     />
 
-                    <input
-                        type="date"
-                        value={deadline}
-                        onChange={e => setDeadline(e.target.value)}
-                    />
-
-                    <button onClick={save}>Spara</button>
-                    <button onClick={() => setEditing(false)}>Avbryt</button>
+                    <button onClick={uploadImages}>
+                        Ladda upp bilder
+                    </button>
                 </>
             ) : (
                 <>
@@ -133,7 +194,6 @@ function TaskItem({
 
                     <p>{task.priority}</p>
 
-                    {/* IMAGES */}
                     {task.images?.length > 0 && (
                         <div style={{ display: "flex", gap: "6px" }}>
                             {task.images.map((img, i) => (
@@ -147,26 +207,10 @@ function TaskItem({
                         </div>
                     )}
 
-                    {/* ACTIONS */}
                     {showActions && (
-                        <div style={{ marginTop: "8px" }}>
-                            <button
-                                onClick={e => {
-                                    e.stopPropagation();
-                                    setEditing(true);
-                                }}
-                            >
-                                Ändra
-                            </button>
-
-                            <button
-                                onClick={e => {
-                                    e.stopPropagation();
-                                    remove();
-                                }}
-                            >
-                                Ta bort
-                            </button>
+                        <div>
+                            <button onClick={() => setEditing(true)}>Ändra</button>
+                            <button onClick={remove}>Ta bort</button>
                         </div>
                     )}
                 </>

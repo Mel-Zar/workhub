@@ -1,6 +1,6 @@
 import express from "express";
 import auth from "../middleware/authMiddleware.js";
-import { upload } from "../middleware/uploadMiddleware.js";
+import upload from "../middleware/uploadMiddleware.js";
 
 import {
     getTasks,
@@ -8,32 +8,23 @@ import {
     createTask,
     updateTask,
     deleteTask,
-    toggleComplete
+    toggleComplete,
+    addImages,
+    removeImage
 } from "../controllers/taskController.js";
 
 const router = express.Router();
 
-// GET all tasks
+// TASK ROUTES
 router.get("/", auth, getTasks);
-
-// GET single task
 router.get("/:id", auth, getTask);
-
-// CREATE task + upload images
-router.post(
-    "/",
-    auth,
-    upload.array("images", 5),   // max 5 images
-    createTask
-);
-
-// UPDATE task
+router.post("/", auth, upload.array("images", 5), createTask);
 router.put("/:id", auth, updateTask);
-
-// DELETE task
 router.delete("/:id", auth, deleteTask);
-
-// TOGGLE completed
 router.patch("/:id/toggle", auth, toggleComplete);
+
+// IMAGE ROUTES
+router.post("/:id/images", auth, upload.array("images", 5), addImages);
+router.delete("/:id/images", auth, removeImage);
 
 export default router;

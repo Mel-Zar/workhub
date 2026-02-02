@@ -1,4 +1,6 @@
 import Task from "../models/Task.js";
+import fs from "fs";
+import path from "path";
 
 /* ===== HELPERS ===== */
 
@@ -8,7 +10,6 @@ const buildQuery = (userId, search, priority, completed, category) => {
     if (search) {
         query.$or = [
             { title: { $regex: search, $options: "i" } },
-            { description: { $regex: search, $options: "i" } },
             { category: { $regex: search, $options: "i" } }
         ];
     }
@@ -22,7 +23,7 @@ const buildQuery = (userId, search, priority, completed, category) => {
     return query;
 };
 
-/* ===== GET TASKS + PAGINATION ===== */
+/* ===== GET TASKS ===== */
 
 export const getTasks = async (req, res) => {
     try {
@@ -44,7 +45,6 @@ export const getTasks = async (req, res) => {
         );
 
         const skip = (page - 1) * limit;
-
         const total = await Task.countDocuments(query);
 
         const tasks = await Task.find(query)
@@ -98,9 +98,9 @@ export const createTask = async (req, res) => {
 
         const task = await Task.create({
             title: req.body.title,
-            priority: req.body.priority,
-            category: req.body.category,
-            deadline: req.body.deadline,
+            priority: req.body.priority || "medium",
+            category: req.body.category || "",
+            deadline: req.body.deadline || null,
             images: imagePaths,
             user: req.user.id
         });
@@ -108,20 +108,23 @@ export const createTask = async (req, res) => {
         res.status(201).json(task);
 
     } catch (err) {
-        console.error("CREATE TASK ERROR:", err);
+        console.error("CREATE ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-
-/* ===== UPDATE ===== */
+/* ===== UPDATE TEXT ===== */
 
 export const updateTask = async (req, res) => {
     try {
-
         const task = await Task.findOneAndUpdate(
             { _id: req.params.id, user: req.user.id },
-            req.body,
+            {
+                title: req.body.title,
+                priority: req.body.priority,
+                category: req.body.category,
+                deadline: req.body.deadline
+            },
             { new: true }
         );
 
@@ -131,15 +134,78 @@ export const updateTask = async (req, res) => {
         res.json(task);
 
     } catch (err) {
+        console.error("UPDATE ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ===== DELETE ===== */
+/* ===== ADD IMAGES ===== */
+
+export const addImages = async (req, res) => {
+    try {
+        const task = await Task.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
+
+        if (!task)
+            return res.status(404).json({ error: "Task not found" });
+
+        const newImages = req.files.map(
+            file => `/uploads/${file.filename}`
+        );
+
+        task.images.push(...newImages);
+        await task.save();
+
+        res.json(task);
+
+    } catch (err) {
+        console.error("ADD IMAGE ERROR:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+/* ===== REMOVE IMAGE ===== */
+
+export const removeImage = async (req, res) => {
+    try {
+        const { image } = req.body;
+
+        if (!image) {
+            return res.status(400).json({ error: "No image provided" });
+        }
+
+        const task = await Task.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
+
+        if (!task) return res.status(404).json({ error: "Task not found" });
+
+        task.images = task.images.filter(img => img !== image);
+        await task.save();
+
+        const filePath = path.join(process.cwd(), image.replace("/uploads", "uploads"));
+        fs.unlink(filePath, err => {
+            if (err) console.log("File delete warning:", err.message);
+        });
+
+        res.json(task);
+
+    } catch (err) {
+        console.log("REMOVE IMAGE ERROR:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+
+
+
+/* ===== DELETE TASK ===== */
 
 export const deleteTask = async (req, res) => {
     try {
-
         const task = await Task.findOneAndDelete({
             _id: req.params.id,
             user: req.user.id
@@ -159,7 +225,6 @@ export const deleteTask = async (req, res) => {
 
 export const toggleComplete = async (req, res) => {
     try {
-
         const task = await Task.findOne({
             _id: req.params.id,
             user: req.user.id
