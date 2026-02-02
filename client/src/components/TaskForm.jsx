@@ -4,7 +4,7 @@ import { apiFetch } from "../api/ApiFetch";
 function TaskForm({ onCreate }) {
 
     const [title, setTitle] = useState("");
-    const [priority, setPriority] = useState("medium");
+    const [priority, setPriority] = useState("");
     const [category, setCategory] = useState("");
     const [deadline, setDeadline] = useState("");
     const [images, setImages] = useState([]);
@@ -21,6 +21,14 @@ function TaskForm({ onCreate }) {
         return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
     }
 
+    // ================= VALIDATION =================
+    const isFormValid =
+        title.trim() !== "" &&
+        priority !== "" &&
+        category.trim() !== "" &&
+        deadline !== "" &&
+        images.length >= 1;   // ✅ minst 1 bild
+
     // ================= IMAGES =================
     function handleSelectImages(e) {
         const selected = Array.from(e.target.files);
@@ -36,6 +44,8 @@ function TaskForm({ onCreate }) {
     async function handleSubmit(e) {
         e.preventDefault();
 
+        if (!isFormValid) return;
+
         const formData = new FormData();
         formData.append("title", formatText(title));
         formData.append("priority", priority.toLowerCase());
@@ -47,8 +57,7 @@ function TaskForm({ onCreate }) {
             "http://localhost:5001/api/tasks",
             {
                 method: "POST",
-                body: formData,
-                headers: {}
+                body: formData
             }
         );
 
@@ -57,6 +66,8 @@ function TaskForm({ onCreate }) {
             setCategory("");
             setDeadline("");
             setImages([]);
+            setPriority("");
+
             onCreate();
         }
     }
@@ -72,7 +83,6 @@ function TaskForm({ onCreate }) {
                 placeholder="Titel"
                 value={title}
                 onChange={e => setTitle(formatText(e.target.value))}
-                required
             />
             <br />
 
@@ -80,10 +90,14 @@ function TaskForm({ onCreate }) {
                 value={priority}
                 onChange={e => setPriority(e.target.value)}
             >
+                <option value="" disabled>
+                    Choose priority
+                </option>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
             </select>
+
             <br />
 
             <input
@@ -127,7 +141,17 @@ function TaskForm({ onCreate }) {
             </div>
 
             <br />
-            <button>Skapa Task</button>
+
+            <button
+                disabled={!isFormValid}
+                style={{
+                    opacity: !isFormValid ? 0.5 : 1,
+                    cursor: !isFormValid ? "not-allowed" : "pointer"
+                }}
+            >
+                Skapa Task
+            </button>
+
         </form>
     );
 }
