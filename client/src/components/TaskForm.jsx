@@ -1,62 +1,133 @@
 import { useState } from "react";
 import { apiFetch } from "../api/ApiFetch";
-import { toast } from "react-toastify";
 
 function TaskForm({ onCreate }) {
 
     const [title, setTitle] = useState("");
-    const [priority, setPriority] = useState("");
+    const [priority, setPriority] = useState("medium");
     const [category, setCategory] = useState("");
     const [deadline, setDeadline] = useState("");
     const [images, setImages] = useState([]);
 
-    const isFormValid =
-        title && priority && category && deadline && images.length > 0;
+    // ================= FORMATTERS =================
+    function formatText(str) {
+        if (!str) return "";
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
 
+    function formatCategory(str) {
+        if (!str) return "";
+        const firstWord = str.split(/\s+/)[0];
+        return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+    }
+
+    // ================= IMAGES =================
+    function handleSelectImages(e) {
+        const selected = Array.from(e.target.files);
+        setImages(prev => [...prev, ...selected]);
+        e.target.value = null;
+    }
+
+    function removeImage(index) {
+        setImages(prev => prev.filter((_, i) => i !== index));
+    }
+
+    // ================= SUBMIT =================
     async function handleSubmit(e) {
         e.preventDefault();
-        if (!isFormValid) return;
 
         const formData = new FormData();
-        formData.append("title", title);
-        formData.append("priority", priority);
-        formData.append("category", category);
+        formData.append("title", formatText(title));
+        formData.append("priority", priority.toLowerCase());
+        formData.append("category", formatCategory(category));
         formData.append("deadline", deadline);
-        images.forEach(i => formData.append("images", i));
+        images.forEach(img => formData.append("images", img));
 
-        const res = await apiFetch("http://localhost:5001/api/tasks", {
-            method: "POST",
-            body: formData
-        });
+        const res = await apiFetch(
+            "http://localhost:5001/api/tasks",
+            {
+                method: "POST",
+                body: formData,
+                headers: {}
+            }
+        );
 
         if (res.ok) {
-            toast.success("Task skapad!");
-            setTitle(""); setPriority(""); setCategory(""); setDeadline(""); setImages([]);
+            setTitle("");
+            setCategory("");
+            setDeadline("");
+            setImages([]);
             onCreate();
-        } else {
-            toast.error("Kunde inte skapa task");
         }
     }
 
+    const today = new Date().toISOString().split("T")[0];
+
+    // ================= RENDER =================
     return (
         <form onSubmit={handleSubmit}>
             <h3>Skapa Task</h3>
 
-            <input placeholder="Titel" value={title} onChange={e => setTitle(e.target.value)} />
-            <select value={priority} onChange={e => setPriority(e.target.value)}>
-                <option value="">Välj prioritet</option>
+            <input
+                placeholder="Titel"
+                value={title}
+                onChange={e => setTitle(formatText(e.target.value))}
+                required
+            />
+            <br />
+
+            <select
+                value={priority}
+                onChange={e => setPriority(e.target.value)}
+            >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
             </select>
+            <br />
 
-            <input placeholder="Kategori" value={category} onChange={e => setCategory(e.target.value)} />
-            <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
-            <input type="file" multiple onChange={e => setImages([...e.target.files])} />
+            <input
+                placeholder="Kategori"
+                value={category}
+                onChange={e => {
+                    const value = e.target.value.replace(/[0-9]/g, "");
+                    setCategory(formatCategory(value));
+                }}
+            />
+            <br />
 
-            <button disabled={!isFormValid}>
-                Skapa Task
-            </button>
+            <input
+                type="date"
+                value={deadline}
+                min={today}
+                onChange={e => setDeadline(e.target.value)}
+            />
+            <br />
+
+            <input
+                type="file"
+                multiple
+                onChange={handleSelectImages}
+            />
+
+            <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+                {images.map((img, i) => (
+                    <div key={i}>
+                        <img
+                            src={URL.createObjectURL(img)}
+                            width="70"
+                            style={{ borderRadius: "6px" }}
+                        />
+                        <br />
+                        <button type="button" onClick={() => removeImage(i)}>
+                            ❌
+                        </button>
+                    </div>
+                ))}
+            </div>
+
+            <br />
+            <button>Skapa Task</button>
         </form>
     );
 }

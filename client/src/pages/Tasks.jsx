@@ -14,34 +14,41 @@ function Tasks() {
     const [tasks, setTasks] = useState([]);
     const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState("createdAt");
-
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // ================= USE EFFECT =================
+    // ================= FETCH TASKS =================
     useEffect(() => {
-        const fetchTasks = async () => {
-            setLoading(true);
-            setError("");
 
+        const fetchTasks = async () => {
             try {
+                setLoading(true);
+                setError("");
+
                 const params = new URLSearchParams({
                     page,
                     limit: 5,
                     sortBy
                 });
 
-                if (filters.search) params.append("search", filters.search);
-                if (filters.priority) params.append("priority", filters.priority);
+                if (filters.search)
+                    params.append("search", filters.search);
+
+                if (filters.priority)
+                    params.append("priority", filters.priority);
+
                 if (filters.completed !== undefined)
                     params.append("completed", filters.completed);
-                if (filters.category) params.append("category", filters.category);
 
-                const res = await apiFetch(
-                    `http://localhost:5001/api/tasks?${params}`
-                );
+                if (filters.category)
+                    params.append("category", filters.category);
+
+                const res = await apiFetch(`/api/tasks?${params}`);
+
+                if (!res.ok)
+                    throw new Error("Fetch failed");
 
                 const data = await res.json();
 
@@ -57,6 +64,7 @@ function Tasks() {
         };
 
         fetchTasks();
+
     }, [page, filters, sortBy]);
 
     // ================= RENDER =================
@@ -67,49 +75,42 @@ function Tasks() {
 
             <TaskSort
                 sortBy={sortBy}
-                onSortChange={(value) => {
+                onSortChange={v => {
                     setPage(1);
-                    setSortBy(value);
+                    setSortBy(v);
                 }}
             />
 
             <TaskSearch
-                onSearch={(search) => {
+                onSearch={v => {
                     setPage(1);
-                    setFilters(prev => ({ ...prev, search }));
+                    setFilters(p => ({ ...p, search: v }));
                 }}
             />
 
             <TaskFilters
-                onFilter={(data) => {
+                onFilter={data => {
                     setPage(1);
-                    setFilters(prev => ({ ...prev, ...data }));
+                    setFilters(p => ({ ...p, ...data }));
                 }}
             />
 
             {loading && <p>Laddar tasks...</p>}
-
             {error && <p style={{ color: "red" }}>{error}</p>}
-
             {!loading && !error && tasks.length === 0 && <p>Inga tasks</p>}
 
             {!loading && !error && tasks.map(task => (
                 <TaskItem
                     key={task._id}
                     task={task}
+                    clickable
                     showActions={false}
-                    clickable={true}
                     onClick={() => navigate(`/task/${task._id}`)}
                 />
             ))}
 
-            {/* PAGINATION */}
-            <div style={{ marginTop: "20px" }}>
-
-                <button
-                    disabled={page === 1}
-                    onClick={() => setPage(p => p - 1)}
-                >
+            <div style={{ marginTop: 20 }}>
+                <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>
                     ⬅ Föregående
                 </button>
 
@@ -117,13 +118,9 @@ function Tasks() {
                     Sida {page} av {pages}
                 </span>
 
-                <button
-                    disabled={page === pages}
-                    onClick={() => setPage(p => p + 1)}
-                >
+                <button disabled={page === pages} onClick={() => setPage(p => p + 1)}>
                     Nästa ➡
                 </button>
-
             </div>
 
         </div>

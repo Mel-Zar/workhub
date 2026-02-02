@@ -1,22 +1,31 @@
+const API_BASE = "http://localhost:5001";
+
 export async function apiFetch(url, options = {}) {
 
-    let accessToken = localStorage.getItem("accessToken");
+    const accessToken = localStorage.getItem("accessToken");
 
     const headers = {
         ...(options.headers || {})
     };
 
-    if (!(options.body instanceof FormData)) {
+    if (options.body && !(options.body instanceof FormData)) {
         headers["Content-Type"] = "application/json";
     }
 
     if (accessToken) {
-        headers["Authorization"] = `Bearer ${accessToken}`;
+        headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    let response = await fetch(url, { ...options, headers });
+    const fullUrl = url.startsWith("http")
+        ? url
+        : `${API_BASE}${url}`;
 
-    // ================= REFRESH =================
+    let response = await fetch(fullUrl, {
+        ...options,
+        headers
+    });
+
+    // 🔁 REFRESH TOKEN
     if (response.status === 401 && !options._retry) {
 
         const refreshToken = localStorage.getItem("refreshToken");
@@ -24,11 +33,11 @@ export async function apiFetch(url, options = {}) {
         if (!refreshToken) {
             localStorage.clear();
             window.location.href = "/login";
-            return;
+            return response;
         }
 
         const refreshRes = await fetch(
-            "http://localhost:5001/api/auth/refresh",
+            `${API_BASE}/api/auth/refresh`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -39,18 +48,19 @@ export async function apiFetch(url, options = {}) {
         if (!refreshRes.ok) {
             localStorage.clear();
             window.location.href = "/login";
-            return;
+            return response;
         }
 
         const data = await refreshRes.json();
         localStorage.setItem("accessToken", data.accessToken);
 
-        headers["Authorization"] = `Bearer ${data.accessToken}`;
-
         return apiFetch(url, {
             ...options,
-            headers,
-            _retry: true
+            _retry: true,
+            headers: {
+                ...headers,
+                Authorization: `Bearer ${data.accessToken}`
+            }
         });
     }
 

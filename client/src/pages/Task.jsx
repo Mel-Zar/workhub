@@ -9,45 +9,33 @@ function Task() {
 
     const [task, setTask] = useState(null);
     const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
 
-    // ================= USE EFFECT =================
+    // ================= FETCH TASK =================
     useEffect(() => {
+
         const fetchTask = async () => {
             try {
-                setLoading(true);
-                setError("");
+                const res = await apiFetch(`/api/tasks/${id}`);
 
-                const res = await apiFetch(
-                    `http://localhost:5001/api/tasks/${id}`
-                );
+                if (!res.ok)
+                    return setError("Kunde inte hämta task");
 
                 const data = await res.json();
-
-                if (!res.ok) {
-                    setError(data.error || "Kunde inte hämta task");
-                    return;
-                }
-
                 setTask(data);
 
             } catch (err) {
                 console.error(err);
                 setError("Serverfel");
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchTask();
+
     }, [id]);
 
-    // ================= STATES =================
-    if (loading) return <p>Laddar task...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
-    if (!task) return null;
+    if (!task) return <p>Laddar task...</p>;
 
-    // ================= RENDER =================
     return (
         <div style={{ padding: "20px" }}>
 
@@ -68,26 +56,20 @@ function Task() {
                 {task.completed ? "Klar" : "Ej klar"}
             </p>
 
-            {/* ===== IMAGE GALLERY ===== */}
             {task.images?.length > 0 && (
-                <div
-                    style={{
-                        display: "flex",
-                        gap: "10px",
-                        marginTop: "15px",
-                        flexWrap: "wrap"
-                    }}
-                >
+                <div style={{
+                    display: "flex",
+                    gap: 10,
+                    flexWrap: "wrap",
+                    marginTop: 20
+                }}>
                     {task.images.map((img, i) => (
                         <img
                             key={i}
                             src={`http://localhost:5001${img}`}
                             alt="task"
-                            width="150"
-                            style={{
-                                borderRadius: "8px",
-                                objectFit: "cover"
-                            }}
+                            width={150}
+                            style={{ borderRadius: 8 }}
                         />
                     ))}
                 </div>

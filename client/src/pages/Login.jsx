@@ -1,61 +1,59 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { toast } from "react-toastify";
+import { apiFetch } from "../api/ApiFetch";
 
 function Login() {
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const { login, isLoggedIn } = useContext(AuthContext);
+  const { login, accessToken } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    if (isLoggedIn) navigate("/dashboard");
-  }, [isLoggedIn, navigate]);
+    if (accessToken) navigate("/dashboard");
+  }, [accessToken, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
-      const res = await fetch("http://localhost:5001/api/auth/login", {
+      const res = await apiFetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || "Inloggning misslyckades");
+        setError(data.error || "Fel email eller lösenord");
         return;
       }
 
-      if (!data.accessToken || !data.refreshToken || !data.name) {
-        toast.error("Servern skickade fel data");
-        return;
-      }
-
-      login(data.accessToken, data.refreshToken, data.name);
-
-      toast.success("Inloggad!");
+      login(data.accessToken, data.refreshToken);
       navigate("/dashboard");
 
-    } catch {
-      toast.error("Kan inte kontakta servern");
+    } catch (err) {
+      console.error(err);
+      setError("Serverfel");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div>
+    <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
       <h2>Logga in</h2>
 
-      <form onSubmit={handleSubmit}>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      <form onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: 10 }}>
 
         <input
           type="email"
@@ -76,7 +74,6 @@ function Login() {
         <button disabled={loading}>
           {loading ? "Loggar in..." : "Logga in"}
         </button>
-
       </form>
     </div>
   );

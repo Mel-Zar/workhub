@@ -3,25 +3,38 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 // ================= REGISTER =================
-export const registerUser = async (req, res) => {
+const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        if (!name || !email || !password)
+
+        if (!name || !email || !password) {
             return res.status(400).json({ error: "All fields are required" });
+        }
 
         const emailRegex = /\S+@\S+\.\S+/;
-        if (!emailRegex.test(email))
+        if (!emailRegex.test(email)) {
             return res.status(400).json({ error: "Invalid email format" });
+        }
 
-        if (password.length < 6)
-            return res.status(400).json({ error: "Password must be at least 6 characters" });
+        if (password.length < 6) {
+            return res
+                .status(400)
+                .json({ error: "Password must be at least 6 characters" });
+        }
 
         const existingUser = await User.findOne({ email });
-        if (existingUser) return res.status(400).json({ error: "User already exists" });
+        if (existingUser) {
+            return res.status(400).json({ error: "User already exists" });
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = new User({ name, email, password: hashedPassword });
+        const user = new User({
+            name,
+            email,
+            password: hashedPassword,
+        });
+
         await user.save();
 
         res.status(201).json({ message: "User registered successfully" });
@@ -33,17 +46,21 @@ export const registerUser = async (req, res) => {
 };
 
 // ================= LOGIN =================
-export const loginUser = async (req, res) => {
+const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-        if (!email || !password)
+
+        if (!email || !password) {
             return res.status(400).json({ error: "Email and password required" });
+        }
 
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+        if (!isMatch) {
+            return res.status(400).json({ error: "Invalid credentials" });
+        }
 
         const accessToken = jwt.sign(
             { id: user._id },
@@ -60,11 +77,9 @@ export const loginUser = async (req, res) => {
         user.refreshToken = refreshToken;
         await user.save();
 
-        // ✅ ENDA TILLÄGGET
         res.json({
             accessToken,
-            refreshToken,
-            name: user.name
+            refreshToken
         });
 
     } catch (err) {
@@ -74,9 +89,12 @@ export const loginUser = async (req, res) => {
 };
 
 // ================= REFRESH =================
-export const refreshAccessToken = async (req, res) => {
+const refreshAccessToken = async (req, res) => {
     const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(401).json({ error: "Refresh token required" });
+
+    if (!refreshToken) {
+        return res.status(401).json({ error: "Refresh token required" });
+    }
 
     try {
         const payload = jwt.verify(
@@ -85,8 +103,10 @@ export const refreshAccessToken = async (req, res) => {
         );
 
         const user = await User.findById(payload.id);
-        if (!user || user.refreshToken !== refreshToken)
+
+        if (!user || user.refreshToken !== refreshToken) {
             return res.status(403).json({ error: "Invalid refresh token" });
+        }
 
         const newAccessToken = jwt.sign(
             { id: user._id },
@@ -102,13 +122,18 @@ export const refreshAccessToken = async (req, res) => {
     }
 };
 
+
 // ================= LOGOUT =================
-export const logout = async (req, res) => {
+const logout = async (req, res) => {
     try {
         const { refreshToken } = req.body;
-        if (!refreshToken) return res.status(400).json({ error: "Refresh token required" });
+
+        if (!refreshToken) {
+            return res.status(400).json({ error: "Refresh token required" });
+        }
 
         const user = await User.findOne({ refreshToken });
+
         if (user) {
             user.refreshToken = null;
             await user.save();
@@ -120,4 +145,12 @@ export const logout = async (req, res) => {
         console.error(err);
         res.status(500).json({ error: "Server error" });
     }
+};
+
+
+export {
+    registerUser,
+    loginUser,
+    refreshAccessToken,
+    logout
 };

@@ -30,7 +30,7 @@ connectDB();
 
 /* ================= ROUTES ================= */
 app.use("/api/auth", authRoutes);
-app.use("/api/tasks", taskRoutes); // task routes after json parser
+app.use("/api/tasks", taskRoutes);
 
 /* ================= TEST ================= */
 app.get("/", (req, res) => {

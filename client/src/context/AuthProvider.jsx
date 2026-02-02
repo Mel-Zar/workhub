@@ -1,52 +1,30 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AuthContext } from "./AuthContext";
 
 export function AuthProvider({ children }) {
 
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userName, setUserName] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(() => {
+        const access = localStorage.getItem("accessToken");
+        const refresh = localStorage.getItem("refreshToken");
+        return !!(access && refresh);
+    });
 
-    useEffect(() => {
+    const [loading] = useState(false);
 
-        const initializeAuth = () => {
-
-            const a = localStorage.getItem("accessToken");
-            const r = localStorage.getItem("refreshToken");
-            const n = localStorage.getItem("userName");
-
-            if (a && r && n) {
-                setUserName(n);
-                setIsLoggedIn(true);
-            }
-
-            setLoading(false);
-        };
-
-        setTimeout(initializeAuth, 0);
-
-    }, []);
-
-    // ✅ TAR EMOT name
-    function login(access, refresh, name) {
-
+    function login(access, refresh) {
         localStorage.setItem("accessToken", access);
         localStorage.setItem("refreshToken", refresh);
-        localStorage.setItem("userName", name);
-
-        setUserName(name);
         setIsLoggedIn(true);
     }
 
     function logout() {
         localStorage.clear();
         setIsLoggedIn(false);
-        setUserName(null);
         window.location.href = "/login";
     }
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, userName, loading, login, logout }}>
+        <AuthContext.Provider value={{ isLoggedIn, loading, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

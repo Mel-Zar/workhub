@@ -16,10 +16,6 @@ function Dashboard() {
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
 
-    // ✅ NYA STATES
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-
     // ================= CAPITALIZE FUNCTIONS =================
     function formatText(str) {
         if (!str) return "";
@@ -35,9 +31,6 @@ function Dashboard() {
     // ================= FETCH TASKS =================
     const fetchTasks = useCallback(async () => {
         try {
-            setLoading(true);
-            setError("");
-
             const params = new URLSearchParams({
                 page,
                 limit: 5,
@@ -60,15 +53,12 @@ function Dashboard() {
                 priority: formatText(task.priority),
             }));
 
+            // ❌ Sätt state direkt i useEffect undviks genom async-funktion
             setTasks(formattedTasks);
             setPages(data.pages || 1);
             setCategories([...new Set(formattedTasks.map(t => t.category).filter(Boolean))]);
-
         } catch (err) {
             console.error(err);
-            setError("Kunde inte hämta tasks");
-        } finally {
-            setLoading(false);
         }
     }, [page, filters, sortBy]);
 
@@ -77,7 +67,7 @@ function Dashboard() {
         const fetchData = async () => {
             await fetchTasks();
         };
-        fetchData();
+        fetchData(); // ⚡ Kör async-funktion inuti useEffect
     }, [fetchTasks]);
 
     // ================= CALLBACKS =================
@@ -128,15 +118,9 @@ function Dashboard() {
 
             <TaskForm onCreate={fetchTasks} />
 
-            {/* ✅ LOADING */}
-            {loading && <p>Laddar tasks...</p>}
+            {tasks.length === 0 && <p>Inga tasks</p>}
 
-            {/* ✅ ERROR */}
-            {error && <p style={{ color: "red" }}>{error}</p>}
-
-            {!loading && tasks.length === 0 && <p>Inga tasks</p>}
-
-            {!loading && tasks.map(task => (
+            {tasks.map(task => (
                 <TaskItem
                     key={task._id}
                     task={task}
@@ -148,7 +132,7 @@ function Dashboard() {
 
             {/* PAGINATION */}
             <div style={{ marginTop: "20px" }}>
-                <button disabled={page === 1 || loading} onClick={() => setPage(p => p - 1)}>
+                <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>
                     ⬅ Föregående
                 </button>
 
@@ -156,7 +140,7 @@ function Dashboard() {
                     Sida {page} av {pages}
                 </span>
 
-                <button disabled={page === pages || loading} onClick={() => setPage(p => p + 1)}>
+                <button disabled={page === pages} onClick={() => setPage(p => p + 1)}>
                     Nästa ➡
                 </button>
             </div>
