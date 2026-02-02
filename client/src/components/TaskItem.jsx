@@ -54,7 +54,6 @@ function TaskItem({
 
     // ================= SAVE =================
     async function handleSave() {
-
         const res = await apiFetch(`/api/tasks/${task._id}`, {
             method: "PUT",
             body: JSON.stringify({
@@ -112,6 +111,9 @@ function TaskItem({
         if (res.ok) onDelete?.(task._id);
     }
 
+    // ================= VALIDATION =================
+    const canSave = title.trim() && priority && category.trim() && deadline && (existingImages.length + newImages.length > 0);
+
     // ================= RENDER =================
     return (
         <div
@@ -162,9 +164,7 @@ function TaskItem({
                         onChange={e => setDeadline(e.target.value)}
                     />
 
-                    {/* EXISTING IMAGES */}
                     <h4>Bilder</h4>
-
                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                         {existingImages.map((img, i) => (
                             <div key={i}>
@@ -179,7 +179,6 @@ function TaskItem({
                                 </button>
                             </div>
                         ))}
-
                         {newImages.map((img, i) => (
                             <div key={i}>
                                 <img
@@ -204,7 +203,7 @@ function TaskItem({
 
                     <br />
 
-                    <button onClick={handleSave}>
+                    <button onClick={handleSave} disabled={!canSave} style={{ cursor: canSave ? "pointer" : "not-allowed" }}>
                         Spara ändringar
                     </button>
 
