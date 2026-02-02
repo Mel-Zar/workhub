@@ -10,6 +10,17 @@ function Task() {
     const [task, setTask] = useState(null);
     const [error, setError] = useState("");
 
+    // ================= FORMATTER =================
+    function formatText(str) {
+        if (!str) return "";
+        return str
+            .toString()
+            .toLowerCase()
+            .split(" ")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+    }
+
     // ================= FETCH TASK =================
     useEffect(() => {
 
@@ -21,7 +32,16 @@ function Task() {
                     return setError("Kunde inte hämta task");
 
                 const data = await res.json();
-                setTask(data);
+
+                // 🔥 Formatera text direkt
+                const formatted = {
+                    ...data,
+                    title: formatText(data.title),
+                    category: formatText(data.category),
+                    priority: formatText(data.priority)
+                };
+
+                setTask(formatted);
 
             } catch (err) {
                 console.error(err);
@@ -57,12 +77,14 @@ function Task() {
             </p>
 
             {task.images?.length > 0 && (
-                <div style={{
-                    display: "flex",
-                    gap: 10,
-                    flexWrap: "wrap",
-                    marginTop: 20
-                }}>
+                <div
+                    style={{
+                        display: "flex",
+                        gap: 10,
+                        flexWrap: "wrap",
+                        marginTop: 20
+                    }}
+                >
                     {task.images.map((img, i) => (
                         <img
                             key={i}
