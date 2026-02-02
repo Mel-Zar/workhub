@@ -1,221 +1,155 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { apiFetch } from "../api/ApiFetch";
 
-function TaskItem({
-    task,
-    onUpdate,
-    onDelete,
-    showActions = true,
-    clickable = false,
-    onClick
-}) {
+function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = false, onClick }) {
 
     const [editing, setEditing] = useState(false);
     const [title, setTitle] = useState(task.title);
     const [priority, setPriority] = useState(task.priority);
     const [category, setCategory] = useState(task.category || "");
-    const [deadline, setDeadline] = useState(
-        task.deadline ? task.deadline.slice(0, 10) : ""
-    );
+    const [deadline, setDeadline] = useState(task.deadline ? task.deadline.slice(0, 10) : "");
 
-    const [newImages, setNewImages] = useState([]);
+    // ====== LOCAL IMAGE STATE ======
+    const [localImages, setLocalImages] = useState([]); // existing images from server
+    const [newImages, setNewImages] = useState([]); // newly selected files
+    const [removedImages, setRemovedImages] = useState([]); // images marked for deletion
 
-    // ================= UPDATE TEXT =================
+    useEffect(() => {
+        setLocalImages(task.images || []);
+    }, [task.images]);
+
+    // ================= UPDATE TEXT & IMAGES =================
     async function save() {
-        const res = await apiFetch(
-            `http://localhost:5001/api/tasks/${task._id}`,
-            {
-                method: "PUT",
-                body: JSON.stringify({
-                    title,
-                    priority,
-                    category,
-                    deadline
-                })
-            }
-        );
+        // 1️⃣ Update task text
+        const textRes = await apiFetch(`http://localhost:5001/api/tasks/${task._id}`, {
+            method: "PUT",
+            body: JSON.stringify({ title, priority, category, deadline })
+        });
 
-        const data = await res.json();
+        const textData = await textRes.json();
+        if (!textRes.ok) return;
 
-        if (res.ok) {
-            onUpdate?.(data);
-            setEditing(false);
+        // 2️⃣ Remove images marked for deletion
+        for (let img of removedImages) {
+            await apiFetch(`http://localhost:5001/api/tasks/${task._id}/images`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image: img })
+            });
         }
-    }
 
-    // ================= ADD IMAGES =================
-    async function uploadImages() {
+        // 3️⃣ Upload new images
+        if (newImages.length > 0) {
+            const formData = new FormData();
+            newImages.forEach(img => formData.append("images", img));
 
-        if (newImages.length === 0) return;
-
-        const formData = new FormData();
-        newImages.forEach(img =>
-            formData.append("images", img)
-        );
-
-        const res = await apiFetch(
-            `http://localhost:5001/api/tasks/${task._id}/images`,
-            {
+            await apiFetch(`http://localhost:5001/api/tasks/${task._id}/images`, {
                 method: "POST",
                 body: formData,
                 headers: {}
-            }
-        );
-
-        const data = await res.json();
-
-        if (res.ok) {
-            onUpdate?.(data);
-            setNewImages([]);
+            });
         }
+
+        // 4️⃣ Refresh task
+        const finalRes = await apiFetch(`http://localhost:5001/api/tasks/${task._id}`);
+        const finalData = await finalRes.json();
+        if (finalRes.ok) onUpdate?.(finalData);
+
+        // reset local states
+        setNewImages([]);
+        setRemovedImages([]);
+        setEditing(false);
     }
 
-    // ================= REMOVE IMAGE =================
-    async function deleteImage(image) {
-        const res = await apiFetch(
-            `http://localhost:5001/api/tasks/${task._id}/images`,
-            {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ image })
-            }
-        );
-
-        const data = await res.json();
-
-        if (res.ok) {
-            onUpdate?.(data);
-        }
-    }
-
-
-    // ================= TOGGLE =================
+    // ================= TOGGLE COMPLETED =================
     async function toggleComplete() {
-        const res = await apiFetch(
-            `http://localhost:5001/api/tasks/${task._id}/toggle`,
-            { method: "PATCH" }
-        );
-
+        const res = await apiFetch(`http://localhost:5001/api/tasks/${task._id}/toggle`, { method: "PATCH" });
         const data = await res.json();
         if (res.ok) onUpdate?.(data);
     }
 
     // ================= DELETE TASK =================
     async function remove() {
-        const res = await apiFetch(
-            `http://localhost:5001/api/tasks/${task._id}`,
-            { method: "DELETE" }
-        );
-
+        const res = await apiFetch(`http://localhost:5001/api/tasks/${task._id}`, { method: "DELETE" });
         if (res.ok) onDelete?.(task._id);
     }
 
-    // ================= UI =================
+    // ================= IMAGE HANDLERS =================
+    function handleSelectImages(e) {
+        const selected = Array.from(e.target.files);
+        setNewImages(prev => [...prev, ...selected]);
+        e.target.value = null;
+    }
+
+    function removeLocalImage(index, isNew) {
+        if (isNew) {
+            setNewImages(prev => prev.filter((_, i) => i !== index));
+        } else {
+            setLocalImages(prev => {
+                const removed = prev[index];
+                setRemovedImages(r => [...r, removed]);
+                return prev.filter((_, i) => i !== index);
+            });
+        }
+    }
+
+    // ================= RENDER =================
     return (
         <div
             onClick={clickable ? onClick : undefined}
-            style={{
-                border: "1px solid #ccc",
-                padding: "12px",
-                borderRadius: "6px",
-                marginBottom: "10px",
-                cursor: clickable ? "pointer" : "default"
-            }}
+            style={{ border: "1px solid #ccc", padding: "12px", borderRadius: "6px", marginBottom: "10px", cursor: clickable ? "pointer" : "default" }}
         >
-
-            {/* CHECKBOX */}
-            {showActions && (
-                <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={toggleComplete}
-                    onClick={e => e.stopPropagation()}
-                />
-            )}
+            {showActions && <input type="checkbox" checked={task.completed} onChange={toggleComplete} onClick={e => e.stopPropagation()} />}
 
             {editing ? (
                 <>
                     <input value={title} onChange={e => setTitle(e.target.value)} />
-
                     <select value={priority} onChange={e => setPriority(e.target.value)}>
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
                         <option value="high">High</option>
                     </select>
-
                     <input value={category} onChange={e => setCategory(e.target.value)} />
                     <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
 
-                    <button onClick={save}>Spara text</button>
-                    <button onClick={() => setEditing(false)}>Klar</button>
-
-                    {/* EXISTING IMAGES */}
+                    {/* PREVIEW EXISTING IMAGES */}
                     <h4>Bilder</h4>
-
                     <div style={{ display: "flex", gap: "6px" }}>
-                        {task.images?.map((img, i) => (
+                        {localImages.map((img, i) => (
                             <div key={i}>
-                                <img
-                                    src={`http://localhost:5001${img}`}
-                                    width="80"
-                                    style={{ borderRadius: "6px" }}
-                                />
-                                <button onClick={() => deleteImage(img)}>X</button>
+                                <img src={`http://localhost:5001${img}`} width="80" style={{ borderRadius: "6px" }} />
+                                <button type="button" onClick={() => removeLocalImage(i, false)}>❌</button>
+                            </div>
+                        ))}
+                        {newImages.map((img, i) => (
+                            <div key={i}>
+                                <img src={URL.createObjectURL(img)} width="80" style={{ borderRadius: "6px" }} />
+                                <button type="button" onClick={() => removeLocalImage(i, true)}>❌</button>
                             </div>
                         ))}
                     </div>
 
-                    {/* ADD NEW */}
-                    <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={e =>
-                            setNewImages(prev => [
-                                ...prev,
-                                ...Array.from(e.target.files)
-                            ])
-                        }
-                    />
-
-                    <button onClick={uploadImages}>
-                        Ladda upp bilder
-                    </button>
+                    <input type="file" multiple accept="image/*" onChange={handleSelectImages} />
+                    <button onClick={save}>Spara ändringar</button>
+                    <button onClick={() => setEditing(false)}>Avbryt</button>
                 </>
             ) : (
                 <>
-                    <h4 style={{
-                        textDecoration: task.completed
-                            ? "line-through"
-                            : "none"
-                    }}>
-                        {task.title}
-                    </h4>
-
+                    <h4 style={{ textDecoration: task.completed ? "line-through" : "none" }}>{task.title}</h4>
                     <p>{task.priority}</p>
-
                     {task.images?.length > 0 && (
                         <div style={{ display: "flex", gap: "6px" }}>
                             {task.images.map((img, i) => (
-                                <img
-                                    key={i}
-                                    src={`http://localhost:5001${img}`}
-                                    width="70"
-                                    style={{ borderRadius: "5px" }}
-                                />
+                                <img key={i} src={`http://localhost:5001${img}`} width="70" style={{ borderRadius: "5px" }} />
                             ))}
                         </div>
                     )}
-
-                    {showActions && (
-                        <div>
-                            <button onClick={() => setEditing(true)}>Ändra</button>
-                            <button onClick={remove}>Ta bort</button>
-                        </div>
-                    )}
+                    {showActions && <div>
+                        <button onClick={() => setEditing(true)}>Ändra</button>
+                        <button onClick={remove}>Ta bort</button>
+                    </div>}
                 </>
             )}
-
         </div>
     );
 }
