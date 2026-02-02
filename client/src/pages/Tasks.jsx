@@ -7,11 +7,24 @@ import TaskSearch from "../components/TaskSearch";
 import TaskFilters from "../components/TaskFilters";
 import TaskSort from "../components/TaskSort";
 
+/* ================= FORMATTERS ================= */
+function formatText(str) {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+function formatCategory(str) {
+    if (!str) return "";
+    const first = str.split(/\s+/)[0];
+    return formatText(first);
+}
+
 function Tasks() {
 
     const navigate = useNavigate();
 
     const [tasks, setTasks] = useState([]);
+    const [categories, setCategories] = useState([]); // ✅ NY
     const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState("createdAt");
     const [page, setPage] = useState(1);
@@ -52,8 +65,21 @@ function Tasks() {
 
                 const data = await res.json();
 
-                setTasks(data.tasks || []);
+                const formatted = (data.tasks || []).map(task => ({
+                    ...task,
+                    title: formatText(task.title),
+                    category: formatCategory(task.category),
+                    priority: formatText(task.priority)
+                }));
+
+                setTasks(formatted);
                 setPages(data.pages || 1);
+
+                // ✅ BYGG KATEGORIER
+                const uniqueCategories = [
+                    ...new Set(formatted.map(t => t.category).filter(Boolean))
+                ];
+                setCategories(uniqueCategories);
 
             } catch (err) {
                 console.error(err);
@@ -88,7 +114,9 @@ function Tasks() {
                 }}
             />
 
+            {/* ✅ SKICKA KATEGORIER */}
             <TaskFilters
+                categories={categories}
                 onFilter={data => {
                     setPage(1);
                     setFilters(p => ({ ...p, ...data }));
@@ -109,6 +137,7 @@ function Tasks() {
                 />
             ))}
 
+            {/* PAGINATION */}
             <div style={{ marginTop: 20 }}>
                 <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>
                     ⬅ Föregående

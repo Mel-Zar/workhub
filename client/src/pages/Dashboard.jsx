@@ -8,6 +8,7 @@ import TaskSearch from "../components/TaskSearch";
 import TaskSort from "../components/TaskSort";
 
 function Dashboard() {
+
     const [tasks, setTasks] = useState([]);
     const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState("deadline");
@@ -15,26 +16,29 @@ function Dashboard() {
     const [categories, setCategories] = useState([]);
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
-
-    // ================= CAPITALIZE FUNCTIONS =================
-    function formatText(str) {
-        if (!str) return "";
-        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-    }
-
-    function formatCategory(str) {
-        if (!str) return "";
-        const firstWord = str.split(/\s+/)[0] || "";
-        return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
-    }
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     // ================= FETCH TASKS =================
     const fetchTasks = useCallback(async () => {
         try {
+            setLoading(true);
+            setError("");
+
+            // FORMATTERS (lokalt för att undvika ESLint-varningar)
+            const formatText = str =>
+                str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+
+            const formatCategory = str => {
+                if (!str) return "";
+                const first = str.split(/\s+/)[0];
+                return formatText(first);
+            };
+
             const params = new URLSearchParams({
                 page,
                 limit: 5,
-                sortBy,
+                sortBy
             });
 
             if (filters.search) params.append("search", filters.search);
@@ -43,44 +47,42 @@ function Dashboard() {
             if (filters.completed !== undefined)
                 params.append("completed", filters.completed);
 
-            const res = await apiFetch(`http://localhost:5001/api/tasks?${params}`);
+            const res = await apiFetch(`/api/tasks?${params}`);
+
+            if (!res.ok) throw new Error("Fetch failed");
+
             const data = await res.json();
 
             const formattedTasks = (data.tasks || []).map(task => ({
                 ...task,
                 title: formatText(task.title),
                 category: formatCategory(task.category),
-                priority: formatText(task.priority),
+                priority: formatText(task.priority)
             }));
 
-            // ❌ Sätt state direkt i useEffect undviks genom async-funktion
             setTasks(formattedTasks);
             setPages(data.pages || 1);
-            setCategories([...new Set(formattedTasks.map(t => t.category).filter(Boolean))]);
+            setCategories([
+                ...new Set(formattedTasks.map(t => t.category).filter(Boolean))
+            ]);
+
         } catch (err) {
             console.error(err);
+            setError("Kunde inte hämta tasks");
+        } finally {
+            setLoading(false);
         }
     }, [page, filters, sortBy]);
 
     // ================= USE EFFECT =================
     useEffect(() => {
-        const fetchData = async () => {
-            await fetchTasks();
-        };
-        fetchData(); // ⚡ Kör async-funktion inuti useEffect
+        fetchTasks();
     }, [fetchTasks]);
 
     // ================= CALLBACKS =================
     function handleUpdate(updatedTask) {
-        const formattedTask = {
-            ...updatedTask,
-            title: formatText(updatedTask.title),
-            category: formatCategory(updatedTask.category),
-            priority: formatText(updatedTask.priority),
-        };
-
         setTasks(prev =>
-            prev.map(t => (t._id === formattedTask._id ? formattedTask : t))
+            prev.map(t => (t._id === updatedTask._id ? updatedTask : t))
         );
     }
 
@@ -91,6 +93,7 @@ function Dashboard() {
     // ================= RENDER =================
     return (
         <div>
+
             <h2>Dashboard</h2>
 
             <TaskSort
@@ -102,9 +105,9 @@ function Dashboard() {
             />
 
             <TaskSearch
-                onSearch={search => {
+                onSearch={value => {
                     setPage(1);
-                    setFilters(prev => ({ ...prev, search }));
+                    setFilters(prev => ({ ...prev, search: value }));
                 }}
             />
 
@@ -118,21 +121,26 @@ function Dashboard() {
 
             <TaskForm onCreate={fetchTasks} />
 
-            {tasks.length === 0 && <p>Inga tasks</p>}
+            {loading && <p>Laddar...</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            {!loading && !error && tasks.length === 0 && <p>Inga tasks</p>}
 
-            {tasks.map(task => (
+            {!loading && !error && tasks.map(task => (
                 <TaskItem
                     key={task._id}
                     task={task}
                     onUpdate={handleUpdate}
                     onDelete={handleDelete}
-                    showActions={true}
+                    showActions
                 />
             ))}
 
             {/* PAGINATION */}
-            <div style={{ marginTop: "20px" }}>
-                <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+            <div style={{ marginTop: 20 }}>
+                <button
+                    disabled={page === 1}
+                    onClick={() => setPage(p => p - 1)}
+                >
                     ⬅ Föregående
                 </button>
 
@@ -140,10 +148,14 @@ function Dashboard() {
                     Sida {page} av {pages}
                 </span>
 
-                <button disabled={page === pages} onClick={() => setPage(p => p + 1)}>
+                <button
+                    disabled={page === pages}
+                    onClick={() => setPage(p => p + 1)}
+                >
                     Nästa ➡
                 </button>
             </div>
+
         </div>
     );
 }

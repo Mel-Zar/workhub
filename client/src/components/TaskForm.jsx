@@ -4,22 +4,20 @@ import { apiFetch } from "../api/ApiFetch";
 function TaskForm({ onCreate }) {
 
     const [title, setTitle] = useState("");
-    const [priority, setPriority] = useState("medium");
+    const [priority, setPriority] = useState("");
     const [category, setCategory] = useState("");
     const [deadline, setDeadline] = useState("");
     const [images, setImages] = useState([]);
 
     // ================= FORMATTERS =================
-    function formatText(str) {
-        if (!str) return "";
-        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-    }
+    const formatText = str =>
+        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
-    function formatCategory(str) {
+    const formatCategory = str => {
         if (!str) return "";
         const firstWord = str.split(/\s+/)[0];
-        return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
-    }
+        return formatText(firstWord);
+    };
 
     // ================= IMAGES =================
     function handleSelectImages(e) {
@@ -36,28 +34,38 @@ function TaskForm({ onCreate }) {
     async function handleSubmit(e) {
         e.preventDefault();
 
-        const formData = new FormData();
-        formData.append("title", formatText(title));
-        formData.append("priority", priority.toLowerCase());
-        formData.append("category", formatCategory(category));
-        formData.append("deadline", deadline);
-        images.forEach(img => formData.append("images", img));
+        if (!title || !priority || !category || !deadline || images.length === 0) {
+            alert("Alla fält inklusive minst en bild måste fyllas i.");
+            return;
+        }
 
-        const res = await apiFetch(
-            "http://localhost:5001/api/tasks",
-            {
+        try {
+            const formData = new FormData();
+            formData.append("title", formatText(title));
+            formData.append("priority", priority.toLowerCase());
+            formData.append("category", formatCategory(category));
+            formData.append("deadline", deadline);
+            images.forEach(img => formData.append("images", img));
+
+            const res = await apiFetch("/api/tasks", {
                 method: "POST",
-                body: formData,
-                headers: {}
-            }
-        );
+                body: formData
+            });
 
-        if (res.ok) {
+            if (!res.ok) throw new Error("Failed to create task");
+
+            // RESET
             setTitle("");
+            setPriority("");
             setCategory("");
             setDeadline("");
             setImages([]);
+
             onCreate();
+
+        } catch (err) {
+            console.error(err);
+            alert("Något gick fel vid skapandet.");
         }
     }
 
@@ -66,6 +74,7 @@ function TaskForm({ onCreate }) {
     // ================= RENDER =================
     return (
         <form onSubmit={handleSubmit}>
+
             <h3>Skapa Task</h3>
 
             <input
@@ -79,7 +88,11 @@ function TaskForm({ onCreate }) {
             <select
                 value={priority}
                 onChange={e => setPriority(e.target.value)}
+                required
             >
+                <option value="" disabled>
+                    Choose priority
+                </option>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -93,6 +106,7 @@ function TaskForm({ onCreate }) {
                     const value = e.target.value.replace(/[0-9]/g, "");
                     setCategory(formatCategory(value));
                 }}
+                required
             />
             <br />
 
@@ -101,15 +115,19 @@ function TaskForm({ onCreate }) {
                 value={deadline}
                 min={today}
                 onChange={e => setDeadline(e.target.value)}
+                required
             />
             <br />
 
             <input
                 type="file"
                 multiple
+                accept="image/*"
                 onChange={handleSelectImages}
+                required={images.length === 0}
             />
 
+            {/* PREVIEW */}
             <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
                 {images.map((img, i) => (
                     <div key={i}>
@@ -127,7 +145,8 @@ function TaskForm({ onCreate }) {
             </div>
 
             <br />
-            <button>Skapa Task</button>
+            <button type="submit">Skapa Task</button>
+
         </form>
     );
 }
