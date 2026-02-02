@@ -9,36 +9,43 @@ function Task() {
 
     const [task, setTask] = useState(null);
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    // ================= FETCH SINGLE TASK =================
-    async function fetchTask() {
-        try {
-            const res = await apiFetch(
-                `http://localhost:5001/api/tasks/${id}`
-            );
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                setError(data.error || "Kunde inte hämta task");
-                return;
-            }
-
-            setTask(data);
-
-        } catch (err) {
-            console.error(err);
-            setError("Serverfel");
-        }
-    }
-
+    // ================= USE EFFECT =================
     useEffect(() => {
+        const fetchTask = async () => {
+            try {
+                setLoading(true);
+                setError("");
+
+                const res = await apiFetch(
+                    `http://localhost:5001/api/tasks/${id}`
+                );
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    setError(data.error || "Kunde inte hämta task");
+                    return;
+                }
+
+                setTask(data);
+
+            } catch (err) {
+                console.error(err);
+                setError("Serverfel");
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchTask();
     }, [id]);
 
     // ================= STATES =================
+    if (loading) return <p>Laddar task...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
-    if (!task) return <p>Laddar task...</p>;
+    if (!task) return null;
 
     // ================= RENDER =================
     return (

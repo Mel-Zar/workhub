@@ -7,20 +7,22 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const { login, accessToken } = useContext(AuthContext);
+  const { login, isLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Om redan inloggad → dashboard
   useEffect(() => {
-    if (accessToken) {
+    if (isLoggedIn) {
       navigate("/dashboard");
     }
-  }, [accessToken, navigate]);
+  }, [isLoggedIn, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const res = await fetch("http://localhost:5001/api/auth/login", {
@@ -38,13 +40,12 @@ function Login() {
         return;
       }
 
-      // Säkerställ att båda tokens finns
       if (!data.accessToken || !data.refreshToken) {
         setError("Servern skickade inte tokens korrekt");
         return;
       }
 
-      // Spara tokens i AuthContext
+      // Spara tokens
       login(data.accessToken, data.refreshToken);
 
       // Gå till dashboard
@@ -53,6 +54,8 @@ function Login() {
     } catch (err) {
       console.error("Login error:", err);
       setError("Kan inte kontakta servern");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -60,6 +63,7 @@ function Login() {
     <div>
       <h2>Logga in</h2>
 
+      {loading && <p>Laddar...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <form onSubmit={handleSubmit}>
@@ -82,7 +86,9 @@ function Login() {
           required
         />
 
-        <button type="submit">Logga in</button>
+        <button type="submit" disabled={loading}>
+          Logga in
+        </button>
 
       </form>
     </div>

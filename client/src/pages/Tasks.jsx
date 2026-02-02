@@ -17,33 +17,45 @@ function Tasks() {
 
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    // ================= FETCH =================
-    async function fetchTasks() {
-
-        const params = new URLSearchParams({
-            page,
-            limit: 5,
-            sortBy
-        });
-
-        if (filters.search) params.append("search", filters.search);
-        if (filters.priority) params.append("priority", filters.priority);
-        if (filters.completed !== undefined)
-            params.append("completed", filters.completed);
-        if (filters.category) params.append("category", filters.category);
-
-        const res = await apiFetch(
-            `http://localhost:5001/api/tasks?${params}`
-        );
-
-        const data = await res.json();
-
-        setTasks(data.tasks || []);
-        setPages(data.pages || 1);
-    }
-
+    // ================= USE EFFECT =================
     useEffect(() => {
+        const fetchTasks = async () => {
+            setLoading(true);
+            setError("");
+
+            try {
+                const params = new URLSearchParams({
+                    page,
+                    limit: 5,
+                    sortBy
+                });
+
+                if (filters.search) params.append("search", filters.search);
+                if (filters.priority) params.append("priority", filters.priority);
+                if (filters.completed !== undefined)
+                    params.append("completed", filters.completed);
+                if (filters.category) params.append("category", filters.category);
+
+                const res = await apiFetch(
+                    `http://localhost:5001/api/tasks?${params}`
+                );
+
+                const data = await res.json();
+
+                setTasks(data.tasks || []);
+                setPages(data.pages || 1);
+
+            } catch (err) {
+                console.error(err);
+                setError("Kunde inte hämta tasks");
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchTasks();
     }, [page, filters, sortBy]);
 
@@ -75,9 +87,13 @@ function Tasks() {
                 }}
             />
 
-            {tasks.length === 0 && <p>Inga tasks</p>}
+            {loading && <p>Laddar tasks...</p>}
 
-            {tasks.map(task => (
+            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            {!loading && !error && tasks.length === 0 && <p>Inga tasks</p>}
+
+            {!loading && !error && tasks.map(task => (
                 <TaskItem
                     key={task._id}
                     task={task}
