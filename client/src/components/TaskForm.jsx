@@ -38,7 +38,7 @@ function TaskForm({ onCreate }) {
 
         const formData = new FormData();
         formData.append("title", formatText(title));
-        formData.append("priority", priority.toLowerCase());   // ✅ VIKTIG FIX
+        formData.append("priority", priority.toLowerCase());
         formData.append("category", formatCategory(category));
         formData.append("deadline", deadline);
         images.forEach(img => formData.append("images", img));
@@ -61,7 +61,6 @@ function TaskForm({ onCreate }) {
         }
     }
 
-    // ================= DATE LIMIT =================
     const today = new Date().toISOString().split("T")[0];
 
     // ================= RENDER =================
@@ -90,14 +89,17 @@ function TaskForm({ onCreate }) {
             <input
                 placeholder="Kategori"
                 value={category}
-                onChange={e => setCategory(formatCategory(e.target.value))}
+                onChange={e => {
+                    const value = e.target.value.replace(/[0-9]/g, "");
+                    setCategory(formatCategory(value));
+                }}
             />
             <br />
 
             <input
                 type="date"
                 value={deadline}
-                min={today}   // 🚫 kan ej välja gamla datum
+                min={today}
                 onChange={e => setDeadline(e.target.value)}
             />
             <br />

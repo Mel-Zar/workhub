@@ -3,7 +3,6 @@ import { apiFetch } from "../api/ApiFetch";
 
 function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = false, onClick }) {
 
-    // ================= CAPITALIZE FUNCTIONS =================
     function formatText(str) {
         if (!str) return "";
         return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -28,7 +27,6 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
 
     const today = new Date().toISOString().split("T")[0];
 
-    // ================= SAVE CHANGES =================
     async function save() {
         const processedTitle = formatText(title);
         const processedCategory = formatCategory(category);
@@ -71,20 +69,17 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
         setEditing(false);
     }
 
-    // ================= TOGGLE COMPLETED =================
     async function toggleComplete() {
         const res = await apiFetch(`http://localhost:5001/api/tasks/${task._id}/toggle`, { method: "PATCH" });
         const data = await res.json();
         if (res.ok) onUpdate?.(data);
     }
 
-    // ================= DELETE TASK =================
     async function remove() {
         const res = await apiFetch(`http://localhost:5001/api/tasks/${task._id}`, { method: "DELETE" });
         if (res.ok) onDelete?.(task._id);
     }
 
-    // ================= IMAGE HANDLERS =================
     function handleSelectImages(e) {
         const selected = Array.from(e.target.files);
         setNewImages(prev => [...prev, ...selected]);
@@ -100,7 +95,6 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
         });
     }
 
-    // ================= RENDER =================
     return (
         <div
             onClick={clickable ? onClick : undefined}
@@ -139,7 +133,10 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
 
                     <input
                         value={category}
-                        onChange={e => setCategory(formatCategory(e.target.value))}
+                        onChange={e => {
+                            const value = e.target.value.replace(/[0-9]/g, "");
+                            setCategory(formatCategory(value));
+                        }}
                     />
 
                     <input
@@ -150,6 +147,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
                     />
 
                     <h4>Bilder</h4>
+
                     <div style={{ display: "flex", gap: "6px" }}>
                         {localImages.map((img, i) => (
                             <div key={i}>
@@ -161,6 +159,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
                                 <button type="button" onClick={() => removeLocalImage(i, false)}>❌</button>
                             </div>
                         ))}
+
                         {newImages.map((img, i) => (
                             <div key={i}>
                                 <img
@@ -183,14 +182,22 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
                     <h4 style={{ textDecoration: task.completed ? "line-through" : "none" }}>
                         {formatText(task.title)}
                     </h4>
+
                     <p>{formatText(task.priority)}</p>
+
                     {task.images?.length > 0 && (
                         <div style={{ display: "flex", gap: "6px" }}>
                             {task.images.map((img, i) => (
-                                <img key={i} src={`http://localhost:5001${img}`} width="70" style={{ borderRadius: "5px" }} />
+                                <img
+                                    key={i}
+                                    src={`http://localhost:5001${img}`}
+                                    width="70"
+                                    style={{ borderRadius: "5px" }}
+                                />
                             ))}
                         </div>
                     )}
+
                     {showActions && (
                         <div>
                             <button onClick={() => setEditing(true)}>Ändra</button>

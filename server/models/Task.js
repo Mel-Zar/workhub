@@ -10,20 +10,25 @@ const taskSchema = new mongoose.Schema(
 
         title: {
             type: String,
-            required: true
+            required: true,
+            trim: true
         },
 
         description: String,
 
         category: {
             type: String,
-            default: "general"
+            default: "general",
+            lowercase: true,
+            trim: true
         },
 
         priority: {
             type: String,
             enum: ["low", "medium", "high"],
-            default: "medium"
+            default: "medium",
+            lowercase: true,
+            trim: true
         },
 
         deadline: Date,
@@ -33,12 +38,7 @@ const taskSchema = new mongoose.Schema(
             default: false
         },
 
-        images: [
-            {
-                type: String
-            }
-        ]
-
+        images: [{ type: String }]
     },
     { timestamps: true }
 );

@@ -25,16 +25,9 @@ const buildQuery = (userId, search, priority, completed, category) => {
 
 /* ===== GET TASKS ===== */
 
-export const getTasks = async (req, res) => {
+const getTasks = async (req, res) => {
     try {
-        const {
-            search,
-            priority,
-            category,
-            completed,
-            page = 1,
-            limit = 5
-        } = req.query;
+        const { search, priority, category, completed, page = 1, limit = 5 } = req.query;
 
         const query = buildQuery(
             req.user.id,
@@ -58,7 +51,6 @@ export const getTasks = async (req, res) => {
             pages: Math.ceil(total / limit),
             total
         });
-
     } catch (err) {
         console.log(err);
         res.status(500).json({ error: "Server error" });
@@ -67,26 +59,24 @@ export const getTasks = async (req, res) => {
 
 /* ===== GET SINGLE ===== */
 
-export const getTask = async (req, res) => {
+const getTask = async (req, res) => {
     try {
         const task = await Task.findOne({
             _id: req.params.id,
             user: req.user.id
         });
 
-        if (!task)
-            return res.status(404).json({ error: "Task not found" });
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         res.json(task);
-
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: "Server error" });
     }
 };
 
 /* ===== CREATE ===== */
 
-export const createTask = async (req, res) => {
+const createTask = async (req, res) => {
     try {
         if (!req.body.title) {
             return res.status(400).json({ error: "Title is required" });
@@ -98,7 +88,7 @@ export const createTask = async (req, res) => {
 
         const task = await Task.create({
             title: req.body.title,
-            priority: req.body.priority || "medium",
+            priority: (req.body.priority || "medium").toLowerCase(),
             category: req.body.category || "",
             deadline: req.body.deadline || null,
             images: imagePaths,
@@ -106,33 +96,30 @@ export const createTask = async (req, res) => {
         });
 
         res.status(201).json(task);
-
     } catch (err) {
         console.error("CREATE ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ===== UPDATE TEXT ===== */
+/* ===== UPDATE ===== */
 
-export const updateTask = async (req, res) => {
+const updateTask = async (req, res) => {
     try {
         const task = await Task.findOneAndUpdate(
             { _id: req.params.id, user: req.user.id },
             {
                 title: req.body.title,
-                priority: req.body.priority,
+                priority: req.body.priority?.toLowerCase(),
                 category: req.body.category,
                 deadline: req.body.deadline
             },
             { new: true }
         );
 
-        if (!task)
-            return res.status(404).json({ error: "Task not found" });
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         res.json(task);
-
     } catch (err) {
         console.error("UPDATE ERROR:", err);
         res.status(500).json({ error: "Server error" });
@@ -141,15 +128,14 @@ export const updateTask = async (req, res) => {
 
 /* ===== ADD IMAGES ===== */
 
-export const addImages = async (req, res) => {
+const addImages = async (req, res) => {
     try {
         const task = await Task.findOne({
             _id: req.params.id,
             user: req.user.id
         });
 
-        if (!task)
-            return res.status(404).json({ error: "Task not found" });
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         const newImages = req.files.map(
             file => `/uploads/${file.filename}`
@@ -159,7 +145,6 @@ export const addImages = async (req, res) => {
         await task.save();
 
         res.json(task);
-
     } catch (err) {
         console.error("ADD IMAGE ERROR:", err);
         res.status(500).json({ error: "Server error" });
@@ -168,13 +153,9 @@ export const addImages = async (req, res) => {
 
 /* ===== REMOVE IMAGE ===== */
 
-export const removeImage = async (req, res) => {
+const removeImage = async (req, res) => {
     try {
         const { image } = req.body;
-
-        if (!image) {
-            return res.status(400).json({ error: "No image provided" });
-        }
 
         const task = await Task.findOne({
             _id: req.params.id,
@@ -186,59 +167,69 @@ export const removeImage = async (req, res) => {
         task.images = task.images.filter(img => img !== image);
         await task.save();
 
-        const filePath = path.join(process.cwd(), image.replace("/uploads", "uploads"));
-        fs.unlink(filePath, err => {
-            if (err) console.log("File delete warning:", err.message);
-        });
+        const filePath = path.join(
+            process.cwd(),
+            image.replace("/uploads", "uploads")
+        );
+
+        fs.unlink(filePath, () => { });
 
         res.json(task);
-
     } catch (err) {
         console.log("REMOVE IMAGE ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
+/* ===== DELETE ===== */
 
-
-
-/* ===== DELETE TASK ===== */
-
-export const deleteTask = async (req, res) => {
+const deleteTask = async (req, res) => {
     try {
         const task = await Task.findOneAndDelete({
             _id: req.params.id,
             user: req.user.id
         });
 
-        if (!task)
-            return res.status(404).json({ error: "Task not found" });
+        if (!task) return res.status(404).json({ error: "Task not found" });
 
         res.json({ message: "Task deleted" });
-
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ===== TOGGLE COMPLETE ===== */
+/* ===== TOGGLE ===== */
 
-export const toggleComplete = async (req, res) => {
+const toggleComplete = async (req, res) => {
     try {
         const task = await Task.findOne({
             _id: req.params.id,
             user: req.user.id
         });
 
-        if (!task)
-            return res.status(404).json({ error: "Task not found" });
+        if (!task) return res.status(404).json({ message: "Task not found" });
 
         task.completed = !task.completed;
+        task.priority = task.priority.toLowerCase();
+
         await task.save();
 
         res.json(task);
-
     } catch (err) {
-        res.status(500).json({ error: "Server error" });
+        console.error("TOGGLE ERROR:", err);
+        res.status(500).json({ message: "Toggle failed" });
     }
+};
+
+/* ===== EXPORTS ===== */
+
+export {
+    getTasks,
+    getTask,
+    createTask,
+    updateTask,
+    deleteTask,
+    toggleComplete,
+    addImages,
+    removeImage
 };
