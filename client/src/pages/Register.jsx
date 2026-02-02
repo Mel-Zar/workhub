@@ -1,21 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function Register() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
-    setSuccess("");
     setLoading(true);
 
     try {
@@ -28,19 +25,15 @@ function Register() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Registrering misslyckades");
+        toast.error(data.error || "Registrering misslyckades");
         return;
       }
 
-      setSuccess("Konto skapat! Skickar dig till inloggning...");
+      toast.success("Konto skapat!");
+      setTimeout(() => navigate("/login"), 1000);
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 1000);
-
-    } catch (err) {
-      console.error("Register error:", err);
-      setError("Kan inte kontakta servern");
+    } catch {
+      toast.error("Kan inte kontakta servern");
     } finally {
       setLoading(false);
     }
@@ -50,22 +43,15 @@ function Register() {
     <div>
       <h2>Registrera</h2>
 
-      {loading && <p>Laddar...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {success && <p style={{ color: "green" }}>{success}</p>}
-
       <form onSubmit={handleSubmit}>
 
-        <input type="text" placeholder="Namn"
-          value={name} onChange={e => setName(e.target.value)} required />
+        <input placeholder="Namn" value={name} onChange={e => setName(e.target.value)} required />
+        <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+        <input type="password" placeholder="Lösenord" value={password} onChange={e => setPassword(e.target.value)} required />
 
-        <input type="email" placeholder="Email"
-          value={email} onChange={e => setEmail(e.target.value)} required />
-
-        <input type="password" placeholder="Lösenord"
-          value={password} onChange={e => setPassword(e.target.value)} required />
-
-        <button type="submit" disabled={loading}>Registrera</button>
+        <button disabled={loading}>
+          {loading ? "Skapar konto..." : "Registrera"}
+        </button>
 
       </form>
     </div>

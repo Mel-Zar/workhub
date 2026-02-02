@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
-
 import { AuthProvider } from "./context/AuthProvider";
 
 // Pages
@@ -14,13 +13,22 @@ import Task from "./pages/Task";
 // PrivateRoute wrapper
 import PrivateRoute from "./routes/PrivateRoute";
 
+// Toast
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 function App() {
   return (
-    // AuthProvider omsluter hela appen
     <AuthProvider>
+
+      {/* 🔔 Toasts */}
+      <ToastContainer position="top-right" autoClose={2500} />
+
       <Navbar />
+
       <Routes>
-        {/* Skyddad home route */}XW
+
+        {/* Skyddad home route */}
         <Route
           path="/"
           element={
@@ -61,9 +69,11 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Alla andra routes skickas till login */}
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
+
       </Routes>
+
     </AuthProvider>
   );
 }
