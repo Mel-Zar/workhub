@@ -75,8 +75,18 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
         if (res.ok) onUpdate?.(data);
     }
 
+    // ✅ CONFIRM DIALOG HÄR
     async function remove() {
-        const res = await apiFetch(`http://localhost:5001/api/tasks/${task._id}`, { method: "DELETE" });
+
+        const ok = window.confirm("Är du säker på att du vill ta bort denna task?");
+
+        if (!ok) return;
+
+        const res = await apiFetch(
+            `http://localhost:5001/api/tasks/${task._id}`,
+            { method: "DELETE" }
+        );
+
         if (res.ok) onDelete?.(task._id);
     }
 

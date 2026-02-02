@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 
-// ✅ Importera AuthProvider från rätt fil
 import { AuthProvider } from "./context/AuthProvider";
 
 // Pages
@@ -21,7 +20,7 @@ function App() {
     <AuthProvider>
       <Navbar />
       <Routes>
-        {/* Skyddad home route */}
+        {/* Skyddad home route */}XW
         <Route
           path="/"
           element={
