@@ -155,7 +155,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
             }}
         >
 
-            {showActions && (
+            {showActions && !editing && (
                 <input
                     type="checkbox"
                     checked={task.completed}
@@ -206,7 +206,12 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
                                     width="80"
                                     style={{ borderRadius: "6px" }}
                                 />
-                                <button type="button" onClick={() => removeLocalImage(i, false)}>❌</button>
+                                <button
+                                    type="button"
+                                    onClick={() => removeLocalImage(i, false)}
+                                >
+                                    ❌
+                                </button>
                             </div>
                         ))}
 
@@ -217,7 +222,12 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
                                     width="80"
                                     style={{ borderRadius: "6px" }}
                                 />
-                                <button type="button" onClick={() => removeLocalImage(i, true)}>❌</button>
+                                <button
+                                    type="button"
+                                    onClick={() => removeLocalImage(i, true)}
+                                >
+                                    ❌
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -229,18 +239,35 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
                         onChange={handleSelectImages}
                     />
 
-                    <button
-                        onClick={save}
-                        disabled={!isFormValid}
-                        style={{
-                            opacity: !isFormValid ? 0.5 : 1,
-                            cursor: !isFormValid ? "not-allowed" : "pointer"
-                        }}
-                    >
-                        Spara ändringar
-                    </button>
+                    {/* 🔹 EDIT MODE BUTTONS */}
+                    <div style={{ marginTop: "10px" }}>
+                        <button
+                            onClick={save}
+                            disabled={!isFormValid}
+                            style={{
+                                opacity: !isFormValid ? 0.5 : 1,
+                                cursor: !isFormValid ? "not-allowed" : "pointer",
+                                marginRight: "6px"
+                            }}
+                        >
+                            Spara ändringar
+                        </button>
 
-                    <button onClick={() => setEditing(false)}>Avbryt</button>
+                        <button
+                            onClick={() => setEditing(false)}
+                            style={{ marginRight: "6px" }}
+                        >
+                            Avbryt
+                        </button>
+
+                        {/* ❗ TA BORT */}
+                        <button
+                            onClick={remove}
+                            style={{ background: "#ff4d4d", color: "white" }}
+                        >
+                            Ta bort
+                        </button>
+                    </div>
                 </>
             ) : (
                 <>
@@ -263,10 +290,12 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
                         </div>
                     )}
 
+                    {/* 🔹 VIEW MODE: BARA ÄNDRA */}
                     {showActions && (
-                        <div>
-                            <button onClick={() => setEditing(true)}>Ändra</button>
-                            <button onClick={remove}>Ta bort</button>
+                        <div style={{ marginTop: "10px" }}>
+                            <button onClick={() => setEditing(true)}>
+                                Ändra
+                            </button>
                         </div>
                     )}
                 </>
@@ -274,6 +303,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, clickable = fa
 
         </div>
     );
+
 }
 
 export default TaskItem;
