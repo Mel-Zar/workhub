@@ -3,40 +3,28 @@ import { AuthContext } from "./AuthContext";
 
 export function AuthProvider({ children }) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userName, setUserName] = useState(null);
+    const [userName, setUserName] = useState("");
     const [loading, setLoading] = useState(true);
 
     // ================= INIT =================
     useEffect(() => {
-        const initAuth = () => {
-            const access = localStorage.getItem("accessToken");
-            const refresh = localStorage.getItem("refreshToken");
+        const access = localStorage.getItem("accessToken");
+        if (!access) {
+            setLoading(false);
+            return;
+        }
 
-            if (access && refresh) {
-                try {
-                    const payload = JSON.parse(atob(access.split(".")[1]));
-                    const name = payload.name || "User";
-
-                    // Sätt state asynkront för att undvika cascading renders
-                    setTimeout(() => {
-                        setUserName(name);
-                        setIsLoggedIn(true);
-                        setLoading(false);
-                    }, 0);
-                } catch (err) {
-                    console.error("Invalid token", err);
-                    setTimeout(() => {
-                        setUserName(null);
-                        setIsLoggedIn(false);
-                        setLoading(false);
-                    }, 0);
-                }
-            } else {
-                setLoading(false);
-            }
-        };
-
-        initAuth();
+        try {
+            const payload = JSON.parse(atob(access.split(".")[1]));
+            setUserName(payload.name || "User");
+            setIsLoggedIn(true);
+        } catch (err) {
+            console.error("Invalid token", err);
+            setUserName("");
+            setIsLoggedIn(false);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     // ================= LOGIN =================
@@ -46,8 +34,7 @@ export function AuthProvider({ children }) {
 
         try {
             const payload = JSON.parse(atob(access.split(".")[1]));
-            const name = payload.name || "User";
-            setUserName(name);
+            setUserName(payload.name || "User");
             setIsLoggedIn(true);
         } catch {
             setUserName("User");
@@ -57,9 +44,10 @@ export function AuthProvider({ children }) {
 
     // ================= LOGOUT =================
     function logout() {
-        localStorage.clear();
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         setIsLoggedIn(false);
-        setUserName(null);
+        setUserName("");
         window.location.href = "/login";
     }
 
