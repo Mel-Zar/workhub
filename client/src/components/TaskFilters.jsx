@@ -8,6 +8,7 @@ function TaskFilters({ onFilter, categories = [] }) {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
 
+    // ================= APPLY FILTER =================
     function triggerFilter(changes = {}) {
 
         const updated = {
@@ -28,26 +29,42 @@ function TaskFilters({ onFilter, categories = [] }) {
 
         onFilter({
             priority: updated.priority || undefined,
-
             category: updated.category
                 ? updated.category.toLowerCase()
                 : undefined,
-
             completed: completedValue,
-
-            // ✅ DATUM FILTER
             fromDate: updated.fromDate || undefined,
             toDate: updated.toDate || undefined
         });
     }
 
+    // ================= RESET =================
+    function handleReset() {
+        setPriority("");
+        setCategory("");
+        setCompleted("");
+        setFromDate("");
+        setToDate("");
+
+        onFilter({
+            priority: undefined,
+            category: undefined,
+            completed: undefined,
+            fromDate: undefined,
+            toDate: undefined
+        });
+    }
+
     return (
-        <div style={{
-            marginBottom: "20px",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "10px"
-        }}>
+        <div
+            style={{
+                marginBottom: "20px",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "10px",
+                alignItems: "center"
+            }}
+        >
 
             {/* PRIORITY */}
             <select
@@ -72,7 +89,6 @@ function TaskFilters({ onFilter, categories = [] }) {
                 }}
             >
                 <option value="">Alla kategorier</option>
-
                 {categories.map(cat => (
                     <option key={cat} value={cat}>
                         {cat}
@@ -112,6 +128,20 @@ function TaskFilters({ onFilter, categories = [] }) {
                     triggerFilter({ toDate: e.target.value });
                 }}
             />
+
+            {/* RESET BUTTON */}
+            <button
+                type="button"
+                onClick={handleReset}
+                style={{
+                    background: "#eee",
+                    border: "1px solid #ccc",
+                    padding: "6px 12px",
+                    cursor: "pointer"
+                }}
+            >
+                🔄 Rensa filter
+            </button>
 
         </div>
     );
