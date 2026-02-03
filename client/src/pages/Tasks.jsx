@@ -24,7 +24,7 @@ function Tasks() {
     const navigate = useNavigate();
 
     const [tasks, setTasks] = useState([]);
-    const [categories, setCategories] = useState([]); // ✅ NY
+    const [categories, setCategories] = useState([]);
     const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState("createdAt");
     const [page, setPage] = useState(1);
@@ -35,7 +35,7 @@ function Tasks() {
     // ================= FETCH TASKS =================
     useEffect(() => {
 
-        const fetchTasks = async () => {
+        async function fetchTasks() {
             try {
                 setLoading(true);
                 setError("");
@@ -58,10 +58,16 @@ function Tasks() {
                 if (filters.category)
                     params.append("category", filters.category);
 
+                // ✅ DATUMFILTER
+                if (filters.fromDate)
+                    params.append("fromDate", filters.fromDate);
+
+                if (filters.toDate)
+                    params.append("toDate", filters.toDate);
+
                 const res = await apiFetch(`/api/tasks?${params}`);
 
-                if (!res.ok)
-                    throw new Error("Fetch failed");
+                if (!res.ok) throw new Error("Fetch failed");
 
                 const data = await res.json();
 
@@ -75,7 +81,7 @@ function Tasks() {
                 setTasks(formatted);
                 setPages(data.pages || 1);
 
-                // ✅ BYGG KATEGORIER
+                // bygg kategorier
                 const uniqueCategories = [
                     ...new Set(formatted.map(t => t.category).filter(Boolean))
                 ];
@@ -87,7 +93,7 @@ function Tasks() {
             } finally {
                 setLoading(false);
             }
-        };
+        }
 
         fetchTasks();
 
@@ -114,7 +120,6 @@ function Tasks() {
                 }}
             />
 
-            {/* ✅ SKICKA KATEGORIER */}
             <TaskFilters
                 categories={categories}
                 onFilter={data => {

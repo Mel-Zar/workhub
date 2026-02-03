@@ -2,11 +2,20 @@ import Task from "../models/Task.js";
 import fs from "fs";
 import path from "path";
 
-/* ===== HELPERS ===== */
+/* ================= HELPERS ================= */
 
-const buildQuery = (userId, search, priority, completed, category) => {
+const buildQuery = (
+    userId,
+    search,
+    priority,
+    completed,
+    category,
+    fromDate,
+    toDate
+) => {
     const query = { user: userId };
 
+    // SEARCH
     if (search) {
         query.$or = [
             { title: { $regex: search, $options: "i" } },
@@ -14,27 +23,55 @@ const buildQuery = (userId, search, priority, completed, category) => {
         ];
     }
 
+    // PRIORITY
     if (priority) query.priority = priority;
+
+    // CATEGORY
     if (category) query.category = category;
 
+    // COMPLETED
     if (completed === "true") query.completed = true;
     if (completed === "false") query.completed = false;
+
+    // ✅ DATE RANGE (deadline)
+    if (fromDate || toDate) {
+        query.deadline = {};
+
+        if (fromDate) {
+            query.deadline.$gte = new Date(fromDate);
+        }
+
+        if (toDate) {
+            query.deadline.$lte = new Date(toDate);
+        }
+    }
 
     return query;
 };
 
-/* ===== GET TASKS ===== */
+/* ================= GET TASKS ================= */
 
 const getTasks = async (req, res) => {
     try {
-        const { search, priority, category, completed, page = 1, limit = 5 } = req.query;
+        const {
+            search,
+            priority,
+            category,
+            completed,
+            fromDate,
+            toDate,
+            page = 1,
+            limit = 5
+        } = req.query;
 
         const query = buildQuery(
             req.user.id,
             search,
             priority,
             completed,
-            category
+            category,
+            fromDate,
+            toDate
         );
 
         const skip = (page - 1) * limit;
@@ -51,13 +88,14 @@ const getTasks = async (req, res) => {
             pages: Math.ceil(total / limit),
             total
         });
+
     } catch (err) {
         console.log(err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ===== GET SINGLE ===== */
+/* ================= GET SINGLE ================= */
 
 const getTask = async (req, res) => {
     try {
@@ -74,7 +112,7 @@ const getTask = async (req, res) => {
     }
 };
 
-/* ===== CREATE ===== */
+/* ================= CREATE ================= */
 
 const createTask = async (req, res) => {
     try {
@@ -102,7 +140,7 @@ const createTask = async (req, res) => {
     }
 };
 
-/* ===== UPDATE ===== */
+/* ================= UPDATE ================= */
 
 const updateTask = async (req, res) => {
     try {
@@ -126,7 +164,7 @@ const updateTask = async (req, res) => {
     }
 };
 
-/* ===== ADD IMAGES ===== */
+/* ================= ADD IMAGES ================= */
 
 const addImages = async (req, res) => {
     try {
@@ -151,7 +189,7 @@ const addImages = async (req, res) => {
     }
 };
 
-/* ===== REMOVE IMAGE ===== */
+/* ================= REMOVE IMAGE ================= */
 
 const removeImage = async (req, res) => {
     try {
@@ -181,7 +219,7 @@ const removeImage = async (req, res) => {
     }
 };
 
-/* ===== DELETE ===== */
+/* ================= DELETE ================= */
 
 const deleteTask = async (req, res) => {
     try {
@@ -198,7 +236,7 @@ const deleteTask = async (req, res) => {
     }
 };
 
-/* ===== TOGGLE ===== */
+/* ================= TOGGLE ================= */
 
 const toggleComplete = async (req, res) => {
     try {
@@ -221,7 +259,7 @@ const toggleComplete = async (req, res) => {
     }
 };
 
-/* ===== EXPORTS ===== */
+/* ================= EXPORTS ================= */
 
 export {
     getTasks,

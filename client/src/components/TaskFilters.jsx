@@ -29,18 +29,27 @@ function TaskFilters({ onFilter, categories = [] }) {
         onFilter({
             priority: updated.priority || undefined,
 
-            // 🔥 LOWERCASE FIX
             category: updated.category
                 ? updated.category.toLowerCase()
                 : undefined,
 
-            completed: completedValue
+            completed: completedValue,
+
+            // ✅ DATUM FILTER
+            fromDate: updated.fromDate || undefined,
+            toDate: updated.toDate || undefined
         });
     }
 
     return (
-        <div style={{ marginBottom: "20px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
+        <div style={{
+            marginBottom: "20px",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "10px"
+        }}>
 
+            {/* PRIORITY */}
             <select
                 value={priority}
                 onChange={e => {
@@ -54,6 +63,7 @@ function TaskFilters({ onFilter, categories = [] }) {
                 <option value="high">High</option>
             </select>
 
+            {/* CATEGORY */}
             <select
                 value={category}
                 onChange={e => {
@@ -68,9 +78,9 @@ function TaskFilters({ onFilter, categories = [] }) {
                         {cat}
                     </option>
                 ))}
-
             </select>
 
+            {/* COMPLETED */}
             <select
                 value={completed}
                 onChange={e => {
@@ -83,16 +93,24 @@ function TaskFilters({ onFilter, categories = [] }) {
                 <option value="false">Ej klara</option>
             </select>
 
+            {/* FROM DATE */}
             <input
                 type="date"
                 value={fromDate}
-                onChange={e => setFromDate(e.target.value)}
+                onChange={e => {
+                    setFromDate(e.target.value);
+                    triggerFilter({ fromDate: e.target.value });
+                }}
             />
 
+            {/* TO DATE */}
             <input
                 type="date"
                 value={toDate}
-                onChange={e => setToDate(e.target.value)}
+                onChange={e => {
+                    setToDate(e.target.value);
+                    triggerFilter({ toDate: e.target.value });
+                }}
             />
 
         </div>
