@@ -25,7 +25,7 @@ export async function apiFetch(url, options = {}) {
         headers
     });
 
-    // 🔁 REFRESH TOKEN
+    // 🔁 AUTO REFRESH TOKEN
     if (response.status === 401 && !options._retry) {
 
         const refreshToken = localStorage.getItem("refreshToken");

@@ -9,16 +9,25 @@ const auth = (req, res, next) => {
             return res.status(401).json({ error: "No token provided" });
         }
 
+        // Kontrollera Bearer-format
+        if (!authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({ error: "Invalid token format" });
+        }
+
         const token = authHeader.split(" ")[1];
+
         if (!token) {
             return res.status(401).json({ error: "No token provided" });
         }
 
         // Verifiera token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret");
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET || "secret"
+        );
 
-        // Spara user id i request
-        req.user = { id: decoded.id };
+        // ✅ Spara hela payloaden
+        req.user = decoded;
 
         next(); // gå vidare till nästa middleware / route
 

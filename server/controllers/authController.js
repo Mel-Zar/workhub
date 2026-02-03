@@ -85,6 +85,57 @@ const loginUser = async (req, res) => {
     }
 };
 
+// ================= UPDATE PROFILE =================
+const updateUser = async (req, res) => {
+    try {
+        if (!req.user?.id)
+            return res.status(401).json({ error: "Not authenticated" });
+
+        const userId = req.user.id;
+        const { name, email, currentPassword, newPassword } = req.body;
+
+        if (!currentPassword)
+            return res.status(400).json({ error: "Current password required" });
+
+        const user = await User.findById(userId);
+        if (!user)
+            return res.status(404).json({ error: "User not found" });
+
+        const match = await bcrypt.compare(currentPassword, user.password);
+        if (!match)
+            return res.status(401).json({ error: "Wrong password" });
+
+        // update fields
+        if (name) user.name = name;
+        if (email) user.email = email;
+
+        if (newPassword) {
+            if (newPassword.length < 6)
+                return res.status(400).json({ error: "Password must be at least 6 characters" });
+
+            user.password = await bcrypt.hash(newPassword, 10);
+        }
+
+        await user.save();
+
+        // ✅ new access token so frontend updates name/email
+        const newAccessToken = createAccessToken(user);
+
+        res.json({
+            message: "Profile updated",
+            accessToken: newAccessToken,
+            user: {
+                name: user.name,
+                email: user.email
+            }
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
 // ================= REFRESH =================
 const refreshAccessToken = async (req, res) => {
     const { refreshToken } = req.body;
@@ -134,4 +185,10 @@ const logout = async (req, res) => {
     }
 };
 
-export { registerUser, loginUser, refreshAccessToken, logout };
+export {
+    registerUser,
+    loginUser,
+    updateUser,
+    refreshAccessToken,
+    logout
+};
