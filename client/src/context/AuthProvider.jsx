@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
     // ================= INIT =================
     useEffect(() => {
         const access = localStorage.getItem("accessToken");
+
         if (!access) {
             setLoading(false);
             return;
@@ -19,9 +20,10 @@ export function AuthProvider({ children }) {
             setUserName(payload.name || "User");
             setIsLoggedIn(true);
         } catch (err) {
-            console.error("Invalid token", err);
-            setUserName("");
+            console.error("Token parse error:", err);
+            localStorage.clear();
             setIsLoggedIn(false);
+            setUserName("");
         } finally {
             setLoading(false);
         }
@@ -35,24 +37,31 @@ export function AuthProvider({ children }) {
         try {
             const payload = JSON.parse(atob(access.split(".")[1]));
             setUserName(payload.name || "User");
-            setIsLoggedIn(true);
         } catch {
             setUserName("User");
-            setIsLoggedIn(true);
         }
+
+        setIsLoggedIn(true);
     }
 
     // ================= LOGOUT =================
     function logout() {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        localStorage.clear();
         setIsLoggedIn(false);
         setUserName("");
         window.location.href = "/login";
     }
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, userName, loading, login, logout }}>
+        <AuthContext.Provider
+            value={{
+                isLoggedIn,
+                userName,
+                loading,
+                login,
+                logout
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

@@ -64,10 +64,9 @@ const loginUser = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
-        const accessToken = createAccessToken(user); // name included
+        const accessToken = createAccessToken(user);
         const refreshToken = createRefreshToken(user);
 
-        // Spara refresh token i databasen
         user.refreshToken = refreshToken;
         await user.save();
 
@@ -90,7 +89,8 @@ const loginUser = async (req, res) => {
 const refreshAccessToken = async (req, res) => {
     const { refreshToken } = req.body;
 
-    if (!refreshToken) return res.status(401).json({ error: "Refresh token required" });
+    if (!refreshToken)
+        return res.status(401).json({ error: "Refresh token required" });
 
     try {
         const payload = jwt.verify(
@@ -105,6 +105,7 @@ const refreshAccessToken = async (req, res) => {
 
         const newAccessToken = createAccessToken(user);
         res.json({ accessToken: newAccessToken });
+
     } catch (err) {
         console.error(err);
         res.status(403).json({ error: "Invalid refresh token" });
@@ -116,7 +117,8 @@ const logout = async (req, res) => {
     try {
         const { refreshToken } = req.body;
 
-        if (!refreshToken) return res.status(400).json({ error: "Refresh token required" });
+        if (!refreshToken)
+            return res.status(400).json({ error: "Refresh token required" });
 
         const user = await User.findOne({ refreshToken });
 

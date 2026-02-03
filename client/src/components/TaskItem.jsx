@@ -95,6 +95,21 @@ function TaskItem({
         setRemovedImages([]);
     }
 
+    // ================= DELETE =================
+    async function removeTask() {
+        const confirmDelete = window.confirm(
+            "Är du säker på att du vill radera denna task?"
+        );
+
+        if (!confirmDelete) return;
+
+        const res = await apiFetch(`/api/tasks/${task._id}`, {
+            method: "DELETE"
+        });
+
+        if (res.ok) onDelete?.(task._id);
+    }
+
     // ================= ACTIONS =================
     async function toggleComplete() {
         const res = await apiFetch(`/api/tasks/${task._id}/toggle`, {
@@ -104,15 +119,13 @@ function TaskItem({
         if (res.ok) onUpdate?.(data);
     }
 
-    async function removeTask() {
-        const res = await apiFetch(`/api/tasks/${task._id}`, {
-            method: "DELETE"
-        });
-        if (res.ok) onDelete?.(task._id);
-    }
-
     // ================= VALIDATION =================
-    const canSave = title.trim() && priority && category.trim() && deadline && (existingImages.length + newImages.length > 0);
+    const canSave =
+        title.trim() &&
+        priority &&
+        category.trim() &&
+        deadline &&
+        (existingImages.length + newImages.length > 0);
 
     // ================= RENDER =================
     return (
@@ -144,7 +157,10 @@ function TaskItem({
                         placeholder="Titel"
                     />
 
-                    <select value={priority} onChange={e => setPriority(e.target.value)}>
+                    <select
+                        value={priority}
+                        onChange={e => setPriority(e.target.value)}
+                    >
                         <option value="">Choose priority</option>
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
@@ -174,11 +190,15 @@ function TaskItem({
                                     style={{ borderRadius: "6px" }}
                                 />
                                 <br />
-                                <button type="button" onClick={() => removeExistingImage(i)}>
+                                <button
+                                    type="button"
+                                    onClick={() => removeExistingImage(i)}
+                                >
                                     ❌
                                 </button>
                             </div>
                         ))}
+
                         {newImages.map((img, i) => (
                             <div key={i}>
                                 <img
@@ -187,7 +207,10 @@ function TaskItem({
                                     style={{ borderRadius: "6px" }}
                                 />
                                 <br />
-                                <button type="button" onClick={() => removeNewImage(i)}>
+                                <button
+                                    type="button"
+                                    onClick={() => removeNewImage(i)}
+                                >
                                     ❌
                                 </button>
                             </div>
@@ -203,12 +226,30 @@ function TaskItem({
 
                     <br />
 
-                    <button onClick={handleSave} disabled={!canSave} style={{ cursor: canSave ? "pointer" : "not-allowed" }}>
+                    <button
+                        onClick={handleSave}
+                        disabled={!canSave}
+                        style={{
+                            cursor: canSave ? "pointer" : "not-allowed"
+                        }}
+                    >
                         Spara ändringar
                     </button>
 
                     <button onClick={() => setEditing(false)}>
                         Avbryt
+                    </button>
+
+                    {/* 🔴 DELETE INSIDE EDIT MODE */}
+                    <button
+                        onClick={removeTask}
+                        style={{
+                            background: "crimson",
+                            color: "white",
+                            marginLeft: "10px"
+                        }}
+                    >
+                        Ta bort task
                     </button>
                 </>
             ) : (
@@ -234,8 +275,9 @@ function TaskItem({
 
                     {showActions && (
                         <div>
-                            <button onClick={() => setEditing(true)}>Ändra</button>
-                            <button onClick={removeTask}>Ta bort</button>
+                            <button onClick={() => setEditing(true)}>
+                                Ändra
+                            </button>
                         </div>
                     )}
                 </>
