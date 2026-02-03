@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { apiFetch } from "../api/ApiFetch";
+import { AuthContext } from "../context/AuthContext";
 
 // ================= LOAD USER FROM TOKEN =================
 function getUserFromToken() {
@@ -18,6 +19,9 @@ function getUserFromToken() {
 }
 
 function Profile() {
+
+    // ✅ FROM CONTEXT
+    const { updateUserName } = useContext(AuthContext);
 
     const user = getUserFromToken();
 
@@ -57,6 +61,15 @@ function Profile() {
         if (!res.ok) {
             setError(data.error || "Something went wrong");
         } else {
+
+            // ✅ SAVE NEW TOKEN
+            if (data.accessToken) {
+                localStorage.setItem("accessToken", data.accessToken);
+            }
+
+            // ✅ UPDATE NAVBAR INSTANTLY
+            updateUserName(data.user.name);
+
             setMessage("Profile updated");
 
             setInitialName(name);
@@ -110,7 +123,6 @@ function Profile() {
                     autoComplete="new-password"
                 />
 
-
                 <h4>Confirm identity</h4>
 
                 <input
@@ -121,7 +133,6 @@ function Profile() {
                     required
                     autoComplete="current-password"
                 />
-
 
                 <button disabled={!hasChanges || loading}>
                     {loading ? "Saving..." : "Save"}

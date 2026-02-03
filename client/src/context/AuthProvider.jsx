@@ -52,6 +52,11 @@ export function AuthProvider({ children }) {
         window.location.href = "/login";
     }
 
+    // ✅ ADD THIS
+    function updateUserName(newName) {
+        setUserName(newName);
+    }
+
     return (
         <AuthContext.Provider
             value={{
@@ -59,7 +64,8 @@ export function AuthProvider({ children }) {
                 userName,
                 loading,
                 login,
-                logout
+                logout,
+                updateUserName   // ✅ expose
             }}
         >
             {children}
