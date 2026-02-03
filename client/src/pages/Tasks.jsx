@@ -7,7 +7,6 @@ import TaskSearch from "../components/TaskSearch";
 import TaskFilters from "../components/TaskFilters";
 import TaskSort from "../components/TaskSort";
 
-/* ================= FORMATTERS ================= */
 function formatText(str) {
     if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -32,7 +31,6 @@ function Tasks() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // ================= FETCH TASKS =================
     useEffect(() => {
 
         async function fetchTasks() {
@@ -46,24 +44,12 @@ function Tasks() {
                     sortBy
                 });
 
-                if (filters.search)
-                    params.append("search", filters.search);
-
-                if (filters.priority)
-                    params.append("priority", filters.priority);
-
+                if (filters.search) params.append("search", filters.search);
+                if (filters.priority) params.append("priority", filters.priority);
                 if (filters.completed !== undefined)
                     params.append("completed", filters.completed);
-
                 if (filters.category)
                     params.append("category", filters.category);
-
-                // ✅ DATUMFILTER
-                if (filters.fromDate)
-                    params.append("fromDate", filters.fromDate);
-
-                if (filters.toDate)
-                    params.append("toDate", filters.toDate);
 
                 const res = await apiFetch(`/api/tasks?${params}`);
 
@@ -81,11 +67,9 @@ function Tasks() {
                 setTasks(formatted);
                 setPages(data.pages || 1);
 
-                // bygg kategorier
-                const uniqueCategories = [
+                setCategories([
                     ...new Set(formatted.map(t => t.category).filter(Boolean))
-                ];
-                setCategories(uniqueCategories);
+                ]);
 
             } catch (err) {
                 console.error(err);
@@ -99,7 +83,6 @@ function Tasks() {
 
     }, [page, filters, sortBy]);
 
-    // ================= RENDER =================
     return (
         <div>
 
@@ -142,20 +125,28 @@ function Tasks() {
                 />
             ))}
 
-            {/* PAGINATION */}
-            <div style={{ marginTop: 20 }}>
-                <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>
-                    ⬅ Föregående
-                </button>
+            {/* ================= PAGINATION ================= */}
+            {pages > 1 && (
+                <div style={{ marginTop: 20 }}>
 
-                <span style={{ margin: "0 10px" }}>
-                    Sida {page} av {pages}
-                </span>
+                    {page > 1 && (
+                        <button onClick={() => setPage(p => p - 1)}>
+                            ⬅ Föregående
+                        </button>
+                    )}
 
-                <button disabled={page === pages} onClick={() => setPage(p => p + 1)}>
-                    Nästa ➡
-                </button>
-            </div>
+                    <span style={{ margin: "0 10px" }}>
+                        Sida {page} av {pages}
+                    </span>
+
+                    {page < pages && tasks.length > 0 && (
+                        <button onClick={() => setPage(p => p + 1)}>
+                            Nästa ➡
+                        </button>
+                    )}
+
+                </div>
+            )}
 
         </div>
     );

@@ -1,7 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
+import { toast } from "react-toastify";
 import { apiFetch } from "../api/ApiFetch";
 
 import TaskForm from "../components/TaskForm";
@@ -26,7 +24,6 @@ function Dashboard() {
         try {
             setLoading(true);
 
-            // ✅ FORMATTERS INSIDE CALLBACK
             const formatText = str =>
                 str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
@@ -76,7 +73,6 @@ function Dashboard() {
         }
     }, [page, filters, sortBy]);
 
-    // ================= USE EFFECT =================
     useEffect(() => {
         fetchTasks();
     }, [fetchTasks]);
@@ -95,8 +91,6 @@ function Dashboard() {
     // ================= RENDER =================
     return (
         <div>
-
-            <ToastContainer position="top-right" autoClose={3000} />
 
             <h2>Dashboard</h2>
 
@@ -138,28 +132,28 @@ function Dashboard() {
                 />
             ))}
 
-            {/* PAGINATION */}
-            <div style={{ marginTop: 20 }}>
+            {/* ================= PAGINATION ================= */}
+            {pages > 1 && (
+                <div style={{ marginTop: 20 }}>
 
-                <button
-                    disabled={page === 1}
-                    onClick={() => setPage(p => p - 1)}
-                >
-                    ⬅ Föregående
-                </button>
+                    {page > 1 && (
+                        <button onClick={() => setPage(p => p - 1)}>
+                            ⬅ Föregående
+                        </button>
+                    )}
 
-                <span style={{ margin: "0 10px" }}>
-                    Sida {page} av {pages}
-                </span>
+                    <span style={{ margin: "0 10px" }}>
+                        Sida {page} av {pages}
+                    </span>
 
-                <button
-                    disabled={page === pages}
-                    onClick={() => setPage(p => p + 1)}
-                >
-                    Nästa ➡
-                </button>
+                    {page < pages && tasks.length > 0 && (
+                        <button onClick={() => setPage(p => p + 1)}>
+                            Nästa ➡
+                        </button>
+                    )}
 
-            </div>
+                </div>
+            )}
 
         </div>
     );
