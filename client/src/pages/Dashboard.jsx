@@ -1,4 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import { apiFetch } from "../api/ApiFetch";
 
 import TaskForm from "../components/TaskForm";
@@ -17,15 +20,13 @@ function Dashboard() {
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
     // ================= FETCH TASKS =================
     const fetchTasks = useCallback(async () => {
         try {
             setLoading(true);
-            setError("");
 
-            // FORMATTERS (lokalt för att undvika ESLint-varningar)
+            // ===== FORMATTERS =====
             const formatText = str =>
                 str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
@@ -62,19 +63,20 @@ function Dashboard() {
 
             setTasks(formattedTasks);
             setPages(data.pages || 1);
+
             setCategories([
                 ...new Set(formattedTasks.map(t => t.category).filter(Boolean))
             ]);
 
         } catch (err) {
             console.error(err);
-            setError("Kunde inte hämta tasks");
+            toast.error("Kunde inte hämta tasks");
         } finally {
             setLoading(false);
         }
     }, [page, filters, sortBy]);
 
-    // ================= USE EFFECT =================
+    // ================= LOAD =================
     useEffect(() => {
         fetchTasks();
     }, [fetchTasks]);
@@ -84,15 +86,20 @@ function Dashboard() {
         setTasks(prev =>
             prev.map(t => (t._id === updatedTask._id ? updatedTask : t))
         );
+        toast.success("Task uppdaterad");
     }
 
     function handleDelete(id) {
         setTasks(prev => prev.filter(t => t._id !== id));
+        toast.success("Task borttagen");
     }
 
     // ================= RENDER =================
     return (
         <div>
+
+            {/* Toastify */}
+            <ToastContainer position="top-right" autoClose={3000} />
 
             <h2>Dashboard</h2>
 
@@ -119,13 +126,15 @@ function Dashboard() {
                 }}
             />
 
-            <TaskForm onCreate={fetchTasks} />
+            <TaskForm onCreate={() => {
+                fetchTasks();
+                toast.success("Task skapad");
+            }} />
 
             {loading && <p>Laddar...</p>}
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {!loading && !error && tasks.length === 0 && <p>Inga tasks</p>}
+            {!loading && tasks.length === 0 && <p>Inga tasks</p>}
 
-            {!loading && !error && tasks.map(task => (
+            {!loading && tasks.map(task => (
                 <TaskItem
                     key={task._id}
                     task={task}
@@ -137,6 +146,7 @@ function Dashboard() {
 
             {/* PAGINATION */}
             <div style={{ marginTop: 20 }}>
+
                 <button
                     disabled={page === 1}
                     onClick={() => setPage(p => p - 1)}
@@ -154,6 +164,7 @@ function Dashboard() {
                 >
                     Nästa ➡
                 </button>
+
             </div>
 
         </div>

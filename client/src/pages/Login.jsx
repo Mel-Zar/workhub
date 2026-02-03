@@ -1,11 +1,11 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { AuthContext } from "../context/AuthContext"; // ✅ korrekt
+import { toast } from "react-toastify";
+import { AuthContext } from "../context/AuthContext";
 import { apiFetch } from "../api/ApiFetch";
 
 function Login() {
+
   const { login, isLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -17,15 +17,14 @@ function Login() {
     if (isLoggedIn) navigate("/dashboard");
   }, [isLoggedIn, navigate]);
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
 
     try {
       const res = await apiFetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password })
       });
 
       const data = await res.json();
@@ -38,27 +37,30 @@ function Login() {
       login(data.accessToken, data.refreshToken);
       toast.success(`Välkommen tillbaka ${data.user.name}!`);
       navigate("/dashboard");
+
     } catch (err) {
       console.error(err);
       toast.error("Serverfel");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
+
       <h2>Logga in</h2>
 
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: 10 }}
       >
+
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
           required
         />
 
@@ -66,16 +68,16 @@ function Login() {
           type="password"
           placeholder="Lösenord"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={e => setPassword(e.target.value)}
           required
         />
 
         <button disabled={loading}>
           {loading ? "Loggar in..." : "Logga in"}
         </button>
+
       </form>
 
-      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

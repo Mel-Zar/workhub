@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { toast } from "react-toastify";
 import { apiFetch } from "../api/ApiFetch";
 import { AuthContext } from "../context/AuthContext";
 
@@ -35,33 +36,30 @@ function Profile() {
     const [newPassword, setNewPassword] = useState("");
     const [deletePassword, setDeletePassword] = useState("");
 
-    const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
     // ================= SAVE PROFILE =================
     async function handleSubmit(e) {
         e.preventDefault();
-
         setLoading(true);
-        setError("");
-        setMessage("");
 
-        const res = await apiFetch("/api/auth/profile", {
-            method: "PUT",
-            body: JSON.stringify({
-                name,
-                email,
-                currentPassword,
-                newPassword
-            })
-        });
+        try {
+            const res = await apiFetch("/api/auth/profile", {
+                method: "PUT",
+                body: JSON.stringify({
+                    name,
+                    email,
+                    currentPassword,
+                    newPassword
+                })
+            });
 
-        const data = await res.json();
+            const data = await res.json();
 
-        if (!res.ok) {
-            setError(data.error || "Something went wrong");
-        } else {
+            if (!res.ok) {
+                toast.error(data.error || "Profile update failed");
+                return;
+            }
 
             // ✅ STORE NEW TOKEN
             if (data.accessToken) {
@@ -71,22 +69,26 @@ function Profile() {
             // ✅ UPDATE NAVBAR NAME
             updateUserName(data.user.name);
 
-            setMessage("Profile updated");
+            toast.success("Profile updated!");
 
             setInitialName(name);
             setInitialEmail(email);
             setCurrentPassword("");
             setNewPassword("");
-        }
 
-        setLoading(false);
+        } catch (err) {
+            console.error(err);
+            toast.error("Server error");
+        } finally {
+            setLoading(false);
+        }
     }
 
     // ================= DELETE ACCOUNT =================
     async function handleDeleteAccount() {
 
         if (!deletePassword) {
-            setError("Password required to delete account");
+            toast.error("Password required to delete account");
             return;
         }
 
@@ -96,22 +98,33 @@ function Profile() {
 
         if (!confirmDelete) return;
 
-        const res = await apiFetch("/api/auth/delete", {
-            method: "DELETE",
-            body: JSON.stringify({
-                currentPassword: deletePassword
-            })
-        });
+        try {
+            const res = await apiFetch("/api/auth/delete", {
+                method: "DELETE",
+                body: JSON.stringify({
+                    currentPassword: deletePassword
+                })
+            });
 
-        const data = await res.json();
+            const data = await res.json();
 
-        if (!res.ok) {
-            setError(data.error || "Delete failed");
-            return;
+            if (!res.ok) {
+                toast.error(data.error || "Delete failed");
+                return;
+            }
+
+            toast.success("Account deleted");
+
+            localStorage.clear();
+
+            setTimeout(() => {
+                window.location.href = "/login";
+            }, 1500);
+
+        } catch (err) {
+            console.error(err);
+            toast.error("Server error");
         }
-
-        localStorage.clear();
-        window.location.href = "/login";
     }
 
     // ================= CHECK CHANGES =================
@@ -125,9 +138,6 @@ function Profile() {
 
             <h2>Profile</h2>
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {message && <p style={{ color: "green" }}>{message}</p>}
-
             {/* ================= PROFILE FORM ================= */}
             <form onSubmit={handleSubmit}>
 
@@ -137,14 +147,12 @@ function Profile() {
                     placeholder="Name"
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    autoComplete="name"
                 />
 
                 <input
                     placeholder="Email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    autoComplete="email"
                 />
 
                 <h4>Change password</h4>
@@ -154,7 +162,6 @@ function Profile() {
                     placeholder="New password"
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
-                    autoComplete="new-password"
                 />
 
                 <h4>Confirm identity</h4>
@@ -165,7 +172,6 @@ function Profile() {
                     value={currentPassword}
                     onChange={e => setCurrentPassword(e.target.value)}
                     required
-                    autoComplete="current-password"
                 />
 
                 <button disabled={!hasChanges || loading}>
@@ -186,10 +192,7 @@ function Profile() {
                 onChange={e => setDeletePassword(e.target.value)}
             />
 
-            <button
-                type="button"
-                onClick={handleDeleteAccount}
-            >
+            <button type="button" onClick={handleDeleteAccount}>
                 Delete account
             </button>
 

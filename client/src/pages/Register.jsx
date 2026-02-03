@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { apiFetch } from "../api/ApiFetch";
 
 function Register() {
@@ -24,16 +25,16 @@ function Register() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Registrering misslyckades");
+        toast.error(data.error || "Registrering misslyckades");
         return;
       }
 
-      alert("Konto skapat!");
+      toast.success("Konto skapat! Logga in nu 🎉");
       navigate("/login");
 
     } catch (err) {
       console.error(err);
-      alert("Serverfel");
+      toast.error("Serverfel");
     } finally {
       setLoading(false);
     }
@@ -41,25 +42,43 @@ function Register() {
 
   return (
     <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
+
       <h2>Registrera</h2>
 
-      <form onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: 10 }}
+      >
 
-        <input placeholder="Namn" value={name}
-          onChange={e => setName(e.target.value)} required />
+        <input
+          placeholder="Namn"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          required
+        />
 
-        <input type="email" placeholder="Email"
-          value={email} onChange={e => setEmail(e.target.value)} required />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+        />
 
-        <input type="password" placeholder="Lösenord"
-          value={password} onChange={e => setPassword(e.target.value)} required />
+        <input
+          type="password"
+          placeholder="Lösenord"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
 
         <button disabled={loading}>
           {loading ? "Skapar konto..." : "Registrera"}
         </button>
 
       </form>
+
     </div>
   );
 }

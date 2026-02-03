@@ -19,7 +19,14 @@ function App() {
   return (
     <AuthProvider>
 
-      <ToastContainer position="top-right" autoClose={2500} />
+      {/* ✅ ONE GLOBAL CONTAINER */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        pauseOnHover
+        draggable
+      />
+
       <Navbar />
 
       <Routes>
