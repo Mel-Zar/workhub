@@ -13,7 +13,7 @@ function Navbar() {
 
     return (
         <nav style={{ marginBottom: "20px" }}>
-            {isLoggedIn && <p>Hej, välkommen <strong>{userName}</strong> 👋</p>}
+            {isLoggedIn && <p>Hej, <strong>{userName}</strong> 👋</p>}
 
             {isLoggedIn ? (
                 <>

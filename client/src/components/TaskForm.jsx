@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import { apiFetch } from "../api/ApiFetch";
 
 function TaskForm({ onCreate }) {
@@ -35,7 +36,7 @@ function TaskForm({ onCreate }) {
         e.preventDefault();
 
         if (!title || !priority || !category || !deadline || images.length === 0) {
-            alert("Alla fält inklusive minst en bild måste fyllas i.");
+            toast.error("Alla fält och minst en bild krävs");
             return;
         }
 
@@ -52,20 +53,20 @@ function TaskForm({ onCreate }) {
                 body: formData
             });
 
-            if (!res.ok) throw new Error("Failed to create task");
+            if (!res.ok) throw new Error();
 
-            // RESET
+            toast.success("Task skapad ✅");
+
             setTitle("");
             setPriority("");
             setCategory("");
             setDeadline("");
             setImages([]);
 
-            onCreate();
+            onCreate?.();
 
-        } catch (err) {
-            console.error(err);
-            alert("Något gick fel vid skapandet.");
+        } catch {
+            toast.error("Kunde inte skapa task");
         }
     }
 
@@ -81,70 +82,52 @@ function TaskForm({ onCreate }) {
                 placeholder="Titel"
                 value={title}
                 onChange={e => setTitle(formatText(e.target.value))}
-                required
             />
-            <br />
 
             <select
                 value={priority}
                 onChange={e => setPriority(e.target.value)}
-                required
             >
-                <option value="" disabled>
-                    Choose priority
-                </option>
+                <option value="">Choose priority</option>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
             </select>
-            <br />
 
             <input
                 placeholder="Kategori"
                 value={category}
-                onChange={e => {
-                    const value = e.target.value.replace(/[0-9]/g, "");
-                    setCategory(formatCategory(value));
-                }}
-                required
+                onChange={e => setCategory(formatCategory(e.target.value))}
             />
-            <br />
 
             <input
                 type="date"
-                value={deadline}
                 min={today}
+                value={deadline}
                 onChange={e => setDeadline(e.target.value)}
-                required
             />
-            <br />
 
             <input
                 type="file"
                 multiple
                 accept="image/*"
                 onChange={handleSelectImages}
-                required={images.length === 0}
             />
 
             {/* PREVIEW */}
-            <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 {images.map((img, i) => (
                     <div key={i}>
                         <img
                             src={URL.createObjectURL(img)}
                             width="70"
-                            style={{ borderRadius: "6px" }}
                         />
                         <br />
-                        <button type="button" onClick={() => removeImage(i)}>
-                            ❌
-                        </button>
+                        <button type="button" onClick={() => removeImage(i)}>❌</button>
                     </div>
                 ))}
             </div>
 
-            <br />
             <button type="submit">Skapa Task</button>
 
         </form>

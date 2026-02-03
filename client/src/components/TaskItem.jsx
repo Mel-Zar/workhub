@@ -17,15 +17,21 @@ function TaskItem({
     const cleanCategory = str =>
         str ? str.replace(/[0-9]/g, "").trim() : "";
 
+    // ================= ORIGINAL VALUES =================
+    const original = {
+        title: capitalize(task.title),
+        priority: task.priority || "",
+        category: capitalize(task.category),
+        deadline: task.deadline ? task.deadline.slice(0, 10) : ""
+    };
+
     // ================= STATE =================
     const [editing, setEditing] = useState(false);
 
-    const [title, setTitle] = useState(capitalize(task.title));
-    const [priority, setPriority] = useState(task.priority || "");
-    const [category, setCategory] = useState(capitalize(task.category));
-    const [deadline, setDeadline] = useState(
-        task.deadline ? task.deadline.slice(0, 10) : ""
-    );
+    const [title, setTitle] = useState(original.title);
+    const [priority, setPriority] = useState(original.priority);
+    const [category, setCategory] = useState(original.category);
+    const [deadline, setDeadline] = useState(original.deadline);
 
     const [existingImages, setExistingImages] = useState(task.images || []);
     const [newImages, setNewImages] = useState([]);
@@ -119,8 +125,17 @@ function TaskItem({
         if (res.ok) onUpdate?.(data);
     }
 
-    // ================= VALIDATION =================
+    // ================= CHANGE CHECK =================
+    const hasChanges =
+        title !== original.title ||
+        priority !== original.priority ||
+        category !== original.category ||
+        deadline !== original.deadline ||
+        newImages.length > 0 ||
+        removedImages.length > 0;
+
     const canSave =
+        hasChanges &&
         title.trim() &&
         priority &&
         category.trim() &&
@@ -181,6 +196,7 @@ function TaskItem({
                     />
 
                     <h4>Bilder</h4>
+
                     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                         {existingImages.map((img, i) => (
                             <div key={i}>
@@ -229,9 +245,7 @@ function TaskItem({
                     <button
                         onClick={handleSave}
                         disabled={!canSave}
-                        style={{
-                            cursor: canSave ? "pointer" : "not-allowed"
-                        }}
+                        style={{ cursor: canSave ? "pointer" : "not-allowed" }}
                     >
                         Spara ändringar
                     </button>
@@ -240,7 +254,6 @@ function TaskItem({
                         Avbryt
                     </button>
 
-                    {/* 🔴 DELETE INSIDE EDIT MODE */}
                     <button
                         onClick={removeTask}
                         style={{
