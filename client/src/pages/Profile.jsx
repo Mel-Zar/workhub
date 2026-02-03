@@ -61,15 +61,13 @@ function Profile() {
                 return;
             }
 
-            // ✅ STORE NEW TOKEN
             if (data.accessToken) {
                 localStorage.setItem("accessToken", data.accessToken);
             }
 
-            // ✅ UPDATE NAVBAR NAME
             updateUserName(data.user.name);
 
-            toast.success("Profile updated!");
+            toast.success("Profil uppdaterad ✅");
 
             setInitialName(name);
             setInitialEmail(email);
@@ -78,25 +76,42 @@ function Profile() {
 
         } catch (err) {
             console.error(err);
-            toast.error("Server error");
+            toast.error("Serverfel");
         } finally {
             setLoading(false);
         }
     }
 
     // ================= DELETE ACCOUNT =================
-    async function handleDeleteAccount() {
+    function handleDeleteAccount() {
 
         if (!deletePassword) {
-            toast.error("Password required to delete account");
+            toast.error("Lösenord krävs för att radera konto");
             return;
         }
 
-        const confirmDelete = window.confirm(
-            "This will permanently delete your account. Continue?"
-        );
+        toast.warn(
+            <div>
+                <p>Är du säker på att du vill radera ditt konto?</p>
 
-        if (!confirmDelete) return;
+                <button
+                    onClick={confirmDeleteAccount}
+                    style={{ marginRight: 10 }}
+                >
+                    Ja, radera
+                </button>
+
+                <button onClick={() => toast.dismiss()}>
+                    Avbryt
+                </button>
+            </div>,
+            { autoClose: false }
+        );
+    }
+
+    async function confirmDeleteAccount() {
+        toast.dismiss();
+        setLoading(true);
 
         try {
             const res = await apiFetch("/api/auth/delete", {
@@ -113,7 +128,7 @@ function Profile() {
                 return;
             }
 
-            toast.success("Account deleted");
+            toast.success("Kontot raderat");
 
             localStorage.clear();
 
@@ -123,7 +138,9 @@ function Profile() {
 
         } catch (err) {
             console.error(err);
-            toast.error("Server error");
+            toast.error("Serverfel");
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -133,6 +150,7 @@ function Profile() {
         email !== initialEmail ||
         newPassword.length > 0;
 
+    // ================= RENDER =================
     return (
         <div>
 
@@ -192,7 +210,11 @@ function Profile() {
                 onChange={e => setDeletePassword(e.target.value)}
             />
 
-            <button type="button" onClick={handleDeleteAccount}>
+            <button
+                type="button"
+                disabled={loading}
+                onClick={handleDeleteAccount}
+            >
                 Delete account
             </button>
 

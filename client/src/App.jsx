@@ -17,58 +17,64 @@ import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <AuthProvider>
+    <div>
 
       {/* ✅ ONE GLOBAL CONTAINER */}
-      <ToastContainer
+      < ToastContainer
         position="top-right"
         autoClose={3000}
         pauseOnHover
         draggable
       />
 
-      <Navbar />
+      <AuthProvider>
 
-      <Routes>
 
-        <Route path="/" element={
-          <PrivateRoute>
-            <Home />
-          </PrivateRoute>
-        } />
 
-        <Route path="/dashboard" element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        } />
+        <Navbar />
 
-        <Route path="/profile" element={
-          <PrivateRoute>
-            <Profile />
-          </PrivateRoute>
-        } />
+        <Routes>
 
-        <Route path="/tasks" element={
-          <PrivateRoute>
-            <Tasks />
-          </PrivateRoute>
-        } />
+          <Route path="/" element={
+            <PrivateRoute>
+              <Home />
+            </PrivateRoute>
+          } />
 
-        <Route path="/task/:id" element={
-          <PrivateRoute>
-            <Task />
-          </PrivateRoute>
-        } />
+          <Route path="/dashboard" element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          } />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          } />
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="/tasks" element={
+            <PrivateRoute>
+              <Tasks />
+            </PrivateRoute>
+          } />
 
-      </Routes>
+          <Route path="/task/:id" element={
+            <PrivateRoute>
+              <Task />
+            </PrivateRoute>
+          } />
 
-    </AuthProvider>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          <Route path="*" element={<Navigate to="/login" replace />} />
+
+        </Routes>
+
+      </AuthProvider>
+
+    </div>
   );
 }
 

@@ -26,7 +26,7 @@ function Dashboard() {
         try {
             setLoading(true);
 
-            // ===== FORMATTERS =====
+            // ✅ FORMATTERS INSIDE CALLBACK
             const formatText = str =>
                 str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
@@ -76,7 +76,7 @@ function Dashboard() {
         }
     }, [page, filters, sortBy]);
 
-    // ================= LOAD =================
+    // ================= USE EFFECT =================
     useEffect(() => {
         fetchTasks();
     }, [fetchTasks]);
@@ -86,19 +86,16 @@ function Dashboard() {
         setTasks(prev =>
             prev.map(t => (t._id === updatedTask._id ? updatedTask : t))
         );
-        toast.success("Task uppdaterad");
     }
 
     function handleDelete(id) {
         setTasks(prev => prev.filter(t => t._id !== id));
-        toast.success("Task borttagen");
     }
 
     // ================= RENDER =================
     return (
         <div>
 
-            {/* Toastify */}
             <ToastContainer position="top-right" autoClose={3000} />
 
             <h2>Dashboard</h2>
@@ -126,10 +123,7 @@ function Dashboard() {
                 }}
             />
 
-            <TaskForm onCreate={() => {
-                fetchTasks();
-                toast.success("Task skapad");
-            }} />
+            <TaskForm onCreate={fetchTasks} />
 
             {loading && <p>Laddar...</p>}
             {!loading && tasks.length === 0 && <p>Inga tasks</p>}
