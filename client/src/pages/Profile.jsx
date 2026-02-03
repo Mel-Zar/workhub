@@ -33,12 +33,13 @@ function Profile() {
 
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
+    const [deletePassword, setDeletePassword] = useState("");
 
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // ================= SAVE =================
+    // ================= SAVE PROFILE =================
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -62,12 +63,12 @@ function Profile() {
             setError(data.error || "Something went wrong");
         } else {
 
-            // ✅ SAVE NEW TOKEN
+            // ✅ STORE NEW TOKEN
             if (data.accessToken) {
                 localStorage.setItem("accessToken", data.accessToken);
             }
 
-            // ✅ UPDATE NAVBAR INSTANTLY
+            // ✅ UPDATE NAVBAR NAME
             updateUserName(data.user.name);
 
             setMessage("Profile updated");
@@ -81,6 +82,38 @@ function Profile() {
         setLoading(false);
     }
 
+    // ================= DELETE ACCOUNT =================
+    async function handleDeleteAccount() {
+
+        if (!deletePassword) {
+            setError("Password required to delete account");
+            return;
+        }
+
+        const confirmDelete = window.confirm(
+            "This will permanently delete your account. Continue?"
+        );
+
+        if (!confirmDelete) return;
+
+        const res = await apiFetch("/api/auth/delete", {
+            method: "DELETE",
+            body: JSON.stringify({
+                currentPassword: deletePassword
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setError(data.error || "Delete failed");
+            return;
+        }
+
+        localStorage.clear();
+        window.location.href = "/login";
+    }
+
     // ================= CHECK CHANGES =================
     const hasChanges =
         name !== initialName ||
@@ -92,9 +125,10 @@ function Profile() {
 
             <h2>Profile</h2>
 
-            {error && <p>{error}</p>}
-            {message && <p>{message}</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            {message && <p style={{ color: "green" }}>{message}</p>}
 
+            {/* ================= PROFILE FORM ================= */}
             <form onSubmit={handleSubmit}>
 
                 <h4>Profile info</h4>
@@ -139,6 +173,25 @@ function Profile() {
                 </button>
 
             </form>
+
+            {/* ================= DELETE ACCOUNT ================= */}
+            <hr />
+
+            <h4>Danger zone</h4>
+
+            <input
+                type="password"
+                placeholder="Confirm password to delete account"
+                value={deletePassword}
+                onChange={e => setDeletePassword(e.target.value)}
+            />
+
+            <button
+                type="button"
+                onClick={handleDeleteAccount}
+            >
+                Delete account
+            </button>
 
         </div>
     );

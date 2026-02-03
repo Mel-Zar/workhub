@@ -136,6 +136,35 @@ const updateUser = async (req, res) => {
     }
 };
 
+// ================= DELETE ACCOUNT =================
+const deleteAccount = async (req, res) => {
+    try {
+        if (!req.user?.id)
+            return res.status(401).json({ error: "Not authenticated" });
+
+        const { currentPassword } = req.body;
+
+        if (!currentPassword)
+            return res.status(400).json({ error: "Password required" });
+
+        const user = await User.findById(req.user.id);
+        if (!user)
+            return res.status(404).json({ error: "User not found" });
+
+        const match = await bcrypt.compare(currentPassword, user.password);
+        if (!match)
+            return res.status(401).json({ error: "Wrong password" });
+
+        await User.findByIdAndDelete(req.user.id);
+
+        res.json({ message: "Account deleted" });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
 // ================= REFRESH =================
 const refreshAccessToken = async (req, res) => {
     const { refreshToken } = req.body;
@@ -189,6 +218,8 @@ export {
     registerUser,
     loginUser,
     updateUser,
+    deleteAccount,
     refreshAccessToken,
     logout
 };
+
