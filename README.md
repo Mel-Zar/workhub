@@ -54,18 +54,29 @@ Applikationen har autentisering, CRUD på tasks, uppladdning av bilder, filtreri
 ## 📂 Projektstruktur
 
 client/
+
 src/
+
 api/
+
 context/
+
 components/
+
 pages/
 
 server/
+
 controllers/
+
 middleware/
+
 models/
+
 routes/
+
 uploads/
+
 server.js
 
 ---
