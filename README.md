@@ -73,6 +73,7 @@ nodemon
 
 ## 📁 Mappstruktur
 
+```bash
 project-root/
 │
 ├── client/
@@ -91,62 +92,80 @@ project-root/
 │ └── server.js
 │
 └── README.md
-
----
+```
 
 ## ⚙️ Installation
 
 ### 1. Klona projekt
 
-````bash
+```bash
 git clone <repo-url>
 cd project-folder
+```
 
-# 2. Installera Backend
+### 2. Installera Backend
 
+```bash
 cd server
 npm install
+```
 
 Skapa .env i server-mappen:
 
+```bash
 MONGO_URI=din_mongodb_connection_string
 JWT_SECRET=din_jwt_secret
 REFRESH_SECRET=din_refresh_secret
-
+```
 
 Starta server:
 
+```bash
 npm run dev
-
+```
 
 Server körs på:
 
+```bash
 http://localhost:5001
+```
 
-3. Installera Frontend
+### 3. Installera Frontend
+
+```bash
 cd client
 npm install
 npm run dev
-
+```
 
 Frontend körs på:
 
+```bash
 http://localhost:5173
+```
 
-🔐 Autentisering
+### 🔐 Autentisering
 
 Alla skyddade requests kräver header:
 
+```bash
 Authorization: Bearer <accessToken>
+```
 
-📡 API Routes
-Auth
+### 📡 API Routes
+
+### Auth
+
+```bash
 POST /api/auth/register
 POST /api/auth/login
 POST /api/auth/refresh
 POST /api/auth/logout
+```
 
-Tasks
+### Tasks
+
+```bash
 GET    /api/tasks
 GET    /api/tasks/:id
 POST   /api/tasks
@@ -155,8 +174,11 @@ DELETE /api/tasks/:id
 
 POST   /api/tasks/:id/images
 DELETE /api/tasks/:id/images
+```
 
-🔍 Query Params (GET /api/tasks)
+### 🔍 Query Params (GET /api/tasks)
+
+```bash
 search
 priority
 category
@@ -166,7 +188,7 @@ toDate
 sortBy
 page
 limit
-
+```
 
 Exempel:
 
@@ -199,7 +221,6 @@ Melissa – Fullstack Developer Student
 
 ISC
 
-
 ---
 
 När du klistrat in:
@@ -208,4 +229,4 @@ När du klistrat in:
 git add README.md
 git commit -m "Add README"
 git push
-````
+```
