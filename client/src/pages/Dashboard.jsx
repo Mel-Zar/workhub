@@ -19,7 +19,7 @@ function Dashboard() {
     const [completionOptions, setCompletionOptions] = useState([]);
 
     const [filters, setFilters] = useState({});
-    const [sortBy, setSortBy] = useState("createdAt");
+    const [sortBy, setSortBy] = useState("");
 
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
