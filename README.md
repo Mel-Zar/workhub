@@ -1,178 +1,96 @@
-📌 README.md
+# 📝 Task Manager – MERN Fullstack Application
 
-# 📝 Task Manager – MERN Stack
+En fullstack Task Manager byggd med **MongoDB, Express, React och Node.js** där användare kan registrera konto, logga in och hantera sina egna tasks.
 
-En fullstack Task Manager byggd med **MongoDB, Express, React och Node.js**.  
-Applikationen har autentisering, CRUD på tasks, uppladdning av bilder, filtrering, sortering, pagination och JWT-baserad säkerhet.
+Projektet stödjer:
+
+- Autentisering med JWT & Refresh Tokens
+- CRUD-operationer
+- Bilduppladdning
+- Filtrering, sortering, sökning & pagination
 
 ---
 
 ## 🚀 Funktioner
 
-- ✅ Registrering & inloggning (JWT + Refresh Token)
-
-- ✅ Skapa, läsa, uppdatera och radera tasks
-
-- ✅ Ladda upp flera bilder per task
-
-- ✅ Filtrera på:
+- 🔐 Registrera & logga in användare
+- 🔁 Access Token + Refresh Token-flöde
+- 📝 Skapa, visa, uppdatera och radera tasks
+- 🖼 Ladda upp upp till 5 bilder per task
+- 🔍 Sök på titel & kategori
+- 🎯 Filtrera på:
   - Prioritet
   - Kategori
   - Klara / Ej klara
   - Datumintervall
-
-- ✅ Sök på titel & kategori
-- ✅ Sortering:
+- 🔃 Sortering:
   - Skapad datum
   - Deadline
   - Prioritet
   - Titel
-- ✅ Pagination
-- ✅ Skyddade routes (backend)
+- 📄 Pagination
+- 🔒 Alla tasks är knutna till inloggad användare
 
 ---
 
 ## 🧰 Tech Stack
 
+### Frontend
+
+- React 19
+- Vite
+- React Router DOM
+- Axios
+- React Toastify
+
 ### Backend
 
 - Node.js
 - Express
-- MongoDB + Mongoose
-- JWT (jsonwebtoken)
-- Multer (filuppladdning)
+- MongoDB
+- Mongoose
+- JSON Web Token
+- Multer
 - Bcryptjs
-
-### Frontend
-
-- React (Vite)
-- Context API
-- Fetch API
+- CORS
+- Dotenv
 
 ---
 
-## 📂 Projektstruktur
+## 📦 Installerade Packages
 
-client/
+### Client
 
-src/
+```txt
+axios
+react
+react-dom
+react-router-dom
+react-toastify
+```
 
-api/
+## Client Dev
 
-components/
+vite
+eslint
+@vitejs/plugin-react
+eslint-plugin-react-hooks
+eslint-plugin-react-refresh
+@types/react
+@types/react-dom
+globals
 
-context/
+## Server
 
-pages/
+express
+mongoose
+mongodb
+jsonwebtoken
+bcryptjs
+cors
+dotenv
+multer
 
----
+## Server Dev
 
-## ⚙️ Installation
-
-### 1️⃣ Klona projektet
-
-````bash
-git clone <repo-url>
-cd project-folder
-
-2️⃣ Backend
-cd server
-npm install
-
-
-Skapa .env i server-mappen:
-
-MONGO_URI=din_mongodb_connection_string
-JWT_SECRET=din_jwt_secret
-REFRESH_SECRET=din_refresh_secret
-
-
-Starta backend:
-
-npm run dev
-
-
-Server körs på:
-
-http://localhost:5001
-
-3️⃣ Frontend
-cd client
-npm install
-npm run dev
-
-
-Frontend körs på:
-
-http://localhost:5173
-
-🔐 Auth Flow
-
-Access token lagras i memory
-
-Refresh token används för att hämta ny access token automatiskt
-
-Alla /api/tasks routes kräver Authorization-header
-
-Authorization: Bearer <accessToken>
-
-📡 API Routes
-Auth
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/refresh
-POST /api/auth/logout
-
-Tasks
-GET    /api/tasks
-GET    /api/tasks/:id
-POST   /api/tasks
-PUT    /api/tasks/:id
-DELETE /api/tasks/:id
-
-POST   /api/tasks/:id/images
-DELETE /api/tasks/:id/images
-
-🧪 Query Params (GET /api/tasks)
-search
-priority
-category
-completed
-fromDate
-toDate
-sortBy
-page
-limit
-
-
-Exempel:
-
-/api/tasks?page=1&limit=5&sortBy=deadline&priority=high
-
-🖼 Bildhantering
-
-Max 5 bilder per request
-
-Lagring i /uploads
-
-Filvägar sparas i databasen
-
-🧑‍💻 Utvecklad av
-
-Melissa 💙
-Fullstack Developer Student
-
-📜 License
-
-ISC
-
-
----
-
-# ✅ Sen kör:
-
-```bash
-git add README.md
-git commit -m "Add project README"
-git push
-````
+nodemon
