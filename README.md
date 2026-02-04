@@ -33,9 +33,9 @@ Projektet stödjer:
 
 ---
 
-## 🧰 Tech Stack
+# 🧰 Tech Stack
 
-# Frontend
+## Frontend
 
 - React 19
 - Vite
@@ -43,7 +43,7 @@ Projektet stödjer:
 - Axios
 - React Toastify
 
-# Backend
+## Backend
 
 - Node.js
 - Express
