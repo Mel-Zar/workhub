@@ -98,25 +98,45 @@ nodemon
 # 📁 Projektstruktur
 
 project-root/
+
 │
+
 ├─ client/
+
 │ └─ src/
+
 │ ├─ api/
+
 │ ├─ components/
+
 │ ├─ context/
+
 │ ├─ pages/
+
 │ ├─ routes/
+
 │ └─ main.jsx
+
 │
+
 ├─ server/
+
 ├─ config/
+
 │ ├─ controllers/
+
 │ ├─ middleware/
+
 │ ├─ models/
+
 │ ├─ routes/
+
 │ ├─ uploads/
+
 │ └─ server.js
+
 │
+
 └─ README.md
 
 # ⚙️ Installation
