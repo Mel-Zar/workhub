@@ -23,11 +23,15 @@ const buildQuery = (
         ];
     }
 
-    // PRIORITY
-    if (priority) query.priority = priority;
+    // PRIORITY 
+    if (priority) {
+        query.priority = new RegExp(`^${priority}$`, "i");
+    }
 
-    // CATEGORY
-    if (category) query.category = category;
+    // PRIORITY (case-insensitive)
+    if (priority) {
+        query.priority = new RegExp(`^${priority}$`, "i");
+    }
 
     // COMPLETED
     if (completed === "true") query.completed = true;

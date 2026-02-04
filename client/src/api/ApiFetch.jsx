@@ -1,5 +1,6 @@
 const API_BASE = "http://localhost:5001";
 
+// ============================================
 export async function apiFetch(url, options = {}) {
 
     const accessToken = localStorage.getItem("accessToken");
@@ -8,10 +9,12 @@ export async function apiFetch(url, options = {}) {
         ...(options.headers || {})
     };
 
+    // Auto JSON header
     if (options.body && !(options.body instanceof FormData)) {
         headers["Content-Type"] = "application/json";
     }
 
+    // Attach access token
     if (accessToken) {
         headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -25,14 +28,17 @@ export async function apiFetch(url, options = {}) {
         headers
     });
 
-    // 🔁 AUTO REFRESH TOKEN
+    // ============================================
+    // 🔁 AUTO REFRESH ACCESS TOKEN
+    // ============================================
+
     if (response.status === 401 && !options._retry) {
 
         const refreshToken = localStorage.getItem("refreshToken");
 
+        // No refresh token → logout
         if (!refreshToken) {
-            localStorage.clear();
-            window.location.href = "/login";
+            hardLogout();
             return response;
         }
 
@@ -40,20 +46,25 @@ export async function apiFetch(url, options = {}) {
             `${API_BASE}/api/auth/refresh`,
             {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({ refreshToken })
             }
         );
 
+        // Refresh failed → logout
         if (!refreshRes.ok) {
-            localStorage.clear();
-            window.location.href = "/login";
+            hardLogout();
             return response;
         }
 
         const data = await refreshRes.json();
+
+        // Save new access token
         localStorage.setItem("accessToken", data.accessToken);
 
+        // Retry original request with new token
         return apiFetch(url, {
             ...options,
             _retry: true,
@@ -65,4 +76,12 @@ export async function apiFetch(url, options = {}) {
     }
 
     return response;
+}
+
+// 🔒 HARD LOGOUT
+
+function hardLogout() {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    window.location.href = "/login";
 }

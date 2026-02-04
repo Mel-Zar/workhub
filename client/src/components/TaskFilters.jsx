@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 function TaskFilters({ onFilter, categories = [] }) {
 
@@ -7,6 +7,22 @@ function TaskFilters({ onFilter, categories = [] }) {
     const [completed, setCompleted] = useState("");
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
+
+    // ================= FORMATTER =================
+    function formatText(str) {
+        if (!str) return "";
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+
+    // ================= CLEAN & SORT CATEGORIES =================
+    const cleanCategories = useMemo(() => {
+        return [...new Set(
+            categories
+                .map(c => c.trim())
+                .filter(Boolean)
+                .map(c => formatText(c))
+        )].sort((a, b) => a.localeCompare(b));
+    }, [categories]);
 
     // ================= APPLY FILTER =================
     function triggerFilter(changes = {}) {
@@ -89,7 +105,8 @@ function TaskFilters({ onFilter, categories = [] }) {
                 }}
             >
                 <option value="">Alla kategorier</option>
-                {categories.map(cat => (
+
+                {cleanCategories.map(cat => (
                     <option key={cat} value={cat}>
                         {cat}
                     </option>
