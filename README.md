@@ -98,7 +98,6 @@ nodemon
 # 📁 Projektstruktur
 
 project-root/
-
 │
 
 ├─ client/
