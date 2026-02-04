@@ -206,31 +206,30 @@ Exempel:
 
 ---
 
-🧪 Scripts
-Client
+### 🧪 Scripts
+
+### Client
+
+```bash
 npm run dev
 npm run build
 npm run preview
 npm run lint
+```
 
-Server
+### Server
+
+```bash
 npm run dev
 npm start
+```
 
-👩‍💻 Developer
+### 👩‍💻 Developer
 
 Melissa – Fullstack Developer Student
 
-📜 License
+### 📜 License
 
 ISC
 
 ---
-
-När du klistrat in:
-
-```bash
-git add README.md
-git commit -m "Add README"
-git push
-```
