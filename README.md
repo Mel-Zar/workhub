@@ -192,15 +192,19 @@ limit
 
 Exempel:
 
+```bash
 /api/tasks?page=1&limit=5&sortBy=deadline
+```
 
-🖼 Bilduppladdning
+---
 
-Max 5 bilder per request
+### 🖼 Bilduppladdning
 
-Sparas i server/uploads
+- Max 5 bilder per request
+- Sparas i server/uploads
+- Filväg lagras i MongoDB
 
-Filväg lagras i MongoDB
+---
 
 🧪 Scripts
 Client
