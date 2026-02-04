@@ -69,7 +69,7 @@ react-router-dom
 react-toastify
 ```
 
-# Client Dev
+### Client Dev
 
 vite
 eslint
@@ -80,7 +80,7 @@ eslint-plugin-react-refresh
 @types/react-dom
 globals
 
-# Server
+## Server
 
 express
 mongoose
@@ -91,11 +91,11 @@ cors
 dotenv
 multer
 
-# Server Dev
+## Server Dev
 
 nodemon
 
-## 📁 Projektstruktur
+# 📁 Projektstruktur
 
 project-root/
 │
@@ -119,43 +119,43 @@ project-root/
 │
 └─ README.md
 
-## ⚙️ Installation
+# ⚙️ Installation
 
-# 1️⃣ Klona projekt
+## 1️⃣ Klona projekt
 
 git clone <repo-url>
 cd project-folder
 
-# 2️⃣ Installera Backend
+## 2️⃣ Installera Backend
 
 cd server
 npm install
 
-# Skapa .env i server-mappen:
+## Skapa .env i server-mappen:
 
 MONGO_URI=din_mongodb_connection_string
 JWT_SECRET=din_jwt_secret
 REFRESH_SECRET=din_refresh_secret
 
-# Starta backend:
+## Starta backend:
 
 npm run dev
 
-# Server körs på:
+## Server körs på:
 
 http://localhost:5001
 
-# 3️⃣ Installera Frontend
+## 3️⃣ Installera Frontend
 
 cd client
 npm install
 npm run dev
 
-# Frontend körs på:
+## Frontend körs på:
 
 http://localhost:5173
 
-## 🔐 Autentisering
+# 🔐 Autentisering
 
 Alla skyddade requests kräver header:
 
@@ -163,16 +163,16 @@ Authorization: Bearer <accessToken>
 
 Access token förnyas automatiskt via refresh token.
 
-## 📡 API Routes
+# 📡 API Routes
 
-# Auth
+## Auth
 
 POST /api/auth/register
 POST /api/auth/login
 POST /api/auth/refresh
 POST /api/auth/logout
 
-# Tasks
+## Tasks
 
 GET /api/tasks
 GET /api/tasks/:id
@@ -195,11 +195,11 @@ sortBy
 page
 limit
 
-# Exempel:
+## Exempel:
 
 /api/tasks?page=1&limit=5&sortBy=deadline&priority=high
 
-## 🖼 Bilduppladdning
+# 🖼 Bilduppladdning
 
 Max 5 bilder per request
 
@@ -207,9 +207,9 @@ Lagring i /server/uploads
 
 Filvägar sparas i MongoDB
 
-## 🧪 Scripts
+# 🧪 Scripts
 
-# Client
+## Client
 
 npm run dev
 npm run build
@@ -221,18 +221,18 @@ npm run lint
 npm run dev
 npm start
 
-## 👩‍💻 Utvecklare
+# 👩‍💻 Utvecklare
 
 Melissa
 Fullstack Developer Student
 
-## 📜 License
+# 📜 License
 
 ISC
 
 ---
 
-# ✅ Push till GitHub
+## ✅ Push till GitHub
 
 ```bash
 git add README.md
