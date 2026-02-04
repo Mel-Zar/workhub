@@ -52,7 +52,7 @@ function Dashboard() {
             setTasks(formatted);
             setPages(data.pages || 1);
 
-            // 🔥 SAME LOGIC AS TASKS.JSX
+            // FILTER OPTIONS BASERAT PÅ DATA I DB
             setCategories([...new Set(formatted.map(t => t.category).filter(Boolean))]);
             setPriorities([...new Set(formatted.map(t => t.priority).filter(Boolean))]);
 
@@ -108,12 +108,22 @@ function Dashboard() {
                 }}
             />
 
-            {/* ✅ SAME PROPS AS TASKS */}
+            {/* ✅ FIXAD FILTER-HANTERING */}
             <TaskFilters
                 categories={categories}
                 priorities={priorities}
                 completionOptions={completionOptions}
                 onFilter={data => {
+
+                    // 🔥 OM RENSNING
+                    if (Object.keys(data).length === 0) {
+                        setPage(1);
+                        setFilters({});
+                        fetchTasks();      // <-- NY RAD
+                        return;
+                    }
+
+                    // 🔥 VANLIG FILTER
                     setPage(1);
                     setFilters(prev => ({ ...prev, ...data }));
                 }}
