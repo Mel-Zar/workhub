@@ -59,25 +59,11 @@ src/
 
 api/
 
-context/
-
 components/
 
+context/
+
 pages/
-
-server/
-
-controllers/
-
-middleware/
-
-models/
-
-routes/
-
-uploads/
-
-server.js
 
 ---
 
