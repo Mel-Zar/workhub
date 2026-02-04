@@ -1,4 +1,10 @@
 import { createContext } from "react";
 
-// Endast context här — inga komponenter
-export const AuthContext = createContext();
+export const AuthContext = createContext({
+    isLoggedIn: false,
+    userName: "",
+    loading: true,
+    login: () => { },
+    logout: () => { },
+    updateUserName: () => { }
+});

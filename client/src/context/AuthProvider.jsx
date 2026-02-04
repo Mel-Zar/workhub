@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
 
-export function AuthProvider({ children }) {
+export default function AuthProvider({ children }) {
+
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userName, setUserName] = useState("");
     const [loading, setLoading] = useState(true);
@@ -52,7 +53,6 @@ export function AuthProvider({ children }) {
         window.location.href = "/login";
     }
 
-    // ✅ ADD THIS
     function updateUserName(newName) {
         setUserName(newName);
     }
@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
                 loading,
                 login,
                 logout,
-                updateUserName   // ✅ expose
+                updateUserName
             }}
         >
             {children}

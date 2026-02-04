@@ -1,46 +1,27 @@
 import jwt from "jsonwebtoken";
 
-const auth = (req, res, next) => {
-    const authHeader = req.headers.authorization;
+export default function auth(req, res, next) {
 
-    if (!authHeader) {
-        return res.status(401).json({ error: "No token provided" });
-    }
+    const authHeader =
+        req.headers.authorization ||
+        req.headers.Authorization;
 
-    if (!authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Invalid token format" });
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ message: "No token" });
     }
 
     const token = authHeader.split(" ")[1];
 
-    if (!token) {
-        return res.status(401).json({ error: "No token provided" });
-    }
-
     try {
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET || "secret"
-        );
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        req.user = decoded;
+        req.user = {
+            id: decoded.id
+        };
+
         next();
 
     } catch (err) {
-
-        // ⛔ token expired = NORMAL
-        if (err.name === "TokenExpiredError") {
-            return res.status(401).json({ error: "Token expired" });
-        }
-
-        // ⛔ invalid token
-        if (err.name === "JsonWebTokenError") {
-            return res.status(401).json({ error: "Invalid token" });
-        }
-
-        // ⛔ everything else
-        return res.status(401).json({ error: "Not authorized" });
+        return res.status(401).json({ message: "Invalid token" });
     }
-};
-
-export default auth;
+}

@@ -6,8 +6,11 @@ import { apiFetch } from "../api/ApiFetch";
 
 function Login() {
 
+  console.log("AUTH CONTEXT:", useContext(AuthContext));
+
   const { login, isLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
+
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,6 +38,7 @@ function Login() {
       }
 
       login(data.accessToken, data.refreshToken);
+
       toast.success(`Välkommen tillbaka ${data.user.name}!`);
       navigate("/dashboard");
 
@@ -45,6 +49,9 @@ function Login() {
       setLoading(false);
     }
   }
+
+
+
 
   return (
     <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>

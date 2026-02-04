@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import { AuthProvider } from "./context/AuthProvider";
+
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -27,50 +27,48 @@ function App() {
         draggable
       />
 
-      <AuthProvider>
 
-        <Navbar />
 
-        <Routes>
+      <Navbar />
 
-          <Route path="/" element={
-            <PrivateRoute>
-              <Home />
-            </PrivateRoute>
-          } />
+      <Routes>
 
-          <Route path="/dashboard" element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          } />
+        <Route path="/" element={
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        } />
 
-          <Route path="/profile" element={
-            <PrivateRoute>
-              <Profile />
-            </PrivateRoute>
-          } />
+        <Route path="/dashboard" element={
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        } />
 
-          <Route path="/tasks" element={
-            <PrivateRoute>
-              <Tasks />
-            </PrivateRoute>
-          } />
+        <Route path="/profile" element={
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        } />
 
-          <Route path="/task/:id" element={
-            <PrivateRoute>
-              <Task />
-            </PrivateRoute>
-          } />
+        <Route path="/tasks" element={
+          <PrivateRoute>
+            <Tasks />
+          </PrivateRoute>
+        } />
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+        <Route path="/task/:id" element={
+          <PrivateRoute>
+            <Task />
+          </PrivateRoute>
+        } />
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-        </Routes>
+        <Route path="*" element={<Navigate to="/login" replace />} />
 
-      </AuthProvider>
+      </Routes>
 
     </div>
   );
