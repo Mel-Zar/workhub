@@ -6,13 +6,13 @@ function TaskFilters({
     priorities = [],
     completionOptions = []
 }) {
-
     const [priority, setPriority] = useState("");
     const [category, setCategory] = useState("");
     const [completed, setCompleted] = useState("");
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
 
+    // Remove empty + duplicates
     const cleanCategories = useMemo(() => {
         return [...new Set(categories.filter(Boolean))];
     }, [categories]);
@@ -22,7 +22,6 @@ function TaskFilters({
     }, [priorities]);
 
     function triggerFilter(changes = {}) {
-
         const updated = {
             priority,
             category,
@@ -56,36 +55,43 @@ function TaskFilters({
             {/* PRIORITY */}
             <select
                 value={priority}
-                onChange={e => {
+                onChange={(e) => {
                     setPriority(e.target.value);
                     triggerFilter({ priority: e.target.value });
-                }}>
+                }}
+            >
                 <option value="">Alla prioriteter</option>
-                {cleanPriorities.map(p => (
-                    <option key={p} value={p}>{p}</option>
+                {cleanPriorities.map((p) => (
+                    <option key={p} value={p}>
+                        {p}
+                    </option>
                 ))}
             </select>
 
             {/* CATEGORY */}
             <select
                 value={category}
-                onChange={e => {
+                onChange={(e) => {
                     setCategory(e.target.value);
                     triggerFilter({ category: e.target.value });
-                }}>
+                }}
+            >
                 <option value="">Alla kategorier</option>
-                {cleanCategories.map(c => (
-                    <option key={c} value={c}>{c}</option>
+                {cleanCategories.map((c) => (
+                    <option key={c} value={c}>
+                        {c}
+                    </option>
                 ))}
             </select>
 
             {/* COMPLETED */}
             <select
                 value={completed}
-                onChange={e => {
+                onChange={(e) => {
                     setCompleted(e.target.value);
                     triggerFilter({ completed: e.target.value });
-                }}>
+                }}
+            >
                 <option value="">Alla</option>
 
                 {completionOptions.includes("true") && (
@@ -97,26 +103,28 @@ function TaskFilters({
                 )}
             </select>
 
+            {/* FROM DATE */}
             <input
                 type="date"
                 value={fromDate}
-                onChange={e => {
+                onChange={(e) => {
                     setFromDate(e.target.value);
                     triggerFilter({ fromDate: e.target.value });
                 }}
             />
 
+            {/* TO DATE */}
             <input
                 type="date"
                 value={toDate}
-                onChange={e => {
+                onChange={(e) => {
                     setToDate(e.target.value);
                     triggerFilter({ toDate: e.target.value });
                 }}
             />
 
+            {/* RESET */}
             <button onClick={handleReset}>🔄 Rensa</button>
-
         </div>
     );
 }

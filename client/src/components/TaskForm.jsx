@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { apiFetch } from "../api/ApiFetch";
+import { capitalize, formatCategory } from "../utils/formatters";
 
 function TaskForm({ onCreate }) {
 
@@ -10,17 +11,6 @@ function TaskForm({ onCreate }) {
     const [deadline, setDeadline] = useState("");
     const [images, setImages] = useState([]);
 
-    // ================= FORMATTERS =================
-    const formatText = str =>
-        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
-
-    const formatCategory = str => {
-        if (!str) return "";
-        const firstWord = str.split(/\s+/)[0];
-        return formatText(firstWord);
-    };
-
-    // ================= IMAGES =================
     function handleSelectImages(e) {
         const selected = Array.from(e.target.files);
         setImages(prev => [...prev, ...selected]);
@@ -31,7 +21,6 @@ function TaskForm({ onCreate }) {
         setImages(prev => prev.filter((_, i) => i !== index));
     }
 
-    // ================= SUBMIT =================
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -42,7 +31,7 @@ function TaskForm({ onCreate }) {
 
         try {
             const formData = new FormData();
-            formData.append("title", formatText(title));
+            formData.append("title", capitalize(title));
             formData.append("priority", priority.toLowerCase());
             formData.append("category", formatCategory(category));
             formData.append("deadline", deadline);
@@ -72,7 +61,6 @@ function TaskForm({ onCreate }) {
 
     const today = new Date().toISOString().split("T")[0];
 
-    // ================= RENDER =================
     return (
         <form onSubmit={handleSubmit}>
 
@@ -81,13 +69,10 @@ function TaskForm({ onCreate }) {
             <input
                 placeholder="Titel"
                 value={title}
-                onChange={e => setTitle(formatText(e.target.value))}
+                onChange={e => setTitle(capitalize(e.target.value))}
             />
 
-            <select
-                value={priority}
-                onChange={e => setPriority(e.target.value)}
-            >
+            <select value={priority} onChange={e => setPriority(e.target.value)}>
                 <option value="">Choose priority</option>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -107,21 +92,12 @@ function TaskForm({ onCreate }) {
                 onChange={e => setDeadline(e.target.value)}
             />
 
-            <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleSelectImages}
-            />
+            <input type="file" multiple accept="image/*" onChange={handleSelectImages} />
 
-            {/* PREVIEW */}
             <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 {images.map((img, i) => (
                     <div key={i}>
-                        <img
-                            src={URL.createObjectURL(img)}
-                            width="70"
-                        />
+                        <img src={URL.createObjectURL(img)} width="70" />
                         <br />
                         <button type="button" onClick={() => removeImage(i)}>❌</button>
                     </div>

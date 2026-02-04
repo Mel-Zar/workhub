@@ -1,35 +1,28 @@
-const API_BASE = "http://localhost:5001";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 // ============================================
 export async function apiFetch(url, options = {}) {
 
     const accessToken = localStorage.getItem("accessToken");
 
-    console.log("➡️ apiFetch called:", url);
-    console.log("🔑 Access token exists:", !!accessToken);
-
     const headers = {
         ...(options.headers || {})
     };
 
-    // Auto JSON header
+    // ================= AUTO JSON HEADER =================
     if (options.body && !(options.body instanceof FormData)) {
         headers["Content-Type"] = "application/json";
     }
 
-    // Attach access token
+    // ================= ATTACH TOKEN =================
     if (accessToken) {
         headers.Authorization = `Bearer ${accessToken}`;
-    } else {
-        console.warn("⚠️ No access token in localStorage");
     }
 
+    // ================= FULL URL =================
     const fullUrl = url.startsWith("http")
         ? url
         : `${API_BASE}${url}`;
-
-    console.log("🌍 Request URL:", fullUrl);
-    console.log("📦 Request headers:", headers);
 
     let response;
 
@@ -43,20 +36,14 @@ export async function apiFetch(url, options = {}) {
         throw err;
     }
 
-    console.log("⬅️ Response status:", response.status);
-
     // ============================================
     // 🔁 AUTO REFRESH ACCESS TOKEN
     // ============================================
-
     if (response.status === 401 && !options._retry) {
-
-        console.warn("🔁 401 received → trying refresh token");
 
         const refreshToken = localStorage.getItem("refreshToken");
 
         if (!refreshToken) {
-            console.error("❌ No refresh token → hard logout");
             hardLogout();
             return response;
         }
@@ -72,21 +59,16 @@ export async function apiFetch(url, options = {}) {
             }
         );
 
-        console.log("🔄 Refresh status:", refreshRes.status);
-
         if (!refreshRes.ok) {
-            console.error("❌ Refresh failed → logout");
             hardLogout();
             return response;
         }
 
         const data = await refreshRes.json();
 
-        console.log("✅ New access token received");
-
         localStorage.setItem("accessToken", data.accessToken);
 
-        // Retry original request with new token
+        // 🔁 RETRY ORIGINAL REQUEST
         return apiFetch(url, {
             ...options,
             _retry: true,
@@ -103,10 +85,11 @@ export async function apiFetch(url, options = {}) {
 // ============================================
 // 🔒 HARD LOGOUT
 // ============================================
-
 function hardLogout() {
     console.warn("🚪 Logging out user");
+
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+
     window.location.href = "/login";
 }
