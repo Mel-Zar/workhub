@@ -57,9 +57,9 @@ Projektet stödjer:
 
 ---
 
-## 📦 Installerade Packages
+# 📦 Installerade Packages
 
-# Client
+## Client
 
 ```txt
 axios
