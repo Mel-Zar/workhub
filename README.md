@@ -2,48 +2,35 @@
 
 En fullstack Task Manager byggd med **MongoDB, Express, React och Node.js** där användare kan registrera konto, logga in och hantera sina egna tasks.
 
-Projektet stödjer:
-
-- Autentisering med JWT & Refresh Tokens
-- CRUD-operationer
-- Bilduppladdning
-- Filtrering, sortering, sökning & pagination
+Projektet innehåller autentisering med JWT, bilduppladdning, filtrering, sortering, sökning och pagination.
 
 ---
 
 ## 🚀 Funktioner
 
 - 🔐 Registrera & logga in användare
-- 🔁 Access Token + Refresh Token-flöde
+- 🔁 Access Token + Refresh Token
 - 📝 Skapa, visa, uppdatera och radera tasks
-- 🖼 Ladda upp upp till 5 bilder per task
+- 🖼 Ladda upp bilder till tasks
 - 🔍 Sök på titel & kategori
-- 🎯 Filtrera på:
-  - Prioritet
-  - Kategori
-  - Klara / Ej klara
-  - Datumintervall
-- 🔃 Sortering:
-  - Skapad datum
-  - Deadline
-  - Prioritet
-  - Titel
+- 🎯 Filtrera på prioritet, kategori, status och datum
+- 🔃 Sortering på skapad datum, deadline, prioritet och titel
 - 📄 Pagination
-- 🔒 Alla tasks är knutna till inloggad användare
+- 🔒 Alla tasks är kopplade till inloggad användare
 
 ---
 
-# 🧰 Tech Stack
+## 🧰 Tech Stack
 
-## Frontend
+### Frontend
 
-- React 19
+- React
 - Vite
 - React Router DOM
 - Axios
 - React Toastify
 
-## Backend
+### Backend
 
 - Node.js
 - Express
@@ -52,35 +39,25 @@ Projektet stödjer:
 - JSON Web Token
 - Multer
 - Bcryptjs
-- CORS
 - Dotenv
+- CORS
 
 ---
 
-# 📦 Installerade Packages
+## 📦 Packages
 
-## Client
+### Client
 
-```txt
 axios
 react
 react-dom
 react-router-dom
 react-toastify
-```
-
-### Client Dev
-
 vite
 eslint
 @vitejs/plugin-react
-eslint-plugin-react-hooks
-eslint-plugin-react-refresh
-@types/react
-@types/react-dom
-globals
 
-## Server
+### Server
 
 express
 mongoose
@@ -90,120 +67,95 @@ bcryptjs
 cors
 dotenv
 multer
-
-## Server Dev
-
 nodemon
 
-# 📁 Projektstruktur
+---
+
+## 📁 Mappstruktur
 
 project-root/
 │
-
-├─ client/
-
-│ └─ src/
-
-│ ├─ api/
-
-│ ├─ components/
-
-│ ├─ context/
-
-│ ├─ pages/
-
-│ ├─ routes/
-
-│ └─ main.jsx
-
+├── client/
+│ └── src/
+│ ├── api/
+│ ├── components/
+│ ├── pages/
+│ └── main.jsx
 │
-
-├─ server/
-
-├─ config/
-
-│ ├─ controllers/
-
-│ ├─ middleware/
-
-│ ├─ models/
-
-│ ├─ routes/
-
-│ ├─ uploads/
-
-│ └─ server.js
-
+├── server/
+│ ├── controllers/
+│ ├── middleware/
+│ ├── models/
+│ ├── routes/
+│ ├── uploads/
+│ └── server.js
 │
+└── README.md
 
-└─ README.md
+---
 
-# ⚙️ Installation
+## ⚙️ Installation
 
-## 1️⃣ Klona projekt
+### 1. Klona projekt
 
+````bash
 git clone <repo-url>
 cd project-folder
 
-## 2️⃣ Installera Backend
-
+2. Installera Backend
 cd server
 npm install
 
-## Skapa .env i server-mappen:
+Skapa .env i server-mappen:
 
 MONGO_URI=din_mongodb_connection_string
 JWT_SECRET=din_jwt_secret
 REFRESH_SECRET=din_refresh_secret
 
-## Starta backend:
+
+Starta server:
 
 npm run dev
 
-## Server körs på:
+
+Server körs på:
 
 http://localhost:5001
 
-## 3️⃣ Installera Frontend
-
+3. Installera Frontend
 cd client
 npm install
 npm run dev
 
-## Frontend körs på:
+
+Frontend körs på:
 
 http://localhost:5173
 
-# 🔐 Autentisering
+🔐 Autentisering
 
 Alla skyddade requests kräver header:
 
 Authorization: Bearer <accessToken>
 
-Access token förnyas automatiskt via refresh token.
-
-# 📡 API Routes
-
-## Auth
-
+📡 API Routes
+Auth
 POST /api/auth/register
 POST /api/auth/login
 POST /api/auth/refresh
 POST /api/auth/logout
 
-## Tasks
-
-GET /api/tasks
-GET /api/tasks/:id
-POST /api/tasks
-PUT /api/tasks/:id
+Tasks
+GET    /api/tasks
+GET    /api/tasks/:id
+POST   /api/tasks
+PUT    /api/tasks/:id
 DELETE /api/tasks/:id
 
-POST /api/tasks/:id/images
+POST   /api/tasks/:id/images
 DELETE /api/tasks/:id/images
 
-# 🔍 Query Parameters (GET /api/tasks)
-
+🔍 Query Params (GET /api/tasks)
 search
 priority
 category
@@ -214,47 +166,45 @@ sortBy
 page
 limit
 
-## Exempel:
 
-/api/tasks?page=1&limit=5&sortBy=deadline&priority=high
+Exempel:
 
-# 🖼 Bilduppladdning
+/api/tasks?page=1&limit=5&sortBy=deadline
+
+🖼 Bilduppladdning
 
 Max 5 bilder per request
 
-Lagring i /server/uploads
+Sparas i server/uploads
 
-Filvägar sparas i MongoDB
+Filväg lagras i MongoDB
 
-# 🧪 Scripts
-
-## Client
-
+🧪 Scripts
+Client
 npm run dev
 npm run build
 npm run preview
 npm run lint
 
-# Server
-
+Server
 npm run dev
 npm start
 
-# 👩‍💻 Utvecklare
+👩‍💻 Developer
 
-Melissa
-Fullstack Developer Student
+Melissa – Fullstack Developer Student
 
-# 📜 License
+📜 License
 
 ISC
 
+
 ---
 
-## ✅ Push till GitHub
+När du klistrat in:
 
 ```bash
 git add README.md
-git commit -m "Add complete project README"
+git commit -m "Add README"
 git push
-```
+````
