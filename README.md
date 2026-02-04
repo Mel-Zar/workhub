@@ -1,77 +1,181 @@
-🗂 WorkHub – Task Manager (Fullstack)
+📌 README.md
 
-WorkHub är en fullstack webbapplikation där användare kan skapa konto, logga in och hantera sina tasks.
-Applikationen är byggd för att visa kunskap inom modern frontend, backend, autentisering och databas.
+# 📝 Task Manager – MERN Stack
 
-🚀 Funktioner
+En fullstack Task Manager byggd med **MongoDB, Express, React och Node.js**.  
+Applikationen har autentisering, CRUD på tasks, uppladdning av bilder, filtrering, sortering, pagination och JWT-baserad säkerhet.
 
-Registrera konto & logga in
-JWT-autentisering med access & refresh tokens
-Skapa, redigera, radera tasks
-Markera tasks som klara
-Sök, filtrera & sortera tasks
-Pagination
-Skyddade routes
-Responsivt gränssnitt
+---
 
-🛠 Teknologier
+## 🚀 Funktioner
 
-Frontend
-React
-React Router
-Context API
+- ✅ Registrering & inloggning (JWT + Refresh Token)
 
-Backend
-Node.js
-Express
-MongoDB
-Mongoose
-JSON Web Tokens (JWT)
+- ✅ Skapa, läsa, uppdatera och radera tasks
 
-📁 Projektstruktur
-workhub/
-├─ client/ (React frontend)
-└─ server/ (Node/Express backend)
+- ✅ Ladda upp flera bilder per task
 
-⚙️ Installation
+- ✅ Filtrera på:
+  - Prioritet
+  - Kategori
+  - Klara / Ej klara
+  - Datumintervall
 
-1. Klona projektet
+- ✅ Sök på titel & kategori
+- ✅ Sortering:
+  - Skapad datum
+  - Deadline
+  - Prioritet
+  - Titel
+- ✅ Pagination
+- ✅ Skyddade routes (backend)
 
-   git clone https://github.com/Mel-Zar/workhub.git
+---
 
-   cd workhub
+## 🧰 Tech Stack
 
-2. Installera backend
+### Backend
 
-   cd server
-   npm install
+- Node.js
+- Express
+- MongoDB + Mongoose
+- JWT (jsonwebtoken)
+- Multer (filuppladdning)
+- Bcryptjs
 
-Skapa en .env fil i server:
+### Frontend
+
+- React (Vite)
+- Context API
+- Fetch API
+
+---
+
+## 📂 Projektstruktur
+
+client/
+src/
+api/
+context/
+components/
+pages/
+
+server/
+controllers/
+middleware/
+models/
+routes/
+uploads/
+server.js
+
+---
+
+## ⚙️ Installation
+
+### 1️⃣ Klona projektet
+
+````bash
+git clone <repo-url>
+cd project-folder
+
+2️⃣ Backend
+cd server
+npm install
+
+
+Skapa .env i server-mappen:
+
 MONGO_URI=din_mongodb_connection_string
-JWT_SECRET=supersecret
-JWT_REFRESH_SECRET=superrefreshsecret
-PORT=5001
+JWT_SECRET=din_jwt_secret
+REFRESH_SECRET=din_refresh_secret
+
 
 Starta backend:
+
 npm run dev
 
-Servern körs på:
+
+Server körs på:
+
 http://localhost:5001
 
-🔐 Inloggning
+3️⃣ Frontend
+cd client
+npm install
+npm run dev
 
-Skapa konto via registreringssidan och logga in.
-Efter inloggning får användaren tillgång till dashboard och sina tasks.
 
-📌 Syfte
+Frontend körs på:
 
-Detta projekt är byggt som ett portfolio-projekt för att visa färdigheter inom:
-Fullstack-utveckling
-Autentisering
-REST API
-State management
-CRUD-funktionalitet
+http://localhost:5173
 
-👤 Utvecklare
+🔐 Auth Flow
 
-Melissa Zarinnegar
+Access token lagras i memory
+
+Refresh token används för att hämta ny access token automatiskt
+
+Alla /api/tasks routes kräver Authorization-header
+
+Authorization: Bearer <accessToken>
+
+📡 API Routes
+Auth
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/refresh
+POST /api/auth/logout
+
+Tasks
+GET    /api/tasks
+GET    /api/tasks/:id
+POST   /api/tasks
+PUT    /api/tasks/:id
+DELETE /api/tasks/:id
+
+POST   /api/tasks/:id/images
+DELETE /api/tasks/:id/images
+
+🧪 Query Params (GET /api/tasks)
+search
+priority
+category
+completed
+fromDate
+toDate
+sortBy
+page
+limit
+
+
+Exempel:
+
+/api/tasks?page=1&limit=5&sortBy=deadline&priority=high
+
+🖼 Bildhantering
+
+Max 5 bilder per request
+
+Lagring i /uploads
+
+Filvägar sparas i databasen
+
+🧑‍💻 Utvecklad av
+
+Melissa 💙
+Fullstack Developer Student
+
+📜 License
+
+ISC
+
+
+---
+
+# ✅ Sen kör:
+
+```bash
+git add README.md
+git commit -m "Add project README"
+git push
+````
