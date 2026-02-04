@@ -37,6 +37,11 @@ function Login() {
         return;
       }
 
+      // ✅ SPARA TOKENS FÖRST
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+
+      // ✅ SEN CONTEXT LOGIN
       login(data.accessToken, data.refreshToken);
 
       toast.success(`Välkommen tillbaka ${data.user.name}!`);
