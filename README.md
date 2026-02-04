@@ -35,7 +35,7 @@ Projektet stödjer:
 
 ## 🧰 Tech Stack
 
-### Frontend
+# Frontend
 
 - React 19
 - Vite
@@ -43,7 +43,7 @@ Projektet stödjer:
 - Axios
 - React Toastify
 
-### Backend
+# Backend
 
 - Node.js
 - Express
@@ -59,7 +59,7 @@ Projektet stödjer:
 
 ## 📦 Installerade Packages
 
-### Client
+# Client
 
 ```txt
 axios
@@ -69,7 +69,7 @@ react-router-dom
 react-toastify
 ```
 
-## Client Dev
+# Client Dev
 
 vite
 eslint
@@ -80,7 +80,7 @@ eslint-plugin-react-refresh
 @types/react-dom
 globals
 
-## Server
+# Server
 
 express
 mongoose
@@ -91,7 +91,7 @@ cors
 dotenv
 multer
 
-## Server Dev
+# Server Dev
 
 nodemon
 
@@ -163,16 +163,16 @@ Authorization: Bearer <accessToken>
 
 Access token förnyas automatiskt via refresh token.
 
-### 📡 API Routes
+## 📡 API Routes
 
-## Auth
+# Auth
 
 POST /api/auth/register
 POST /api/auth/login
 POST /api/auth/refresh
 POST /api/auth/logout
 
-## Tasks
+# Tasks
 
 GET /api/tasks
 GET /api/tasks/:id
@@ -183,7 +183,7 @@ DELETE /api/tasks/:id
 POST /api/tasks/:id/images
 DELETE /api/tasks/:id/images
 
-### 🔍 Query Parameters (GET /api/tasks)
+# 🔍 Query Parameters (GET /api/tasks)
 
 search
 priority
@@ -199,7 +199,7 @@ limit
 
 /api/tasks?page=1&limit=5&sortBy=deadline&priority=high
 
-### 🖼 Bilduppladdning
+## 🖼 Bilduppladdning
 
 Max 5 bilder per request
 
@@ -207,16 +207,16 @@ Lagring i /server/uploads
 
 Filvägar sparas i MongoDB
 
-### 🧪 Scripts
+## 🧪 Scripts
 
-## Client
+# Client
 
 npm run dev
 npm run build
 npm run preview
 npm run lint
 
-## Server
+# Server
 
 npm run dev
 npm start
