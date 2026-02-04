@@ -102,7 +102,8 @@ project-root/
 git clone <repo-url>
 cd project-folder
 
-2. Installera Backend
+# 2. Installera Backend
+
 cd server
 npm install
 
