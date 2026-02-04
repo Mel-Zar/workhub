@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import { apiFetch } from "../api/ApiFetch";
 
 import TaskForm from "../components/TaskForm";
@@ -11,10 +13,14 @@ import TaskSort from "../components/TaskSort";
 function Dashboard() {
 
     const [tasks, setTasks] = useState([]);
-    const [filters, setFilters] = useState({});
-    const [sortBy, setSortBy] = useState("deadline");
 
     const [categories, setCategories] = useState([]);
+    const [priorities, setPriorities] = useState([]);
+    const [completionOptions, setCompletionOptions] = useState([]);
+
+    const [filters, setFilters] = useState({});
+    const [sortBy, setSortBy] = useState("createdAt");
+
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -24,15 +30,6 @@ function Dashboard() {
         try {
             setLoading(true);
 
-            const formatText = str =>
-                str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
-
-            const formatCategory = str => {
-                if (!str) return "";
-                const first = str.split(/\s+/)[0];
-                return formatText(first);
-            };
-
             const params = new URLSearchParams({
                 page,
                 limit: 5,
@@ -41,29 +38,28 @@ function Dashboard() {
 
             if (filters.search) params.append("search", filters.search);
             if (filters.priority) params.append("priority", filters.priority);
-            if (filters.category) params.append("category", filters.category);
             if (filters.completed !== undefined)
                 params.append("completed", filters.completed);
+            if (filters.category)
+                params.append("category", filters.category);
 
             const res = await apiFetch(`/api/tasks?${params}`);
-
             if (!res.ok) throw new Error("Fetch failed");
 
             const data = await res.json();
+            const formatted = data.tasks || [];
 
-            const formattedTasks = (data.tasks || []).map(task => ({
-                ...task,
-                title: formatText(task.title),
-                category: formatCategory(task.category),
-                priority: formatText(task.priority)
-            }));
-
-            setTasks(formattedTasks);
+            setTasks(formatted);
             setPages(data.pages || 1);
 
-            setCategories([
-                ...new Set(formattedTasks.map(t => t.category).filter(Boolean))
-            ]);
+            // 🔥 SAME LOGIC AS TASKS.JSX
+            setCategories([...new Set(formatted.map(t => t.category).filter(Boolean))]);
+            setPriorities([...new Set(formatted.map(t => t.priority).filter(Boolean))]);
+
+            const comp = [];
+            if (formatted.some(t => t.completed === true)) comp.push("true");
+            if (formatted.some(t => t.completed === false)) comp.push("false");
+            setCompletionOptions(comp);
 
         } catch (err) {
             console.error(err);
@@ -73,6 +69,7 @@ function Dashboard() {
         }
     }, [page, filters, sortBy]);
 
+    // ================= USE EFFECT =================
     useEffect(() => {
         fetchTasks();
     }, [fetchTasks]);
@@ -92,6 +89,8 @@ function Dashboard() {
     return (
         <div>
 
+            <ToastContainer position="top-right" autoClose={3000} />
+
             <h2>Dashboard</h2>
 
             <TaskSort
@@ -109,8 +108,11 @@ function Dashboard() {
                 }}
             />
 
+            {/* ✅ SAME PROPS AS TASKS */}
             <TaskFilters
                 categories={categories}
+                priorities={priorities}
+                completionOptions={completionOptions}
                 onFilter={data => {
                     setPage(1);
                     setFilters(prev => ({ ...prev, ...data }));
@@ -132,7 +134,7 @@ function Dashboard() {
                 />
             ))}
 
-            {/* ================= PAGINATION ================= */}
+            {/* PAGINATION */}
             {pages > 1 && (
                 <div style={{ marginTop: 20 }}>
 
@@ -146,7 +148,7 @@ function Dashboard() {
                         Sida {page} av {pages}
                     </span>
 
-                    {page < pages && tasks.length > 0 && (
+                    {page < pages && (
                         <button onClick={() => setPage(p => p + 1)}>
                             Nästa ➡
                         </button>

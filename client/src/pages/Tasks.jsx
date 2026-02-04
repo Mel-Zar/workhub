@@ -7,76 +7,51 @@ import TaskSearch from "../components/TaskSearch";
 import TaskFilters from "../components/TaskFilters";
 import TaskSort from "../components/TaskSort";
 
-function formatText(str) {
-    if (!str) return "";
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
-
-function formatCategory(str) {
-    if (!str) return "";
-    const first = str.split(/\s+/)[0];
-    return formatText(first);
-}
-
 function Tasks() {
 
     const navigate = useNavigate();
 
     const [tasks, setTasks] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [priorities, setPriorities] = useState([]);
+    const [completionOptions, setCompletionOptions] = useState([]);
+
     const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState("createdAt");
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
     useEffect(() => {
 
         async function fetchTasks() {
-            try {
-                setLoading(true);
-                setError("");
 
-                const params = new URLSearchParams({
-                    page,
-                    limit: 5,
-                    sortBy
-                });
+            const params = new URLSearchParams({
+                page,
+                limit: 5,
+                sortBy
+            });
 
-                if (filters.search) params.append("search", filters.search);
-                if (filters.priority) params.append("priority", filters.priority);
-                if (filters.completed !== undefined)
-                    params.append("completed", filters.completed);
-                if (filters.category)
-                    params.append("category", filters.category);
+            if (filters.search) params.append("search", filters.search);
+            if (filters.priority) params.append("priority", filters.priority);
+            if (filters.completed !== undefined)
+                params.append("completed", filters.completed);
+            if (filters.category)
+                params.append("category", filters.category);
 
-                const res = await apiFetch(`/api/tasks?${params}`);
+            const res = await apiFetch(`/api/tasks?${params}`);
+            const data = await res.json();
+            const formatted = data.tasks || [];
 
-                if (!res.ok) throw new Error("Fetch failed");
+            setTasks(formatted);
+            setPages(data.pages || 1);
 
-                const data = await res.json();
+            setCategories([...new Set(formatted.map(t => t.category).filter(Boolean))]);
+            setPriorities([...new Set(formatted.map(t => t.priority).filter(Boolean))]);
 
-                const formatted = (data.tasks || []).map(task => ({
-                    ...task,
-                    title: formatText(task.title),
-                    category: formatCategory(task.category),
-                    priority: formatText(task.priority)
-                }));
-
-                setTasks(formatted);
-                setPages(data.pages || 1);
-
-                setCategories([
-                    ...new Set(formatted.map(t => t.category).filter(Boolean))
-                ]);
-
-            } catch (err) {
-                console.error(err);
-                setError("Kunde inte hämta tasks");
-            } finally {
-                setLoading(false);
-            }
+            const comp = [];
+            if (formatted.some(t => t.completed === true)) comp.push("true");
+            if (formatted.some(t => t.completed === false)) comp.push("false");
+            setCompletionOptions(comp);
         }
 
         fetchTasks();
@@ -105,17 +80,15 @@ function Tasks() {
 
             <TaskFilters
                 categories={categories}
+                priorities={priorities}
+                completionOptions={completionOptions}
                 onFilter={data => {
                     setPage(1);
                     setFilters(p => ({ ...p, ...data }));
                 }}
             />
 
-            {loading && <p>Laddar tasks...</p>}
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {!loading && !error && tasks.length === 0 && <p>Inga tasks</p>}
-
-            {!loading && !error && tasks.map(task => (
+            {tasks.map(task => (
                 <TaskItem
                     key={task._id}
                     task={task}

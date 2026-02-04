@@ -15,7 +15,6 @@ const buildQuery = (
 ) => {
     const query = { user: userId };
 
-    // SEARCH
     if (search) {
         query.$or = [
             { title: { $regex: search, $options: "i" } },
@@ -23,31 +22,19 @@ const buildQuery = (
         ];
     }
 
-    // PRIORITY 
     if (priority) {
         query.priority = new RegExp(`^${priority}$`, "i");
     }
 
-    // PRIORITY (case-insensitive)
-    if (priority) {
-        query.priority = new RegExp(`^${priority}$`, "i");
-    }
+    if (category) query.category = category;
 
-    // COMPLETED
     if (completed === "true") query.completed = true;
     if (completed === "false") query.completed = false;
 
-    // ✅ DATE RANGE (deadline)
     if (fromDate || toDate) {
         query.deadline = {};
-
-        if (fromDate) {
-            query.deadline.$gte = new Date(fromDate);
-        }
-
-        if (toDate) {
-            query.deadline.$lte = new Date(toDate);
-        }
+        if (fromDate) query.deadline.$gte = new Date(fromDate);
+        if (toDate) query.deadline.$lte = new Date(toDate);
     }
 
     return query;
@@ -55,27 +42,15 @@ const buildQuery = (
 
 /* ================= GET TASKS ================= */
 
-const getTasks = async (req, res) => {
+export const getTasks = async (req, res) => {
     try {
-        const {
-            search,
-            priority,
-            category,
-            completed,
-            fromDate,
-            toDate,
-            page = 1,
-            limit = 5
-        } = req.query;
+        const { search, priority, completed, page = 1, limit = 5 } = req.query;
 
         const query = buildQuery(
             req.user.id,
             search,
             priority,
-            completed,
-            category,
-            fromDate,
-            toDate
+            completed
         );
 
         const skip = (page - 1) * limit;
@@ -101,7 +76,7 @@ const getTasks = async (req, res) => {
 
 /* ================= GET SINGLE ================= */
 
-const getTask = async (req, res) => {
+export const getTask = async (req, res) => {
     try {
         const task = await Task.findOne({
             _id: req.params.id,
@@ -118,12 +93,8 @@ const getTask = async (req, res) => {
 
 /* ================= CREATE ================= */
 
-const createTask = async (req, res) => {
+export const createTask = async (req, res) => {
     try {
-        if (!req.body.title) {
-            return res.status(400).json({ error: "Title is required" });
-        }
-
         const imagePaths = req.files
             ? req.files.map(file => `/uploads/${file.filename}`)
             : [];
@@ -134,98 +105,53 @@ const createTask = async (req, res) => {
             category: req.body.category || "",
             deadline: req.body.deadline || null,
             images: imagePaths,
+            completed: false,
             user: req.user.id
         });
 
         res.status(201).json(task);
     } catch (err) {
-        console.error("CREATE ERROR:", err);
+        console.log(err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ================= UPDATE ================= */
+/* ================= UPDATE + TOGGLE ================= */
 
-const updateTask = async (req, res) => {
+export const updateTask = async (req, res) => {
     try {
+
+        const updateData = {
+            title: req.body.title,
+            priority: req.body.priority?.toLowerCase(),
+            category: req.body.category,
+            deadline: req.body.deadline
+        };
+
+        // 🔥 THIS FIXES CHECKBOX
+        if (typeof req.body.completed === "boolean") {
+            updateData.completed = req.body.completed;
+        }
+
         const task = await Task.findOneAndUpdate(
             { _id: req.params.id, user: req.user.id },
-            {
-                title: req.body.title,
-                priority: req.body.priority?.toLowerCase(),
-                category: req.body.category,
-                deadline: req.body.deadline
-            },
+            updateData,
             { new: true }
         );
 
         if (!task) return res.status(404).json({ error: "Task not found" });
 
         res.json(task);
+
     } catch (err) {
-        console.error("UPDATE ERROR:", err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
-
-/* ================= ADD IMAGES ================= */
-
-const addImages = async (req, res) => {
-    try {
-        const task = await Task.findOne({
-            _id: req.params.id,
-            user: req.user.id
-        });
-
-        if (!task) return res.status(404).json({ error: "Task not found" });
-
-        const newImages = req.files.map(
-            file => `/uploads/${file.filename}`
-        );
-
-        task.images.push(...newImages);
-        await task.save();
-
-        res.json(task);
-    } catch (err) {
-        console.error("ADD IMAGE ERROR:", err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
-
-/* ================= REMOVE IMAGE ================= */
-
-const removeImage = async (req, res) => {
-    try {
-        const { image } = req.body;
-
-        const task = await Task.findOne({
-            _id: req.params.id,
-            user: req.user.id
-        });
-
-        if (!task) return res.status(404).json({ error: "Task not found" });
-
-        task.images = task.images.filter(img => img !== image);
-        await task.save();
-
-        const filePath = path.join(
-            process.cwd(),
-            image.replace("/uploads", "uploads")
-        );
-
-        fs.unlink(filePath, () => { });
-
-        res.json(task);
-    } catch (err) {
-        console.log("REMOVE IMAGE ERROR:", err);
+        console.log(err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
 /* ================= DELETE ================= */
 
-const deleteTask = async (req, res) => {
+export const deleteTask = async (req, res) => {
     try {
         const task = await Task.findOneAndDelete({
             _id: req.params.id,
@@ -240,38 +166,53 @@ const deleteTask = async (req, res) => {
     }
 };
 
-/* ================= TOGGLE ================= */
+/* ================= ADD IMAGES ================= */
 
-const toggleComplete = async (req, res) => {
+export const addImages = async (req, res) => {
     try {
         const task = await Task.findOne({
             _id: req.params.id,
             user: req.user.id
         });
 
-        if (!task) return res.status(404).json({ message: "Task not found" });
+        const newImages = req.files.map(
+            file => `/uploads/${file.filename}`
+        );
 
-        task.completed = !task.completed;
-        task.priority = task.priority.toLowerCase();
-
+        task.images.push(...newImages);
         await task.save();
 
         res.json(task);
     } catch (err) {
-        console.error("TOGGLE ERROR:", err);
-        res.status(500).json({ message: "Toggle failed" });
+        res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ================= EXPORTS ================= */
+/* ================= REMOVE IMAGE ================= */
 
-export {
-    getTasks,
-    getTask,
-    createTask,
-    updateTask,
-    deleteTask,
-    toggleComplete,
-    addImages,
-    removeImage
+export const removeImage = async (req, res) => {
+    try {
+        const { image } = req.body;
+
+        const task = await Task.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
+
+        task.images = task.images.filter(img => img !== image);
+        await task.save();
+
+        const filePath = path.join(
+            process.cwd(),
+            image.replace("/uploads", "uploads")
+        );
+
+        fs.unlink(filePath, () => { });
+
+        res.json(task);
+    } catch {
+        res.status(500).json({ error: "Server error" });
+    }
 };
+
+

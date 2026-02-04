@@ -106,7 +106,7 @@ function TaskItem({
         setRemovedImages([]);
     }
 
-    // ================= TOAST CONFIRM DELETE =================
+    // ================= DELETE CONFIRM =================
     function confirmDeleteTask() {
         toast.info(
             ({ closeToast }) => (
@@ -147,13 +147,26 @@ function TaskItem({
         toast.success("Task borttagen 🗑️");
     }
 
-    // ================= ACTIONS =================
-    async function toggleComplete() {
-        const res = await apiFetch(`/api/tasks/${task._id}/toggle`, {
-            method: "PATCH"
-        });
-        const data = await res.json();
-        if (res.ok) onUpdate?.(data);
+    // ================= TOGGLE COMPLETED (FIXED) =================
+    async function toggleComplete(e) {
+        e.stopPropagation();
+
+        try {
+            const res = await apiFetch(`/api/tasks/${task._id}`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    completed: !task.completed
+                })
+            });
+
+            if (!res.ok) throw new Error();
+
+            const data = await res.json();
+            onUpdate?.(data);
+
+        } catch {
+            toast.error("Kunde inte uppdatera status");
+        }
     }
 
     // ================= CHANGE CHECK =================
@@ -182,7 +195,8 @@ function TaskItem({
                 padding: "12px",
                 borderRadius: "8px",
                 marginBottom: "10px",
-                cursor: clickable ? "pointer" : "default"
+                cursor: clickable ? "pointer" : "default",
+                background: task.completed ? "#f1f1f1" : "white"
             }}
         >
 
@@ -191,13 +205,13 @@ function TaskItem({
                     type="checkbox"
                     checked={task.completed}
                     onChange={toggleComplete}
-                    onClick={e => e.stopPropagation()}
                 />
             )}
 
             {editing ? (
                 <>
                     <input value={title} onChange={e => setTitle(capitalize(e.target.value))} />
+
                     <select value={priority} onChange={e => setPriority(e.target.value)}>
                         <option value="">Choose priority</option>
                         <option value="low">Low</option>

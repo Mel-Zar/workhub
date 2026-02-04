@@ -1,6 +1,11 @@
 import { useState, useMemo } from "react";
 
-function TaskFilters({ onFilter, categories = [] }) {
+function TaskFilters({
+    onFilter,
+    categories = [],
+    priorities = [],
+    completionOptions = []
+}) {
 
     const [priority, setPriority] = useState("");
     const [category, setCategory] = useState("");
@@ -8,23 +13,29 @@ function TaskFilters({ onFilter, categories = [] }) {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
 
-    // ================= FORMATTER =================
     function formatText(str) {
         if (!str) return "";
         return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     }
 
-    // ================= CLEAN & SORT CATEGORIES =================
     const cleanCategories = useMemo(() => {
         return [...new Set(
             categories
                 .map(c => c.trim())
                 .filter(Boolean)
                 .map(c => formatText(c))
-        )].sort((a, b) => a.localeCompare(b));
+        )];
     }, [categories]);
 
-    // ================= APPLY FILTER =================
+    const cleanPriorities = useMemo(() => {
+        return [...new Set(
+            priorities
+                .map(p => p.trim())
+                .filter(Boolean)
+                .map(p => formatText(p))
+        )];
+    }, [priorities]);
+
     function triggerFilter(changes = {}) {
 
         const updated = {
@@ -54,33 +65,17 @@ function TaskFilters({ onFilter, categories = [] }) {
         });
     }
 
-    // ================= RESET =================
     function handleReset() {
         setPriority("");
         setCategory("");
         setCompleted("");
         setFromDate("");
         setToDate("");
-
-        onFilter({
-            priority: undefined,
-            category: undefined,
-            completed: undefined,
-            fromDate: undefined,
-            toDate: undefined
-        });
+        onFilter({});
     }
 
     return (
-        <div
-            style={{
-                marginBottom: "20px",
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "10px",
-                alignItems: "center"
-            }}
-        >
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
 
             {/* PRIORITY */}
             <select
@@ -91,9 +86,11 @@ function TaskFilters({ onFilter, categories = [] }) {
                 }}
             >
                 <option value="">Alla prioriteter</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                {cleanPriorities.map(p => (
+                    <option key={p} value={p.toLowerCase()}>
+                        {p}
+                    </option>
+                ))}
             </select>
 
             {/* CATEGORY */}
@@ -105,7 +102,6 @@ function TaskFilters({ onFilter, categories = [] }) {
                 }}
             >
                 <option value="">Alla kategorier</option>
-
                 {cleanCategories.map(cat => (
                     <option key={cat} value={cat}>
                         {cat}
@@ -122,41 +118,29 @@ function TaskFilters({ onFilter, categories = [] }) {
                 }}
             >
                 <option value="">Alla</option>
-                <option value="true">Klara</option>
-                <option value="false">Ej klara</option>
+                {completionOptions.includes("true") && (
+                    <option value="true">Klara</option>
+                )}
+                {completionOptions.includes("false") && (
+                    <option value="false">Ej klara</option>
+                )}
             </select>
 
-            {/* FROM DATE */}
-            <input
-                type="date"
-                value={fromDate}
+            <input type="date" value={fromDate}
                 onChange={e => {
                     setFromDate(e.target.value);
                     triggerFilter({ fromDate: e.target.value });
                 }}
             />
 
-            {/* TO DATE */}
-            <input
-                type="date"
-                value={toDate}
+            <input type="date" value={toDate}
                 onChange={e => {
                     setToDate(e.target.value);
                     triggerFilter({ toDate: e.target.value });
                 }}
             />
 
-            {/* RESET BUTTON */}
-            <button
-                type="button"
-                onClick={handleReset}
-                style={{
-                    background: "#eee",
-                    border: "1px solid #ccc",
-                    padding: "6px 12px",
-                    cursor: "pointer"
-                }}
-            >
+            <button type="button" onClick={handleReset}>
                 🔄 Rensa filter
             </button>
 
