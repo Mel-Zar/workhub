@@ -31,7 +31,7 @@ const buildQuery = (
 
     // 📁 CATEGORY
     if (category) {
-        query.category = category;
+        query.category = category.toLowerCase();
     }
 
     // ✅ COMPLETED
@@ -104,7 +104,7 @@ export const getTasks = async (req, res) => {
         const total = await Task.countDocuments(query);
 
         const tasks = await Task.find(query)
-            .sort(sort)          // ✅ FRONTEND STYR SORT
+            .sort(sort)
             .skip(skip)
             .limit(Number(limit));
 
@@ -184,7 +184,7 @@ export const updateTask = async (req, res) => {
             deadline: req.body.deadline
         };
 
-        // ✅ FIX CHECKBOX
+        // ✅ checkbox fix
         if (typeof req.body.completed === "boolean") {
             updateData.completed = req.body.completed;
         }
