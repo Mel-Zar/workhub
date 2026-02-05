@@ -1,10 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { apiFetch } from "../api/ApiFetch";
+import { taskService } from "../services/taskService";
 import { toast } from "react-toastify";
 
 function Task() {
-    const { id } = useParams();  // <-- hämtar task-id från URL
+    const { id } = useParams();
     const [task, setTask] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -12,9 +12,7 @@ function Task() {
         async function fetchTask() {
             setLoading(true);
             try {
-                const res = await apiFetch(`/api/tasks/${id}`);
-                if (!res.ok) throw new Error("Kunde inte hämta task");
-                const data = await res.json();
+                const data = await taskService.getById(id);
                 setTask(data);
             } catch (err) {
                 console.error(err);
@@ -36,10 +34,15 @@ function Task() {
             <p>Category: {task.category}</p>
             <p>Deadline: {task.deadline?.slice(0, 10)}</p>
             <p>Status: {task.completed ? "Klar" : "Ej klar"}</p>
+
             {task.images?.length > 0 && (
                 <div style={{ display: "flex", gap: 8 }}>
                     {task.images.map((img, i) => (
-                        <img key={i} src={`${import.meta.env.VITE_API_URL}${img}`} width="80" />
+                        <img
+                            key={i}
+                            src={`${import.meta.env.VITE_API_URL}${img}`}
+                            width="80"
+                        />
                     ))}
                 </div>
             )}

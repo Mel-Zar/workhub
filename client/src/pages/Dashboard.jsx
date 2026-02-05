@@ -1,41 +1,69 @@
 import { useEffect, useState, useMemo } from "react";
-import { apiFetch } from "../api/ApiFetch";
+import { taskService } from "../services/taskService";
+
 import TaskItem from "../components/TaskItem";
 import TaskSearch from "../components/TaskSearch";
 import TaskFilters from "../components/TaskFilters";
 import TaskSort from "../components/TaskSort";
+import TaskForm from "../components/TaskForm";
 
 function Dashboard() {
+
     const [allTasks, setAllTasks] = useState([]);
-    const [filters, setFilters] = useState({ search: "", priority: "", category: "", completed: "", fromDate: "", toDate: "" });
+    const [filters, setFilters] = useState({
+        search: "",
+        priority: "",
+        category: "",
+        completed: "",
+        fromDate: "",
+        toDate: ""
+    });
+
     const [sortBy, setSortBy] = useState("");
     const [page, setPage] = useState(1);
     const [limit] = useState(5);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        async function fetchAll() {
+    // =========================
+    // Hämta alla tasks
+    // =========================xw
+
+
+    async function refreshTasks() {
+        try {
             setLoading(true);
-            try {
-                const res = await apiFetch("/api/tasks?limit=10000");
-                const data = await res.json();
-                setAllTasks(data.tasks || []);
-            } catch (err) { console.error(err); }
+            const data = await taskService.getAll();
+            setAllTasks(data.tasks || []);
+        } catch (err) {
+            console.error(err);
+        } finally {
             setLoading(false);
         }
-        fetchAll();
+    }
+
+    useEffect(() => {
+        refreshTasks();
     }, []);
 
-    const filteredTasks = useMemo(() => allTasks.filter(t => {
-        if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
-        if (filters.priority && t.priority !== filters.priority) return false;
-        if (filters.category && t.category !== filters.category) return false;
-        if (filters.completed !== "" && String(t.completed) !== filters.completed) return false;
-        if (filters.fromDate && t.deadline && new Date(t.deadline) < new Date(filters.fromDate)) return false;
-        if (filters.toDate && t.deadline && new Date(t.deadline) > new Date(filters.toDate)) return false;
-        return true;
-    }), [allTasks, filters]);
+    // =========================
+    // Filter
+    // =========================
+    const filteredTasks = useMemo(() =>
+        allTasks.filter(t => {
+            if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
+            if (filters.priority && t.priority !== filters.priority) return false;
+            if (filters.category && t.category !== filters.category) return false;
+            if (filters.completed !== "" && String(t.completed) !== filters.completed) return false;
+            if (filters.fromDate && t.deadline && new Date(t.deadline) < new Date(filters.fromDate)) return false;
+            if (filters.toDate && t.deadline && new Date(t.deadline) > new Date(filters.toDate)) return false;
+            return true;
+        }),
+        [allTasks, filters]
+    );
 
+    // =========================
+    // Sortering
+    // =========================
     const sortedTasks = useMemo(() => {
         const copy = [...filteredTasks];
         if (sortBy === "deadline") return copy.sort((a, b) => new Date(a.deadline || 0) - new Date(b.deadline || 0));
@@ -44,11 +72,22 @@ function Dashboard() {
         return copy;
     }, [filteredTasks, sortBy]);
 
+    // =========================
+    // Pagination
+    // =========================
     const pages = Math.ceil(sortedTasks.length / limit);
     const paginatedTasks = sortedTasks.slice((page - 1) * limit, page * limit);
 
-    const categories = useMemo(() => [...new Set(filteredTasks.map(t => t.category).filter(Boolean))], [filteredTasks]);
-    const priorities = useMemo(() => [...new Set(filteredTasks.map(t => t.priority).filter(Boolean))], [filteredTasks]);
+    const categories = useMemo(() =>
+        [...new Set(filteredTasks.map(t => t.category).filter(Boolean))],
+        [filteredTasks]
+    );
+
+    const priorities = useMemo(() =>
+        [...new Set(filteredTasks.map(t => t.priority).filter(Boolean))],
+        [filteredTasks]
+    );
+
     const completionOptions = useMemo(() => {
         const arr = [];
         if (filteredTasks.some(t => t.completed)) arr.push("true");
@@ -58,11 +97,35 @@ function Dashboard() {
 
     return (
         <div>
-            <h2>Dashboard</h2>
-            <TaskSort onSortChange={(value) => { setPage(1); setSortBy(value); }} />
-            <TaskSearch onSearch={(value) => { setPage(1); setFilters(prev => ({ ...prev, search: value })); }} />
-            <TaskFilters filters={filters} onChange={(data) => { setPage(1); setFilters(data); }} categories={categories} priorities={priorities} completionOptions={completionOptions} />
 
+            <h2>Dashboard</h2>
+
+            {/* ===== SKAPA TASK ===== */}
+            <TaskForm onCreate={refreshTasks} />
+
+            {/* ===== FILTERS ===== */}
+            <TaskSort onSortChange={(value) => {
+                setPage(1);
+                setSortBy(value);
+            }} />
+
+            <TaskSearch onSearch={(value) => {
+                setPage(1);
+                setFilters(prev => ({ ...prev, search: value }));
+            }} />
+
+            <TaskFilters
+                filters={filters}
+                onChange={(data) => {
+                    setPage(1);
+                    setFilters(data);
+                }}
+                categories={categories}
+                priorities={priorities}
+                completionOptions={completionOptions}
+            />
+
+            {/* ===== LISTA ===== */}
             {loading && <p>Laddar...</p>}
             {!loading && paginatedTasks.length === 0 && <p>Inga tasks</p>}
 
@@ -72,18 +135,40 @@ function Dashboard() {
                     task={task}
                     showActions
                     editable
-                    onUpdate={(t) => setAllTasks(prev => prev.map(x => x._id === t._id ? t : x))}
-                    onDelete={(id) => setAllTasks(prev => prev.filter(x => x._id !== id))}
+                    onUpdate={(t) =>
+                        setAllTasks(prev =>
+                            prev.map(x => x._id === t._id ? t : x)
+                        )
+                    }
+                    onDelete={(id) =>
+                        setAllTasks(prev =>
+                            prev.filter(x => x._id !== id)
+                        )
+                    }
                 />
             ))}
 
+            {/* ===== PAGINATION ===== */}
             {pages > 1 && (
                 <div style={{ marginTop: 20 }}>
-                    {page > 1 && <button onClick={() => setPage(p => p - 1)}>⬅ Föregående</button>}
-                    <span style={{ margin: "0 10px" }}>Sida {page} av {pages}</span>
-                    {page < pages && <button onClick={() => setPage(p => p + 1)}>Nästa ➡</button>}
+                    {page > 1 &&
+                        <button onClick={() => setPage(p => p - 1)}>
+                            ⬅ Föregående
+                        </button>
+                    }
+
+                    <span style={{ margin: "0 10px" }}>
+                        Sida {page} av {pages}
+                    </span>
+
+                    {page < pages &&
+                        <button onClick={() => setPage(p => p + 1)}>
+                            Nästa ➡
+                        </button>
+                    }
                 </div>
             )}
+
         </div>
     );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiFetch } from "../api/ApiFetch";
+import { taskService } from "../services/taskService";
 import TaskItem from "../components/TaskItem";
 import TaskSearch from "../components/TaskSearch";
 import TaskFilters from "../components/TaskFilters";
@@ -19,10 +19,11 @@ function Tasks() {
         async function fetchAll() {
             setLoading(true);
             try {
-                const res = await apiFetch("/api/tasks?limit=10000");
-                const data = await res.json();
+                const data = await taskService.getAll();
                 setAllTasks(data.tasks || []);
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error(err);
+            }
             setLoading(false);
         }
         fetchAll();
@@ -61,9 +62,16 @@ function Tasks() {
     return (
         <div>
             <h2>Tasks</h2>
+
             <TaskSort onSortChange={(value) => { setPage(1); setSortBy(value); }} />
             <TaskSearch onSearch={(value) => { setPage(1); setFilters(prev => ({ ...prev, search: value })); }} />
-            <TaskFilters filters={filters} onChange={(data) => { setPage(1); setFilters(data); }} categories={categories} priorities={priorities} completionOptions={completionOptions} />
+            <TaskFilters
+                filters={filters}
+                onChange={(data) => { setPage(1); setFilters(data); }}
+                categories={categories}
+                priorities={priorities}
+                completionOptions={completionOptions}
+            />
 
             {loading && <p>Laddar...</p>}
             {!loading && paginatedTasks.length === 0 && <p>Inga tasks</p>}
@@ -74,7 +82,7 @@ function Tasks() {
                     task={task}
                     showActions={false}
                     editable={false}
-                    onClick={() => navigate(`/task/${task._id}`)} // Klick tar till single task
+                    onClick={() => navigate(`/task/${task._id}`)}
                 />
             ))}
 

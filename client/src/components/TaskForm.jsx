@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { apiFetch } from "../api/ApiFetch";
+import { taskService } from "../services/taskService";
 import { capitalize, formatCategory } from "../utils/formatters";
 
 function TaskForm({ onCreate }) {
@@ -37,12 +37,7 @@ function TaskForm({ onCreate }) {
             formData.append("deadline", deadline);
             images.forEach(img => formData.append("images", img));
 
-            const res = await apiFetch("/api/tasks", {
-                method: "POST",
-                body: formData
-            });
-
-            if (!res.ok) throw new Error();
+            await taskService.create(formData);
 
             toast.success("Task skapad ✅");
 

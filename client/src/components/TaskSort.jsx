@@ -7,9 +7,7 @@ function TaskSort({ sortBy, onSortChange }) {
                 value={sortBy || ""}
                 onChange={e => onSortChange(e.target.value)}
             >
-                {/* Neutral default */}
                 <option value="">Välj</option>
-
                 <option value="createdAt">Skapad datum</option>
                 <option value="deadline">Deadline</option>
                 <option value="priority">Priority</option>
