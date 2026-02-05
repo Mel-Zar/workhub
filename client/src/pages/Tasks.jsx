@@ -8,10 +8,8 @@ import TaskFilters from "../components/TaskFilters";
 import TaskSort from "../components/TaskSort";
 
 function Tasks() {
-
     const navigate = useNavigate();
 
-    // ================= DATA =================
     const [allTasks, setAllTasks] = useState([]);
     const [filters, setFilters] = useState({
         search: "",
@@ -23,7 +21,7 @@ function Tasks() {
     });
     const [sortBy, setSortBy] = useState("");
     const [page, setPage] = useState(1);
-    const [limit] = useState(5); // tasks per page
+    const [limit] = useState(5);
     const [loading, setLoading] = useState(false);
 
     // ================= FETCH ALL TASKS =================
@@ -79,7 +77,6 @@ function Tasks() {
         return arr;
     }, [filteredTasks]);
 
-    // ================= RENDER =================
     return (
         <div>
             <h2>Mina Tasks</h2>
@@ -111,7 +108,6 @@ function Tasks() {
                 />
             ))}
 
-            {/* ================= PAGINATION ================= */}
             {pages > 1 && (
                 <div style={{ marginTop: 20 }}>
                     {page > 1 && <button onClick={() => setPage(p => p - 1)}>⬅ Föregående</button>}
