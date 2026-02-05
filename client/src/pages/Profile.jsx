@@ -1,9 +1,8 @@
 import { useState, useContext } from "react";
 import { toast } from "react-toastify";
-import { apiFetch } from "../api/ApiFetch";
 import { AuthContext } from "../context/AuthContext";
+import { authService } from "../services/authService";
 
-// ================= LOAD USER FROM TOKEN =================
 function getUserFromToken() {
     const token = localStorage.getItem("accessToken");
     if (!token) return { name: "", email: "" };
@@ -20,55 +19,35 @@ function getUserFromToken() {
 }
 
 function Profile() {
-
-    // ✅ FROM CONTEXT
     const { updateUserName } = useContext(AuthContext);
-
     const user = getUserFromToken();
 
     const [name, setName] = useState(user.name);
     const [email, setEmail] = useState(user.email);
-
     const [initialName, setInitialName] = useState(user.name);
     const [initialEmail, setInitialEmail] = useState(user.email);
-
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [deletePassword, setDeletePassword] = useState("");
-
     const [loading, setLoading] = useState(false);
 
-    // ================= SAVE PROFILE =================
     async function handleSubmit(e) {
         e.preventDefault();
         setLoading(true);
 
         try {
-            const res = await apiFetch("/api/auth/profile", {
-                method: "PUT",
-                body: JSON.stringify({
-                    name,
-                    email,
-                    currentPassword,
-                    newPassword
-                })
+            const data = await authService.updateProfile({
+                name,
+                email,
+                currentPassword,
+                newPassword
             });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                toast.error(data.error || "Profile update failed");
-                return;
-            }
-
-            if (data.accessToken) {
-                localStorage.setItem("accessToken", data.accessToken);
-            }
+            if (data.accessToken) localStorage.setItem("accessToken", data.accessToken);
 
             updateUserName(data.user.name);
 
             toast.success("Profil uppdaterad ✅");
-
             setInitialName(name);
             setInitialEmail(email);
             setCurrentPassword("");
@@ -76,148 +55,66 @@ function Profile() {
 
         } catch (err) {
             console.error(err);
-            toast.error("Serverfel");
+            toast.error(err.message || "Serverfel vid uppdatering");
         } finally {
             setLoading(false);
         }
     }
 
-    // ================= DELETE ACCOUNT =================
-    function handleDeleteAccount() {
-
+    async function handleDeleteAccount() {
         if (!deletePassword) {
             toast.error("Lösenord krävs för att radera konto");
             return;
         }
 
-        toast.warn(
-            <div>
-                <p>Är du säker på att du vill radera ditt konto?</p>
+        if (!window.confirm("Är du säker på att du vill radera ditt konto?")) return;
 
-                <button
-                    onClick={confirmDeleteAccount}
-                    style={{ marginRight: 10 }}
-                >
-                    Ja, radera
-                </button>
-
-                <button onClick={() => toast.dismiss()}>
-                    Avbryt
-                </button>
-            </div>,
-            { autoClose: false }
-        );
-    }
-
-    async function confirmDeleteAccount() {
-        toast.dismiss();
         setLoading(true);
 
         try {
-            const res = await apiFetch("/api/auth/delete", {
-                method: "DELETE",
-                body: JSON.stringify({
-                    currentPassword: deletePassword
-                })
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                toast.error(data.error || "Delete failed");
-                return;
-            }
-
+            await authService.deleteAccount(deletePassword);
             toast.success("Kontot raderat");
 
             localStorage.clear();
-
-            setTimeout(() => {
-                window.location.href = "/login";
-            }, 1500);
+            setTimeout(() => (window.location.href = "/login"), 1000);
 
         } catch (err) {
             console.error(err);
-            toast.error("Serverfel");
+            toast.error(err.message || "Serverfel vid radering");
         } finally {
             setLoading(false);
         }
     }
 
-    // ================= CHECK CHANGES =================
-    const hasChanges =
-        name !== initialName ||
-        email !== initialEmail ||
-        newPassword.length > 0;
+    const hasChanges = name !== initialName || email !== initialEmail || newPassword.length > 0;
 
-    // ================= RENDER =================
     return (
-        <div>
+        <div style={{ maxWidth: 500, margin: "auto", padding: 20 }}>
+            <h2>Profil</h2>
 
-            <h2>Profile</h2>
-
-            {/* ================= PROFILE FORM ================= */}
             <form onSubmit={handleSubmit}>
+                <h4>Profil info</h4>
+                <input placeholder="Namn" value={name} onChange={e => setName(e.target.value)} />
+                <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
 
-                <h4>Profile info</h4>
+                <h4>Byt lösenord</h4>
+                <input type="password" placeholder="Nytt lösenord" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
 
-                <input
-                    placeholder="Name"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                />
-
-                <input
-                    placeholder="Email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                />
-
-                <h4>Change password</h4>
-
-                <input
-                    type="password"
-                    placeholder="New password"
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                />
-
-                <h4>Confirm identity</h4>
-
-                <input
-                    type="password"
-                    placeholder="Current password (required)"
-                    value={currentPassword}
-                    onChange={e => setCurrentPassword(e.target.value)}
-                    required
-                />
+                <h4>Bekräfta identitet</h4>
+                <input type="password" placeholder="Nuvarande lösenord" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required />
 
                 <button disabled={!hasChanges || loading}>
-                    {loading ? "Saving..." : "Save"}
+                    {loading ? "Sparar..." : "Spara"}
                 </button>
-
             </form>
 
-            {/* ================= DELETE ACCOUNT ================= */}
             <hr />
 
-            <h4>Danger zone</h4>
-
-            <input
-                type="password"
-                placeholder="Confirm password to delete account"
-                value={deletePassword}
-                onChange={e => setDeletePassword(e.target.value)}
-            />
-
-            <button
-                type="button"
-                disabled={loading}
-                onClick={handleDeleteAccount}
-            >
-                Delete account
+            <h4>Farlig zon</h4>
+            <input type="password" placeholder="Bekräfta lösenord för radering" value={deletePassword} onChange={e => setDeletePassword(e.target.value)} />
+            <button type="button" disabled={loading} onClick={handleDeleteAccount}>
+                Radera konto
             </button>
-
         </div>
     );
 }

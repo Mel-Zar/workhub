@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 function Navbar() {
-    const { isLoggedIn, userName, logout } = useContext(AuthContext);
+    const { isLoggedIn, user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -13,7 +13,7 @@ function Navbar() {
 
     return (
         <nav style={{ marginBottom: "20px" }}>
-            {isLoggedIn && <p>Hej, <strong>{userName}</strong> 👋</p>}
+            {isLoggedIn && <p>Hej, <strong>{user?.name}</strong> 👋</p>}
 
             {isLoggedIn ? (
                 <>

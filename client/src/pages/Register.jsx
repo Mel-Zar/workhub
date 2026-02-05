@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { apiFetch } from "../api/ApiFetch";
+import { authService } from "../services/authService";
 
 function Register() {
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,24 +16,15 @@ function Register() {
     setLoading(true);
 
     try {
-      const res = await apiFetch("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify({ name, email, password })
-      });
+      // 🔑 Registrera via authService
+      await authService.register({ name, email, password });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "Registrering misslyckades");
-        return;
-      }
-
-      toast.success("Konto skapat! Logga in nu 🎉");
+      toast.success("Konto skapat! Logga in 🎉");
       navigate("/login");
 
     } catch (err) {
       console.error(err);
-      toast.error("Serverfel");
+      toast.error(err.message || "Registrering misslyckades");
     } finally {
       setLoading(false);
     }
@@ -42,14 +32,12 @@ function Register() {
 
   return (
     <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
-
       <h2>Registrera</h2>
 
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: 10 }}
       >
-
         <input
           placeholder="Namn"
           value={name}
@@ -76,9 +64,7 @@ function Register() {
         <button disabled={loading}>
           {loading ? "Skapar konto..." : "Registrera"}
         </button>
-
       </form>
-
     </div>
   );
 }

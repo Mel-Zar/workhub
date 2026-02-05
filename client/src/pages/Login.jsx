@@ -2,15 +2,11 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
-import { apiFetch } from "../api/ApiFetch";
+import { authService } from "../services/authService";
 
 function Login() {
-
-  console.log("AUTH CONTEXT:", useContext(AuthContext));
-
   const { login, isLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
-
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,23 +21,10 @@ function Login() {
     setLoading(true);
 
     try {
-      const res = await apiFetch("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password })
-      });
+      // 🔑 Login via authService
+      const data = await authService.login({ email, password });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "Fel email eller lösenord");
-        return;
-      }
-
-      // ✅ SPARA TOKENS FÖRST
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
-
-      // ✅ SEN CONTEXT LOGIN
+      // Uppdatera context med tokens
       login(data.accessToken, data.refreshToken);
 
       toast.success(`Välkommen tillbaka ${data.user.name}!`);
@@ -49,25 +32,20 @@ function Login() {
 
     } catch (err) {
       console.error(err);
-      toast.error("Serverfel");
+      toast.error(err.message || "Fel email eller lösenord");
     } finally {
       setLoading(false);
     }
   }
 
-
-
-
   return (
     <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
-
       <h2>Logga in</h2>
 
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: 10 }}
       >
-
         <input
           type="email"
           placeholder="Email"
@@ -87,9 +65,7 @@ function Login() {
         <button disabled={loading}>
           {loading ? "Loggar in..." : "Logga in"}
         </button>
-
       </form>
-
     </div>
   );
 }

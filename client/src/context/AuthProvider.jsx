@@ -1,68 +1,54 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AuthContext } from "./AuthContext";
+
+function getUserFromToken() {
+    const access = localStorage.getItem("accessToken");
+    if (!access) return null;
+
+    try {
+        const payload = JSON.parse(atob(access.split(".")[1]));
+        return { name: payload.name };
+    } catch {
+        localStorage.clear();
+        return null;
+    }
+}
 
 export default function AuthProvider({ children }) {
 
-
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userName, setUserName] = useState("");
-    const [loading, setLoading] = useState(true);
-
-    // ================= INIT =================
-    useEffect(() => {
-        const access = localStorage.getItem("accessToken");
-
-        if (!access) {
-            setLoading(false);
-            return;
-        }
-
-        try {
-            const payload = JSON.parse(atob(access.split(".")[1]));
-            setUserName(payload.name || "User");
-            setIsLoggedIn(true);
-        } catch (err) {
-            console.error("Token parse error:", err);
-            localStorage.clear();
-            setIsLoggedIn(false);
-            setUserName("");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    const [user, setUser] = useState(() => getUserFromToken());
+    const [loading] = useState(false);
 
     // ================= LOGIN =================
-    function login(access, refresh) {
-        localStorage.setItem("accessToken", access);
-        localStorage.setItem("refreshToken", refresh);
+    function login(accessToken, refreshToken) {
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
 
         try {
-            const payload = JSON.parse(atob(access.split(".")[1]));
-            setUserName(payload.name || "User");
+            const payload = JSON.parse(atob(accessToken.split(".")[1]));
+            setUser({ name: payload.name });
         } catch {
-            setUserName("User");
+            setUser({ name: "User" });
         }
-
-        setIsLoggedIn(true);
     }
 
     // ================= LOGOUT =================
     function logout() {
         localStorage.clear();
-        setIsLoggedIn(false);
-        setUserName("");
+        setUser(null);
         window.location.href = "/login";
     }
 
-    function updateUserName(newName) {
-        setUserName(newName);
+    // ================= UPDATE USER NAME =================
+    function updateUserName(name) {
+        setUser(prev => ({ ...prev, name }));
     }
 
     return (
         <AuthContext.Provider
             value={{
-                isLoggedIn,
-                userName,
+                user,
+                isLoggedIn: !!user,
                 loading,
                 login,
                 logout,
