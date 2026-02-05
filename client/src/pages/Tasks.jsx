@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api/ApiFetch";
-
 import TaskItem from "../components/TaskItem";
 import TaskSearch from "../components/TaskSearch";
 import TaskFilters from "../components/TaskFilters";
@@ -9,52 +8,36 @@ import TaskSort from "../components/TaskSort";
 
 function Tasks() {
     const navigate = useNavigate();
-
     const [allTasks, setAllTasks] = useState([]);
-    const [filters, setFilters] = useState({
-        search: "",
-        priority: "",
-        category: "",
-        completed: "",
-        fromDate: "",
-        toDate: ""
-    });
+    const [filters, setFilters] = useState({ search: "", priority: "", category: "", completed: "", fromDate: "", toDate: "" });
     const [sortBy, setSortBy] = useState("");
     const [page, setPage] = useState(1);
     const [limit] = useState(5);
     const [loading, setLoading] = useState(false);
 
-    // ================= FETCH ALL TASKS =================
     useEffect(() => {
         async function fetchAll() {
+            setLoading(true);
             try {
-                setLoading(true);
                 const res = await apiFetch("/api/tasks?limit=10000");
                 const data = await res.json();
                 setAllTasks(data.tasks || []);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
+            } catch (err) { console.error(err); }
+            setLoading(false);
         }
         fetchAll();
     }, []);
 
-    // ================= FILTERED TASKS =================
-    const filteredTasks = useMemo(() => {
-        return allTasks.filter(t => {
-            if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
-            if (filters.priority && t.priority !== filters.priority) return false;
-            if (filters.category && t.category !== filters.category) return false;
-            if (filters.completed !== "" && String(t.completed) !== filters.completed) return false;
-            if (filters.fromDate && t.deadline && new Date(t.deadline) < new Date(filters.fromDate)) return false;
-            if (filters.toDate && t.deadline && new Date(t.deadline) > new Date(filters.toDate)) return false;
-            return true;
-        });
-    }, [allTasks, filters]);
+    const filteredTasks = useMemo(() => allTasks.filter(t => {
+        if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
+        if (filters.priority && t.priority !== filters.priority) return false;
+        if (filters.category && t.category !== filters.category) return false;
+        if (filters.completed !== "" && String(t.completed) !== filters.completed) return false;
+        if (filters.fromDate && t.deadline && new Date(t.deadline) < new Date(filters.fromDate)) return false;
+        if (filters.toDate && t.deadline && new Date(t.deadline) > new Date(filters.toDate)) return false;
+        return true;
+    }), [allTasks, filters]);
 
-    // ================= SORTED TASKS =================
     const sortedTasks = useMemo(() => {
         const copy = [...filteredTasks];
         if (sortBy === "deadline") return copy.sort((a, b) => new Date(a.deadline || 0) - new Date(b.deadline || 0));
@@ -63,37 +46,15 @@ function Tasks() {
         return copy;
     }, [filteredTasks, sortBy]);
 
-    // ================= PAGINATION =================
     const pages = Math.ceil(sortedTasks.length / limit);
     const paginatedTasks = sortedTasks.slice((page - 1) * limit, page * limit);
 
-    // ================= DROPDOWN VALUES =================
-    const categories = useMemo(() => [...new Set(filteredTasks.map(t => t.category).filter(Boolean))], [filteredTasks]);
-    const priorities = useMemo(() => [...new Set(filteredTasks.map(t => t.priority).filter(Boolean))], [filteredTasks]);
-    const completionOptions = useMemo(() => {
-        const arr = [];
-        if (filteredTasks.some(t => t.completed)) arr.push("true");
-        if (filteredTasks.some(t => !t.completed)) arr.push("false");
-        return arr;
-    }, [filteredTasks]);
-
     return (
         <div>
-            <h2>Mina Tasks</h2>
-
+            <h2>Tasks</h2>
             <TaskSort onSortChange={(value) => { setPage(1); setSortBy(value); }} />
-
-            <TaskSearch
-                onSearch={(value) => { setPage(1); setFilters(prev => ({ ...prev, search: value })); }}
-            />
-
-            <TaskFilters
-                filters={filters}
-                onChange={(data) => { setPage(1); setFilters(data); }}
-                categories={categories}
-                priorities={priorities}
-                completionOptions={completionOptions}
-            />
+            <TaskSearch onSearch={(value) => { setPage(1); setFilters(prev => ({ ...prev, search: value })); }} />
+            <TaskFilters filters={filters} onChange={(data) => { setPage(1); setFilters(data); }} categories={[...new Set(allTasks.map(t => t.category).filter(Boolean))]} priorities={[...new Set(allTasks.map(t => t.priority).filter(Boolean))]} completionOptions={["true", "false"]} />
 
             {loading && <p>Laddar...</p>}
             {!loading && paginatedTasks.length === 0 && <p>Inga tasks</p>}
@@ -102,8 +63,8 @@ function Tasks() {
                 <TaskItem
                     key={task._id}
                     task={task}
-                    clickable
-                    showActions={false}
+                    showActions={false}  // Ingen checkbox
+                    editable={false}     // Ingen redigera-knapp
                     onClick={() => navigate(`/task/${task._id}`)}
                 />
             ))}

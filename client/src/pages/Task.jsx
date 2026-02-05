@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { apiFetch } from "../api/ApiFetch";
+import { apiFetch } from "../api/ApiFetch.jsx";
 
 function Task() {
 
