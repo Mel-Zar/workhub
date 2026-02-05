@@ -49,7 +49,12 @@ function Dashboard() {
 
     const categories = useMemo(() => [...new Set(filteredTasks.map(t => t.category).filter(Boolean))], [filteredTasks]);
     const priorities = useMemo(() => [...new Set(filteredTasks.map(t => t.priority).filter(Boolean))], [filteredTasks]);
-    const completionOptions = useMemo(() => { const arr = []; if (filteredTasks.some(t => t.completed)) arr.push("true"); if (filteredTasks.some(t => !t.completed)) arr.push("false"); return arr; }, [filteredTasks]);
+    const completionOptions = useMemo(() => {
+        const arr = [];
+        if (filteredTasks.some(t => t.completed)) arr.push("true");
+        if (filteredTasks.some(t => !t.completed)) arr.push("false");
+        return arr;
+    }, [filteredTasks]);
 
     return (
         <div>
@@ -72,11 +77,13 @@ function Dashboard() {
                 />
             ))}
 
-            {pages > 1 && <div style={{ marginTop: 20 }}>
-                {page > 1 && <button onClick={() => setPage(p => p - 1)}>⬅ Föregående</button>}
-                <span style={{ margin: "0 10px" }}>Sida {page} av {pages}</span>
-                {page < pages && <button onClick={() => setPage(p => p + 1)}>Nästa ➡</button>}
-            </div>}
+            {pages > 1 && (
+                <div style={{ marginTop: 20 }}>
+                    {page > 1 && <button onClick={() => setPage(p => p - 1)}>⬅ Föregående</button>}
+                    <span style={{ margin: "0 10px" }}>Sida {page} av {pages}</span>
+                    {page < pages && <button onClick={() => setPage(p => p + 1)}>Nästa ➡</button>}
+                </div>
+            )}
         </div>
     );
 }

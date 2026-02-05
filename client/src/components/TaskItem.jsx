@@ -1,4 +1,3 @@
-// src/components/TaskItem.jsx
 import { useState } from "react";
 import { apiFetch } from "../api/ApiFetch";
 import { toast } from "react-toastify";
@@ -165,8 +164,10 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
             }}
             onClick={() => { if (onClick && !editing) onClick(); }}
         >
-            {showActions && <input type="checkbox" checked={task.completed} onChange={toggleComplete} />}
+            {/* Checkbox */}
+            {showActions && <input type="checkbox" checked={task.completed} onChange={toggleComplete} onClick={(e) => e.stopPropagation()} />}
 
+            {/* EDIT MODE */}
             {editing && editable ? (
                 <>
                     <input value={title} onChange={e => setTitle(e.target.value)} />
@@ -205,6 +206,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
                 </>
             ) : (
                 <>
+                    {/* VIEW MODE */}
                     <h4>{capitalize(task.title)}</h4>
                     <p>{capitalize(task.priority)}</p>
                     <p>{capitalize(task.category)}</p>

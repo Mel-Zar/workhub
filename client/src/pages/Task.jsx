@@ -1,120 +1,50 @@
-import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { apiFetch } from "../api/ApiFetch";
-import TaskItem from "../components/TaskItem";
-import TaskSearch from "../components/TaskSearch";
-import TaskFilters from "../components/TaskFilters";
-import TaskSort from "../components/TaskSort";
+import { toast } from "react-toastify";
 
-function Tasks() {
-    const navigate = useNavigate();
+function Task() {
+    const { id } = useParams();  // <-- hämtar task-id från URL
+    const [task, setTask] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const [allTasks, setAllTasks] = useState([]);
-    const [filters, setFilters] = useState({
-        search: "",
-        priority: "",
-        category: "",
-        completed: "",
-        fromDate: "",
-        toDate: ""
-    });
-    const [sortBy, setSortBy] = useState("");
-    const [page, setPage] = useState(1);
-    const limit = 5;
-    const [loading, setLoading] = useState(false);
-
-    // ================= FETCH ALL TASKS =================
     useEffect(() => {
-        async function fetchAll() {
+        async function fetchTask() {
             setLoading(true);
             try {
-                const res = await apiFetch("/api/tasks?limit=10000");
+                const res = await apiFetch(`/api/tasks/${id}`);
+                if (!res.ok) throw new Error("Kunde inte hämta task");
                 const data = await res.json();
-                setAllTasks(data.tasks || []);
+                setTask(data);
             } catch (err) {
                 console.error(err);
+                toast.error("Kunde inte hämta task");
             } finally {
                 setLoading(false);
             }
         }
-        fetchAll();
-    }, []);
+        fetchTask();
+    }, [id]);
 
-    // ================= FILTERED TASKS =================
-    const filteredTasks = useMemo(() => {
-        return allTasks.filter(t => {
-            if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
-            if (filters.priority && t.priority !== filters.priority) return false;
-            if (filters.category && t.category !== filters.category) return false;
-            if (filters.completed !== "" && String(t.completed) !== filters.completed) return false;
-            if (filters.fromDate && t.deadline && new Date(t.deadline) < new Date(filters.fromDate)) return false;
-            if (filters.toDate && t.deadline && new Date(t.deadline) > new Date(filters.toDate)) return false;
-            return true;
-        });
-    }, [allTasks, filters]);
+    if (loading) return <p>Laddar...</p>;
+    if (!task) return <p>Task hittades inte</p>;
 
-    // ================= SORTED TASKS =================
-    const sortedTasks = useMemo(() => {
-        const copy = [...filteredTasks];
-        if (sortBy === "deadline") return copy.sort((a, b) => new Date(a.deadline || 0) - new Date(b.deadline || 0));
-        if (sortBy === "priority") return copy.sort((a, b) => a.priority.localeCompare(b.priority));
-        if (sortBy === "title") return copy.sort((a, b) => a.title.localeCompare(b.title));
-        return copy;
-    }, [filteredTasks, sortBy]);
-
-    // ================= PAGINATION =================
-    const pages = Math.ceil(sortedTasks.length / limit);
-    const paginatedTasks = sortedTasks.slice((page - 1) * limit, page * limit);
-
-    // ================= DROPDOWN VALUES =================
-    const categories = useMemo(() => [...new Set(allTasks.map(t => t.category).filter(Boolean))], [allTasks]);
-    const priorities = useMemo(() => [...new Set(allTasks.map(t => t.priority).filter(Boolean))], [allTasks]);
-    const completionOptions = useMemo(() => {
-        const arr = [];
-        if (allTasks.some(t => t.completed)) arr.push("true");
-        if (allTasks.some(t => !t.completed)) arr.push("false");
-        return arr;
-    }, [allTasks]);
-
-    // ================= RENDER =================
     return (
         <div>
-            <h2>Tasks</h2>
-
-            <TaskSort onSortChange={(value) => { setPage(1); setSortBy(value); }} />
-
-            <TaskSearch onSearch={(value) => { setPage(1); setFilters(prev => ({ ...prev, search: value })); }} />
-
-            <TaskFilters
-                filters={filters}
-                onChange={(data) => { setPage(1); setFilters(data); }}
-                categories={categories}
-                priorities={priorities}
-                completionOptions={completionOptions}
-            />
-
-            {loading && <p>Laddar...</p>}
-            {!loading && paginatedTasks.length === 0 && <p>Inga tasks</p>}
-
-            {!loading && paginatedTasks.map(task => (
-                <TaskItem
-                    key={task._id}
-                    task={task}
-                    showActions={false}  // Ingen checkbox
-                    editable={false}     // Ingen redigera-knapp
-                    onClick={() => navigate(`/task/${task._id}`)}
-                />
-            ))}
-
-            {pages > 1 && (
-                <div style={{ marginTop: 20 }}>
-                    {page > 1 && <button onClick={() => setPage(p => p - 1)}>⬅ Föregående</button>}
-                    <span style={{ margin: "0 10px" }}>Sida {page} av {pages}</span>
-                    {page < pages && <button onClick={() => setPage(p => p + 1)}>Nästa ➡</button>}
+            <h2>{task.title}</h2>
+            <p>Priority: {task.priority}</p>
+            <p>Category: {task.category}</p>
+            <p>Deadline: {task.deadline?.slice(0, 10)}</p>
+            <p>Status: {task.completed ? "Klar" : "Ej klar"}</p>
+            {task.images?.length > 0 && (
+                <div style={{ display: "flex", gap: 8 }}>
+                    {task.images.map((img, i) => (
+                        <img key={i} src={`${import.meta.env.VITE_API_URL}${img}`} width="80" />
+                    ))}
                 </div>
             )}
         </div>
     );
 }
 
-export default Tasks;
+export default Task;
