@@ -1,110 +1,120 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { apiFetch } from "../api/ApiFetch.jsx";
+import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../api/ApiFetch";
+import TaskItem from "../components/TaskItem";
+import TaskSearch from "../components/TaskSearch";
+import TaskFilters from "../components/TaskFilters";
+import TaskSort from "../components/TaskSort";
 
-function Task() {
-
-    const { id } = useParams();
+function Tasks() {
     const navigate = useNavigate();
 
-    const [task, setTask] = useState(null);
-    const [error, setError] = useState("");
+    const [allTasks, setAllTasks] = useState([]);
+    const [filters, setFilters] = useState({
+        search: "",
+        priority: "",
+        category: "",
+        completed: "",
+        fromDate: "",
+        toDate: ""
+    });
+    const [sortBy, setSortBy] = useState("");
+    const [page, setPage] = useState(1);
+    const limit = 5;
+    const [loading, setLoading] = useState(false);
 
-    // ================= FORMATTER =================
-    function formatText(str) {
-        if (!str) return "";
-        return str
-            .toString()
-            .toLowerCase()
-            .split(" ")
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
-    }
-
-    // ================= FETCH TASK =================
+    // ================= FETCH ALL TASKS =================
     useEffect(() => {
-
-        const fetchTask = async () => {
+        async function fetchAll() {
+            setLoading(true);
             try {
-                const res = await apiFetch(`/api/tasks/${id}`);
-
-                if (!res.ok)
-                    return setError("Kunde inte hämta task");
-
+                const res = await apiFetch("/api/tasks?limit=10000");
                 const data = await res.json();
-
-                // 🔥 Formatera text direkt
-                const formatted = {
-                    ...data,
-                    title: formatText(data.title),
-                    category: formatText(data.category),
-                    priority: formatText(data.priority)
-                };
-
-                setTask(formatted);
-
+                setAllTasks(data.tasks || []);
             } catch (err) {
                 console.error(err);
-                setError("Serverfel");
+            } finally {
+                setLoading(false);
             }
-        };
+        }
+        fetchAll();
+    }, []);
 
-        fetchTask();
+    // ================= FILTERED TASKS =================
+    const filteredTasks = useMemo(() => {
+        return allTasks.filter(t => {
+            if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
+            if (filters.priority && t.priority !== filters.priority) return false;
+            if (filters.category && t.category !== filters.category) return false;
+            if (filters.completed !== "" && String(t.completed) !== filters.completed) return false;
+            if (filters.fromDate && t.deadline && new Date(t.deadline) < new Date(filters.fromDate)) return false;
+            if (filters.toDate && t.deadline && new Date(t.deadline) > new Date(filters.toDate)) return false;
+            return true;
+        });
+    }, [allTasks, filters]);
 
-    }, [id]);
+    // ================= SORTED TASKS =================
+    const sortedTasks = useMemo(() => {
+        const copy = [...filteredTasks];
+        if (sortBy === "deadline") return copy.sort((a, b) => new Date(a.deadline || 0) - new Date(b.deadline || 0));
+        if (sortBy === "priority") return copy.sort((a, b) => a.priority.localeCompare(b.priority));
+        if (sortBy === "title") return copy.sort((a, b) => a.title.localeCompare(b.title));
+        return copy;
+    }, [filteredTasks, sortBy]);
 
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
-    if (!task) return <p>Laddar task...</p>;
+    // ================= PAGINATION =================
+    const pages = Math.ceil(sortedTasks.length / limit);
+    const paginatedTasks = sortedTasks.slice((page - 1) * limit, page * limit);
 
+    // ================= DROPDOWN VALUES =================
+    const categories = useMemo(() => [...new Set(allTasks.map(t => t.category).filter(Boolean))], [allTasks]);
+    const priorities = useMemo(() => [...new Set(allTasks.map(t => t.priority).filter(Boolean))], [allTasks]);
+    const completionOptions = useMemo(() => {
+        const arr = [];
+        if (allTasks.some(t => t.completed)) arr.push("true");
+        if (allTasks.some(t => !t.completed)) arr.push("false");
+        return arr;
+    }, [allTasks]);
+
+    // ================= RENDER =================
     return (
-        <div style={{ padding: "20px" }}>
+        <div>
+            <h2>Tasks</h2>
 
-            <h2>{task.title}</h2>
+            <TaskSort onSortChange={(value) => { setPage(1); setSortBy(value); }} />
 
-            <p><strong>Kategori:</strong> {task.category || "Ingen"}</p>
-            <p><strong>Prioritet:</strong> {task.priority}</p>
+            <TaskSearch onSearch={(value) => { setPage(1); setFilters(prev => ({ ...prev, search: value })); }} />
 
-            <p>
-                <strong>Deadline:</strong>{" "}
-                {task.deadline
-                    ? new Date(task.deadline).toLocaleDateString()
-                    : "Ingen"}
-            </p>
+            <TaskFilters
+                filters={filters}
+                onChange={(data) => { setPage(1); setFilters(data); }}
+                categories={categories}
+                priorities={priorities}
+                completionOptions={completionOptions}
+            />
 
-            <p>
-                <strong>Status:</strong>{" "}
-                {task.completed ? "Klar" : "Ej klar"}
-            </p>
+            {loading && <p>Laddar...</p>}
+            {!loading && paginatedTasks.length === 0 && <p>Inga tasks</p>}
 
-            {task.images?.length > 0 && (
-                <div
-                    style={{
-                        display: "flex",
-                        gap: 10,
-                        flexWrap: "wrap",
-                        marginTop: 20
-                    }}
-                >
-                    {task.images.map((img, i) => (
-                        <img
-                            key={i}
-                            src={`http://localhost:5001${img}`}
-                            alt="task"
-                            width={150}
-                            style={{ borderRadius: 8 }}
-                        />
-                    ))}
+            {!loading && paginatedTasks.map(task => (
+                <TaskItem
+                    key={task._id}
+                    task={task}
+                    showActions={false}  // Ingen checkbox
+                    editable={false}     // Ingen redigera-knapp
+                    onClick={() => navigate(`/task/${task._id}`)}
+                />
+            ))}
+
+            {pages > 1 && (
+                <div style={{ marginTop: 20 }}>
+                    {page > 1 && <button onClick={() => setPage(p => p - 1)}>⬅ Föregående</button>}
+                    <span style={{ margin: "0 10px" }}>Sida {page} av {pages}</span>
+                    {page < pages && <button onClick={() => setPage(p => p + 1)}>Nästa ➡</button>}
                 </div>
             )}
-
-            <br />
-
-            <button onClick={() => navigate(-1)}>
-                Tillbaka
-            </button>
-
         </div>
     );
 }
 
-export default Task;
+export default Tasks;
