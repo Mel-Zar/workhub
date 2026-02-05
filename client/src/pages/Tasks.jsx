@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api/ApiFetch";
 
@@ -11,66 +11,96 @@ function Tasks() {
 
     const navigate = useNavigate();
 
+    // ================= DATA =================
     const [tasks, setTasks] = useState([]);
+    const [allTasks, setAllTasks] = useState([]);
 
-    const [categories, setCategories] = useState([]);
-    const [priorities, setPriorities] = useState([]);
-    const [completionOptions, setCompletionOptions] = useState([]);
+    // ================= FILTER STATE =================
+    const [filters, setFilters] = useState({
+        search: "",
+        priority: "",
+        category: "",
+        completed: "",
+        fromDate: "",
+        toDate: ""
+    });
 
-    const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState("");
-
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
     const [loading, setLoading] = useState(false);
 
-    // ================= FETCH TASKS =================
-    const fetchTasks = useCallback(async () => {
-        try {
-            setLoading(true);
-
-            const params = new URLSearchParams({
-                page,
-                limit: 5,
-                sortBy
-            });
-
-            if (filters.search) params.append("search", filters.search);
-            if (filters.priority) params.append("priority", filters.priority);
-            if (filters.completed !== undefined)
-                params.append("completed", filters.completed);
-            if (filters.category)
-                params.append("category", filters.category);
-
-            const res = await apiFetch(`/api/tasks?${params}`);
-            if (!res.ok) throw new Error("Fetch failed");
-
-            const data = await res.json();
-            const formatted = data.tasks || [];
-
-            setTasks(formatted);
-            setPages(data.pages || 1);
-
-            // 🔥 Dynamiska filter-val
-            setCategories([...new Set(formatted.map(t => t.category).filter(Boolean))]);
-            setPriorities([...new Set(formatted.map(t => t.priority).filter(Boolean))]);
-
-            const comp = [];
-            if (formatted.some(t => t.completed === true)) comp.push("true");
-            if (formatted.some(t => t.completed === false)) comp.push("false");
-            setCompletionOptions(comp);
-
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    }, [page, filters, sortBy]);
-
-    // ================= USE EFFECT =================
+    // ================= FETCH ALL TASKS (ONCE) =================
     useEffect(() => {
-        fetchTasks();
-    }, [fetchTasks]);
+        async function fetchAll() {
+            const res = await apiFetch("/api/tasks?limit=10000");
+            const data = await res.json();
+            setAllTasks(data.tasks || []);
+        }
+        fetchAll();
+    }, []);
+
+    // ================= FETCH FILTERED TASKS =================
+    useEffect(() => {
+
+        async function fetchFiltered() {
+
+            try {
+                setLoading(true);
+
+                const params = new URLSearchParams({
+                    page,
+                    limit: 5,
+                    sortBy
+                });
+
+                Object.entries(filters).forEach(([key, value]) => {
+                    if (value) params.append(key, value);
+                });
+
+                const res = await apiFetch(`/api/tasks?${params}`);
+                const data = await res.json();
+
+                setTasks(data.tasks || []);
+                setPages(data.pages || 1);
+
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchFiltered();
+
+    }, [filters, sortBy, page]);
+
+    // ================= SOURCE FOR DROPDOWNS =================
+    const isFiltering =
+        filters.search ||
+        filters.priority ||
+        filters.category ||
+        filters.completed ||
+        filters.fromDate ||
+        filters.toDate;
+
+    const sourceForFilters = isFiltering ? tasks : allTasks;
+
+    // ================= DROPDOWN VALUES =================
+    const categories = useMemo(() => {
+        return [...new Set(sourceForFilters.map(t => t.category).filter(Boolean))];
+    }, [sourceForFilters]);
+
+    const priorities = useMemo(() => {
+        return [...new Set(sourceForFilters.map(t => t.priority).filter(Boolean))];
+    }, [sourceForFilters]);
+
+    const completionOptions = useMemo(() => {
+        const arr = [];
+        if (sourceForFilters.some(t => t.completed)) arr.push("true");
+        if (sourceForFilters.some(t => !t.completed)) arr.push("false");
+        return arr;
+    }, [sourceForFilters]);
 
     // ================= RENDER =================
     return (
@@ -78,37 +108,23 @@ function Tasks() {
 
             <h2>Mina Tasks</h2>
 
-            <TaskSort
-                sortBy={sortBy}
-                onSortChange={value => {
-                    setPage(1);
-                    setSortBy(value);
-                }}
-            />
+            <TaskSort onSortChange={(value) => {
+                setPage(1);
+                setSortBy(value);
+            }} />
 
             <TaskSearch
-                onSearch={value => {
+                onSearch={(value) => {
                     setPage(1);
                     setFilters(prev => ({ ...prev, search: value }));
                 }}
             />
 
-            {/* ✅ FIXAD FILTER */}
             <TaskFilters
                 categories={categories}
                 priorities={priorities}
                 completionOptions={completionOptions}
-                onFilter={data => {
-
-                    // 🔥 Rensa filter
-                    if (Object.keys(data).length === 0) {
-                        setPage(1);
-                        setFilters({});
-                        fetchTasks();
-                        return;
-                    }
-
-                    // 🔥 Vanliga filter
+                onFilter={(data) => {
                     setPage(1);
                     setFilters(prev => ({ ...prev, ...data }));
                 }}

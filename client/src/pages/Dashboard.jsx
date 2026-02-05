@@ -1,34 +1,44 @@
-import { useEffect, useState, useCallback } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
+import { useEffect, useState, useMemo } from "react";
 import { apiFetch } from "../api/ApiFetch";
 
-import TaskForm from "../components/TaskForm";
-import TaskItem from "../components/TaskItem";
 import TaskFilters from "../components/TaskFilters";
 import TaskSearch from "../components/TaskSearch";
 import TaskSort from "../components/TaskSort";
+import TaskItem from "../components/TaskItem";
 
 function Dashboard() {
 
+    // ================= DATA =================
     const [tasks, setTasks] = useState([]);
+    const [allTasks, setAllTasks] = useState([]);
 
-    const [categories, setCategories] = useState([]);
-    const [priorities, setPriorities] = useState([]);
-    const [completionOptions, setCompletionOptions] = useState([]);
+    // ================= FILTER STATE =================
+    const [filters, setFilters] = useState({
+        priority: "",
+        category: "",
+        completed: "",
+        fromDate: "",
+        toDate: "",
+        search: ""
+    });
 
-    const [filters, setFilters] = useState({});
     const [sortBy, setSortBy] = useState("");
+    const [page] = useState(1);
 
-    const [page, setPage] = useState(1);
-    const [pages, setPages] = useState(1);
-    const [loading, setLoading] = useState(false);
+    // ================= FETCH ALL TASKS (ONCE) =================
+    useEffect(() => {
+        async function fetchAll() {
+            const res = await apiFetch("/api/tasks?limit=10000");
+            const data = await res.json();
+            setAllTasks(data.tasks || []);
+        }
+        fetchAll();
+    }, []);
 
-    // ================= FETCH TASKS =================
-    const fetchTasks = useCallback(async () => {
-        try {
-            setLoading(true);
+    // ================= FETCH FILTERED TASKS =================
+    useEffect(() => {
+
+        async function fetchFiltered() {
 
             const params = new URLSearchParams({
                 page,
@@ -36,136 +46,72 @@ function Dashboard() {
                 sortBy
             });
 
-            if (filters.search) params.append("search", filters.search);
-            if (filters.priority) params.append("priority", filters.priority);
-            if (filters.completed !== undefined)
-                params.append("completed", filters.completed);
-            if (filters.category)
-                params.append("category", filters.category);
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value) params.append(key, value);
+            });
 
             const res = await apiFetch(`/api/tasks?${params}`);
-            if (!res.ok) throw new Error("Fetch failed");
-
             const data = await res.json();
-            const formatted = data.tasks || [];
-
-            setTasks(formatted);
-            setPages(data.pages || 1);
-
-            // FILTER OPTIONS BASERAT PÅ DATA I DB
-            setCategories([...new Set(formatted.map(t => t.category).filter(Boolean))]);
-            setPriorities([...new Set(formatted.map(t => t.priority).filter(Boolean))]);
-
-            const comp = [];
-            if (formatted.some(t => t.completed === true)) comp.push("true");
-            if (formatted.some(t => t.completed === false)) comp.push("false");
-            setCompletionOptions(comp);
-
-        } catch (err) {
-            console.error(err);
-            toast.error("Kunde inte hämta tasks");
-        } finally {
-            setLoading(false);
+            setTasks(data.tasks || []);
         }
-    }, [page, filters, sortBy]);
 
-    // ================= USE EFFECT =================
-    useEffect(() => {
-        fetchTasks();
-    }, [fetchTasks]);
+        fetchFiltered();
 
-    // ================= CALLBACKS =================
-    function handleUpdate(updatedTask) {
-        setTasks(prev =>
-            prev.map(t => (t._id === updatedTask._id ? updatedTask : t))
-        );
-    }
+    }, [filters, sortBy, page]);
 
-    function handleDelete(id) {
-        setTasks(prev => prev.filter(t => t._id !== id));
-    }
+    // ================= SOURCE FOR DROPDOWNS =================
+    const isFiltering =
+        filters.priority ||
+        filters.category ||
+        filters.completed ||
+        filters.fromDate ||
+        filters.toDate ||
+        filters.search;
+
+    const sourceForFilters = isFiltering ? tasks : allTasks;
+
+    // ================= DROPDOWN VALUES =================
+    const categories = useMemo(() => {
+        return [...new Set(sourceForFilters.map(t => t.category).filter(Boolean))];
+    }, [sourceForFilters]);
+
+    const priorities = useMemo(() => {
+        return [...new Set(sourceForFilters.map(t => t.priority).filter(Boolean))];
+    }, [sourceForFilters]);
+
+    const completionOptions = useMemo(() => {
+        const arr = [];
+        if (sourceForFilters.some(t => t.completed)) arr.push("true");
+        if (sourceForFilters.some(t => !t.completed)) arr.push("false");
+        return arr;
+    }, [sourceForFilters]);
 
     // ================= RENDER =================
     return (
         <div>
 
-            <ToastContainer position="top-right" autoClose={3000} />
-
-            <h2>Dashboard</h2>
-
-            <TaskSort
-                sortBy={sortBy}
-                onSortChange={value => {
-                    setPage(1);
-                    setSortBy(value);
-                }}
-            />
+            <TaskSort onSortChange={setSortBy} />
 
             <TaskSearch
-                onSearch={value => {
-                    setPage(1);
-                    setFilters(prev => ({ ...prev, search: value }));
-                }}
+                onSearch={(value) =>
+                    setFilters(prev => ({ ...prev, search: value }))
+                }
             />
 
-            {/* ✅ FIXAD FILTER-HANTERING */}
             <TaskFilters
                 categories={categories}
                 priorities={priorities}
                 completionOptions={completionOptions}
-                onFilter={data => {
-
-                    // 🔥 OM RENSNING
-                    if (Object.keys(data).length === 0) {
-                        setPage(1);
-                        setFilters({});
-                        fetchTasks();      // <-- NY RAD
-                        return;
-                    }
-
-                    // 🔥 VANLIG FILTER
-                    setPage(1);
-                    setFilters(prev => ({ ...prev, ...data }));
-                }}
+                onFilter={(data) =>
+                    setFilters(prev => ({ ...prev, ...data }))
+                }
             />
 
-            <TaskForm onCreate={fetchTasks} />
+            {tasks.length === 0 && <p>Inga tasks</p>}
 
-            {loading && <p>Laddar...</p>}
-            {!loading && tasks.length === 0 && <p>Inga tasks</p>}
-
-            {!loading && tasks.map(task => (
-                <TaskItem
-                    key={task._id}
-                    task={task}
-                    onUpdate={handleUpdate}
-                    onDelete={handleDelete}
-                    showActions
-                />
+            {tasks.map(task => (
+                <TaskItem key={task._id} task={task} />
             ))}
-
-            {/* PAGINATION */}
-            {pages > 1 && (
-                <div style={{ marginTop: 20 }}>
-
-                    {page > 1 && (
-                        <button onClick={() => setPage(p => p - 1)}>
-                            ⬅ Föregående
-                        </button>
-                    )}
-
-                    <span style={{ margin: "0 10px" }}>
-                        Sida {page} av {pages}
-                    </span>
-
-                    {page < pages && (
-                        <button onClick={() => setPage(p => p + 1)}>
-                            Nästa ➡
-                        </button>
-                    )}
-
-                </div>
-            )}
 
         </div>
     );
