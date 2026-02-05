@@ -1,130 +1,60 @@
-import { useState, useMemo } from "react";
-
 function TaskFilters({
-    onFilter,
-    categories = [],
-    priorities = [],
-    completionOptions = []
+    filters,
+    onChange,
+    categories,
+    priorities,
+    completionOptions
 }) {
-    const [priority, setPriority] = useState("");
-    const [category, setCategory] = useState("");
-    const [completed, setCompleted] = useState("");
-    const [fromDate, setFromDate] = useState("");
-    const [toDate, setToDate] = useState("");
 
-    // Remove empty + duplicates
-    const cleanCategories = useMemo(() => {
-        return [...new Set(categories.filter(Boolean))];
-    }, [categories]);
+    function handleChange(e) {
+        const { name, value } = e.target;
 
-    const cleanPriorities = useMemo(() => {
-        return [...new Set(priorities.filter(Boolean))];
-    }, [priorities]);
-
-    function triggerFilter(changes = {}) {
-        const updated = {
-            priority,
-            category,
-            completed,
-            fromDate,
-            toDate,
-            ...changes
-        };
-
-        onFilter({
-            priority: updated.priority || undefined,
-            category: updated.category || undefined,
-            completed: updated.completed || undefined,
-            fromDate: updated.fromDate || undefined,
-            toDate: updated.toDate || undefined
+        onChange({
+            ...filters,
+            [name]: value
         });
-    }
-
-    function handleReset() {
-        setPriority("");
-        setCategory("");
-        setCompleted("");
-        setFromDate("");
-        setToDate("");
-        onFilter({});
     }
 
     return (
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
 
-            {/* PRIORITY */}
-            <select
-                value={priority}
-                onChange={(e) => {
-                    setPriority(e.target.value);
-                    triggerFilter({ priority: e.target.value });
-                }}
-            >
+            <select name="priority" value={filters.priority} onChange={handleChange}>
                 <option value="">Alla prioriteter</option>
-                {cleanPriorities.map((p) => (
-                    <option key={p} value={p}>
-                        {p}
-                    </option>
-                ))}
+                {priorities.map(p =>
+                    <option key={p} value={p}>{p}</option>
+                )}
             </select>
 
-            {/* CATEGORY */}
-            <select
-                value={category}
-                onChange={(e) => {
-                    setCategory(e.target.value);
-                    triggerFilter({ category: e.target.value });
-                }}
-            >
+            <select name="category" value={filters.category} onChange={handleChange}>
                 <option value="">Alla kategorier</option>
-                {cleanCategories.map((c) => (
-                    <option key={c} value={c}>
-                        {c}
-                    </option>
-                ))}
+                {categories.map(c =>
+                    <option key={c} value={c}>{c}</option>
+                )}
             </select>
 
-            {/* COMPLETED */}
-            <select
-                value={completed}
-                onChange={(e) => {
-                    setCompleted(e.target.value);
-                    triggerFilter({ completed: e.target.value });
-                }}
-            >
+            <select name="completed" value={filters.completed} onChange={handleChange}>
                 <option value="">Alla</option>
-
-                {completionOptions.includes("true") && (
-                    <option value="true">Klara</option>
-                )}
-
-                {completionOptions.includes("false") && (
-                    <option value="false">Ej klara</option>
+                {completionOptions.map(v =>
+                    <option key={v} value={v}>
+                        {v === "true" ? "Klara" : "Ej klara"}
+                    </option>
                 )}
             </select>
 
-            {/* FROM DATE */}
             <input
                 type="date"
-                value={fromDate}
-                onChange={(e) => {
-                    setFromDate(e.target.value);
-                    triggerFilter({ fromDate: e.target.value });
-                }}
+                name="fromDate"
+                value={filters.fromDate}
+                onChange={handleChange}
             />
 
-            {/* TO DATE */}
             <input
                 type="date"
-                value={toDate}
-                onChange={(e) => {
-                    setToDate(e.target.value);
-                    triggerFilter({ toDate: e.target.value });
-                }}
+                name="toDate"
+                value={filters.toDate}
+                onChange={handleChange}
             />
 
-            {/* RESET */}
-            <button onClick={handleReset}>🔄 Rensa</button>
         </div>
     );
 }

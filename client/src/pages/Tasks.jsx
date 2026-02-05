@@ -12,10 +12,7 @@ function Tasks() {
     const navigate = useNavigate();
 
     // ================= DATA =================
-    const [tasks, setTasks] = useState([]);
     const [allTasks, setAllTasks] = useState([]);
-
-    // ================= FILTER STATE =================
     const [filters, setFilters] = useState({
         search: "",
         priority: "",
@@ -24,118 +21,87 @@ function Tasks() {
         fromDate: "",
         toDate: ""
     });
-
     const [sortBy, setSortBy] = useState("");
     const [page, setPage] = useState(1);
-    const [pages, setPages] = useState(1);
+    const [limit] = useState(5); // tasks per page
     const [loading, setLoading] = useState(false);
 
-    // ================= FETCH ALL TASKS (ONCE) =================
+    // ================= FETCH ALL TASKS =================
     useEffect(() => {
         async function fetchAll() {
-            const res = await apiFetch("/api/tasks?limit=10000");
-            const data = await res.json();
-            setAllTasks(data.tasks || []);
-        }
-        fetchAll();
-    }, []);
-
-    // ================= FETCH FILTERED TASKS =================
-    useEffect(() => {
-
-        async function fetchFiltered() {
-
             try {
                 setLoading(true);
-
-                const params = new URLSearchParams({
-                    page,
-                    limit: 5,
-                    sortBy
-                });
-
-                Object.entries(filters).forEach(([key, value]) => {
-                    if (value !== "" && value !== undefined) {
-                        params.append(key, value);
-                    }
-                });
-
-                const res = await apiFetch(`/api/tasks?${params}`);
+                const res = await apiFetch("/api/tasks?limit=10000");
                 const data = await res.json();
-
-                setTasks(data.tasks || []);
-                setPages(data.pages || 1);
-
+                setAllTasks(data.tasks || []);
             } catch (err) {
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         }
+        fetchAll();
+    }, []);
 
-        fetchFiltered();
+    // ================= FILTERED TASKS =================
+    const filteredTasks = useMemo(() => {
+        return allTasks.filter(t => {
+            if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
+            if (filters.priority && t.priority !== filters.priority) return false;
+            if (filters.category && t.category !== filters.category) return false;
+            if (filters.completed !== "" && String(t.completed) !== filters.completed) return false;
+            if (filters.fromDate && t.deadline && new Date(t.deadline) < new Date(filters.fromDate)) return false;
+            if (filters.toDate && t.deadline && new Date(t.deadline) > new Date(filters.toDate)) return false;
+            return true;
+        });
+    }, [allTasks, filters]);
 
-    }, [filters, sortBy, page]);
+    // ================= SORTED TASKS =================
+    const sortedTasks = useMemo(() => {
+        const copy = [...filteredTasks];
+        if (sortBy === "deadline") return copy.sort((a, b) => new Date(a.deadline || 0) - new Date(b.deadline || 0));
+        if (sortBy === "priority") return copy.sort((a, b) => a.priority.localeCompare(b.priority));
+        if (sortBy === "title") return copy.sort((a, b) => a.title.localeCompare(b.title));
+        return copy;
+    }, [filteredTasks, sortBy]);
 
-    // ================= SOURCE FOR DROPDOWNS =================
-    const isFiltering =
-        filters.search ||
-        filters.priority ||
-        filters.category ||
-        filters.completed ||
-        filters.fromDate ||
-        filters.toDate;
-
-    const sourceForFilters = isFiltering ? tasks : allTasks;
+    // ================= PAGINATION =================
+    const pages = Math.ceil(sortedTasks.length / limit);
+    const paginatedTasks = sortedTasks.slice((page - 1) * limit, page * limit);
 
     // ================= DROPDOWN VALUES =================
-    const categories = useMemo(() => {
-        return [...new Set(sourceForFilters.map(t => t.category).filter(Boolean))];
-    }, [sourceForFilters]);
-
-    const priorities = useMemo(() => {
-        return [...new Set(sourceForFilters.map(t => t.priority).filter(Boolean))];
-    }, [sourceForFilters]);
-
+    const categories = useMemo(() => [...new Set(filteredTasks.map(t => t.category).filter(Boolean))], [filteredTasks]);
+    const priorities = useMemo(() => [...new Set(filteredTasks.map(t => t.priority).filter(Boolean))], [filteredTasks]);
     const completionOptions = useMemo(() => {
         const arr = [];
-        if (sourceForFilters.some(t => t.completed)) arr.push("true");
-        if (sourceForFilters.some(t => !t.completed)) arr.push("false");
+        if (filteredTasks.some(t => t.completed)) arr.push("true");
+        if (filteredTasks.some(t => !t.completed)) arr.push("false");
         return arr;
-    }, [sourceForFilters]);
+    }, [filteredTasks]);
 
     // ================= RENDER =================
     return (
         <div>
-
             <h2>Mina Tasks</h2>
 
-            <TaskSort onSortChange={(value) => {
-                setPage(1);
-                setSortBy(value);
-            }} />
+            <TaskSort onSortChange={(value) => { setPage(1); setSortBy(value); }} />
 
             <TaskSearch
-                onSearch={(value) => {
-                    setPage(1);
-                    setFilters(prev => ({ ...prev, search: value }));
-                }}
+                onSearch={(value) => { setPage(1); setFilters(prev => ({ ...prev, search: value })); }}
             />
 
             <TaskFilters
+                filters={filters}
+                onChange={(data) => { setPage(1); setFilters(data); }}
                 categories={categories}
                 priorities={priorities}
                 completionOptions={completionOptions}
-                onFilter={(data) => {
-                    setPage(1);
-                    setFilters(prev => ({ ...prev, ...data }));
-                }}
             />
 
             {loading && <p>Laddar...</p>}
-            {!loading && tasks.length === 0 && <p>Inga tasks</p>}
+            {!loading && paginatedTasks.length === 0 && <p>Inga tasks</p>}
 
-            {!loading && tasks.map(task => (
+            {!loading && paginatedTasks.map(task => (
                 <TaskItem
                     key={task._id}
                     task={task}
@@ -148,26 +114,11 @@ function Tasks() {
             {/* ================= PAGINATION ================= */}
             {pages > 1 && (
                 <div style={{ marginTop: 20 }}>
-
-                    {page > 1 && (
-                        <button onClick={() => setPage(p => p - 1)}>
-                            ⬅ Föregående
-                        </button>
-                    )}
-
-                    <span style={{ margin: "0 10px" }}>
-                        Sida {page} av {pages}
-                    </span>
-
-                    {page < pages && (
-                        <button onClick={() => setPage(p => p + 1)}>
-                            Nästa ➡
-                        </button>
-                    )}
-
+                    {page > 1 && <button onClick={() => setPage(p => p - 1)}>⬅ Föregående</button>}
+                    <span style={{ margin: "0 10px" }}>Sida {page} av {pages}</span>
+                    {page < pages && <button onClick={() => setPage(p => p + 1)}>Nästa ➡</button>}
                 </div>
             )}
-
         </div>
     );
 }

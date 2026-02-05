@@ -8,111 +8,127 @@ import TaskItem from "../components/TaskItem";
 
 function Dashboard() {
 
-    // ================= DATA =================
+    // ALL TASKS
     const [tasks, setTasks] = useState([]);
-    const [allTasks, setAllTasks] = useState([]);
 
-
-    // ================= FILTER STATE =================
+    // FILTER STATE
     const [filters, setFilters] = useState({
+        search: "",
         priority: "",
         category: "",
         completed: "",
         fromDate: "",
-        toDate: "",
-        search: ""
+        toDate: ""
     });
 
     const [sortBy, setSortBy] = useState("");
-    const [page] = useState(1);
 
-    // ================= FETCH ALL TASKS (ONCE) =================
+    // FETCH ONCE
     useEffect(() => {
         async function fetchAll() {
             const res = await apiFetch("/api/tasks?limit=10000");
             const data = await res.json();
-            setAllTasks(data.tasks || []);
+            setTasks(data.tasks || []);
         }
         fetchAll();
     }, []);
 
-    // ================= FETCH FILTERED TASKS =================
-    useEffect(() => {
+    // FILTERING
+    const filteredTasks = useMemo(() => {
+        return tasks.filter(t => {
 
-        async function fetchFiltered() {
+            if (
+                filters.search &&
+                !t.title.toLowerCase().includes(filters.search.toLowerCase())
+            ) return false;
 
-            const params = new URLSearchParams({
-                page,
-                limit: 5,
-                sortBy
-            });
+            if (filters.priority && t.priority !== filters.priority)
+                return false;
 
-            Object.entries(filters).forEach(([key, value]) => {
-                if (value !== "" && value !== undefined) {
-                    params.append(key, value);
-                }
-            });
+            if (filters.category && t.category !== filters.category)
+                return false;
 
-            const res = await apiFetch(`/api/tasks?${params}`);
-            const data = await res.json();
-            setTasks(data.tasks || []);
-        }
+            if (
+                filters.completed !== "" &&
+                String(t.completed) !== filters.completed
+            ) return false;
 
-        fetchFiltered();
+            if (filters.fromDate && t.deadline) {
+                if (new Date(t.deadline) < new Date(filters.fromDate))
+                    return false;
+            }
 
-    }, [filters, sortBy, page]);
+            if (filters.toDate && t.deadline) {
+                if (new Date(t.deadline) > new Date(filters.toDate))
+                    return false;
+            }
 
-    // ================= SOURCE FOR DROPDOWNS =================
-    const isFiltering =
-        filters.priority ||
-        filters.category ||
-        filters.completed ||
-        filters.fromDate ||
-        filters.toDate ||
-        filters.search;
+            return true;
+        });
+    }, [tasks, filters]);
 
-    const sourceForFilters = isFiltering ? tasks : allTasks;
+    // CASCADE OPTIONS
+    const categories = useMemo(() =>
+        [...new Set(filteredTasks.map(t => t.category))],
+        [filteredTasks]
+    );
 
-    // ================= DROPDOWN VALUES =================
-    const categories = useMemo(() => {
-        return [...new Set(sourceForFilters.map(t => t.category).filter(Boolean))];
-    }, [sourceForFilters]);
-
-    const priorities = useMemo(() => {
-        return [...new Set(sourceForFilters.map(t => t.priority).filter(Boolean))];
-    }, [sourceForFilters]);
+    const priorities = useMemo(() =>
+        [...new Set(filteredTasks.map(t => t.priority))],
+        [filteredTasks]
+    );
 
     const completionOptions = useMemo(() => {
         const arr = [];
-        if (sourceForFilters.some(t => t.completed)) arr.push("true");
-        if (sourceForFilters.some(t => !t.completed)) arr.push("false");
+        if (filteredTasks.some(t => t.completed)) arr.push("true");
+        if (filteredTasks.some(t => !t.completed)) arr.push("false");
         return arr;
-    }, [sourceForFilters]);
+    }, [filteredTasks]);
 
-    // ================= RENDER =================
+    // SORT
+    const sortedTasks = useMemo(() => {
+        const copy = [...filteredTasks];
+
+        if (sortBy === "deadline")
+            return copy.sort((a, b) =>
+                new Date(a.deadline || 0) - new Date(b.deadline || 0)
+            );
+
+        if (sortBy === "priority")
+            return copy.sort((a, b) =>
+                a.priority.localeCompare(b.priority)
+            );
+
+        if (sortBy === "title")
+            return copy.sort((a, b) =>
+                a.title.localeCompare(b.title)
+            );
+
+        return copy;
+    }, [filteredTasks, sortBy]);
+
     return (
         <div>
 
             <TaskSort onSortChange={setSortBy} />
 
             <TaskSearch
-                onSearch={(value) =>
+                onSearch={value =>
                     setFilters(prev => ({ ...prev, search: value }))
                 }
             />
 
             <TaskFilters
+                filters={filters}
+                onChange={setFilters}
                 categories={categories}
                 priorities={priorities}
                 completionOptions={completionOptions}
-                onFilter={(data) =>
-                    setFilters(prev => ({ ...prev, ...data }))
-                }
             />
 
-            {tasks.length === 0 && <p>Inga tasks</p>}
+            {sortedTasks.length === 0 && <p>Inga tasks</p>}
 
-            {tasks.map(task => (
+            {sortedTasks.map(task => (
                 <TaskItem key={task._id} task={task} />
             ))}
 
