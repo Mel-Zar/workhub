@@ -55,7 +55,9 @@ function Tasks() {
                 });
 
                 Object.entries(filters).forEach(([key, value]) => {
-                    if (value) params.append(key, value);
+                    if (value !== "" && value !== undefined) {
+                        params.append(key, value);
+                    }
                 });
 
                 const res = await apiFetch(`/api/tasks?${params}`);

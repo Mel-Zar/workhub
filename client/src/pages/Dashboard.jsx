@@ -12,6 +12,7 @@ function Dashboard() {
     const [tasks, setTasks] = useState([]);
     const [allTasks, setAllTasks] = useState([]);
 
+
     // ================= FILTER STATE =================
     const [filters, setFilters] = useState({
         priority: "",
@@ -47,7 +48,9 @@ function Dashboard() {
             });
 
             Object.entries(filters).forEach(([key, value]) => {
-                if (value) params.append(key, value);
+                if (value !== "" && value !== undefined) {
+                    params.append(key, value);
+                }
             });
 
             const res = await apiFetch(`/api/tasks?${params}`);
