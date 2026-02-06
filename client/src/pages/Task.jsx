@@ -1,12 +1,16 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { taskService } from "../services/taskService";
 import { toast } from "react-toastify";
 
 function Task() {
+
     const { id } = useParams();
     const [task, setTask] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         async function fetchTask() {
@@ -46,6 +50,10 @@ function Task() {
                     ))}
                 </div>
             )}
+            <div>
+                <button onClick={() => navigate(-1)}>Go back</button>
+
+            </div>
         </div>
     );
 }
