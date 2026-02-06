@@ -312,9 +312,13 @@ Handled by:
 This project demonstrates:
 
 ✅ Fullstack architecture
+
 ✅ Real authentication system
+
 ✅ Scalable folder structure
+
 ✅ Clean code separation
+
 ✅ Production-style API layer
 
 Perfect as a portfolio project.
