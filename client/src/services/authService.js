@@ -10,7 +10,11 @@ export const authService = {
         });
 
         const data = await res.json();
+
         if (!res.ok) throw new Error(data.error || "Login failed");
+
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
 
         return data;
     },
