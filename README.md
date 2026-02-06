@@ -379,3 +379,176 @@ Junior Fullstack Developer
 - Task sharing
 
 - Notifications
+
+## 📦 Frontend Dependencies
+
+```bash
+cd client
+npm install react react-dom react-router-dom react-toastify
+```
+
+## 📦 Backend Dependencies
+
+```bash
+cd server
+npm install express mongoose cors dotenv bcryptjs jsonwebtoken multer
+npm install -D nodemon
+```
+
+## 🔐 Environment Variables
+
+Frontend (.env)
+
+```bash
+VITE_API_URL=http://localhost:5000
+```
+
+### Backend (.env)
+
+```bash
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+JWT_REFRESH_SECRET=your_refresh_secret
+```
+
+⚠️ Never commit .env files to GitHub.
+
+---
+
+## ⚙️ Installation
+
+### 1️⃣ Clone repository
+
+```bash
+git clone https://github.com/yourusername/workhub.git
+cd workhub
+```
+
+### 2️⃣ Install backend
+
+```bash
+cd server
+npm install
+npm run dev
+```
+
+### 3️⃣ Install frontend
+
+Open new terminal:
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+## 🔁 Authentication Flow
+
+1. User logs in
+
+2. Backend returns accessToken & refreshToken
+
+3. Tokens saved in localStorage
+
+4. Every request uses apiFetch()
+
+5. If accessToken expires → auto refresh
+
+6. If refresh fails → logout
+
+## 🌍 API Architecture
+
+```bash
+apiFetch → service → component
+```
+
+✔ Centralized error handling
+
+✔ Automatic headers
+
+✔ Token refresh
+
+✔ Cleaner components
+
+## 🧰 Utils Usage
+
+```bash
+utils/formatters.js
+```
+
+- Capitalizing titles
+
+- Cleaning categories
+
+- Formatting user input
+
+Example:
+
+```bash
+capitalize("hello") → "Hello"
+formatCategory("work123") → "Work"
+```
+
+## 🖼️ Screenshots
+
+```bash
+/screenshots
+```
+
+```bash
+![Login](screenshots/login.png)
+![Dashboard](screenshots/dashboard.png)
+![Create Task](screenshots/create-task.png)
+![Edit Task](screenshots/edit-task.png)
+```
+
+## 🛡️ Protected Routes
+
+- /dashboard
+
+- /tasks
+
+- /task/:id
+
+- /profile
+
+Handled by:
+
+```bash
+<PrivateRoute />
+```
+
+## 🚀 Why This Project?
+
+✅ Fullstack architecture
+
+✅ Real authentication system
+
+✅ Scalable folder structure
+
+✅ Clean code separation
+
+✅ Production-style API layer
+
+Perfect portfolio project.
+
+## 👨‍💻 Author
+
+**Melissa Zarinnegar**
+
+Web Developer (E-commerce specialization)
+
+Junior Fullstack Developer
+
+## ⭐ Future Improvements
+
+- Drag & drop tasks
+
+- Dark mode
+
+- Role based access
+
+- Task sharing
+
+- Notifications
