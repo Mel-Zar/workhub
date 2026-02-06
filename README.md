@@ -36,7 +36,7 @@ This project demonstrates a **real-world architecture** with services, hooks, re
 
 ## 🖥️ Tech Stack
 
-###Frontend
+### Frontend
 
 - React
 
@@ -150,6 +150,39 @@ workhub/
 ```
 
 ---
+
+## 📦 Frontend Dependencies
+
+- react
+- react-dom
+- react-router-dom
+- react-toastify
+
+Install:
+
+```bash
+cd client
+npm install react react-dom react-router-dom react-toastify
+```
+
+## 📦 Backend Dependencies
+
+- express
+- mongoose
+- dotenv
+- cors
+- jsonwebtoken
+- bcryptjs
+- multer
+- nodemon
+
+Install:
+
+```bash
+cd server
+npm install express mongoose cors dotenv bcryptjs jsonwebtoken multer
+npm install -D nodemon
+```
 
 ## 🔐 Environment Variables (.env)
 
