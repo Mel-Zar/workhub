@@ -8,33 +8,23 @@ import {
     createTask,
     updateTask,
     deleteTask,
+    toggleComplete,
     addImages,
     removeImage
 } from "../controllers/taskController.js";
 
 const router = express.Router();
 
-// ================= TASK ROUTES =================
-
-// GET all tasks (filter, search, pagination, sort)
+// TASK ROUTES
 router.get("/", auth, getTasks);
-
-// GET single task
 router.get("/:id", auth, getTask);
-
-// CREATE task
 router.post("/", auth, upload.array("images", 5), createTask);
-
-// UPDATE task
 router.put("/:id", auth, updateTask);
-
-// DELETE task
 router.delete("/:id", auth, deleteTask);
+router.patch("/:id/toggle", auth, toggleComplete);
 
-// ADD images
+// IMAGE ROUTES
 router.post("/:id/images", auth, upload.array("images", 5), addImages);
-
-// REMOVE image
 router.delete("/:id/images", auth, removeImage);
 
 export default router;

@@ -57,5 +57,15 @@ export const taskService = {
             body: JSON.stringify({ image }),
             headers: { "Content-Type": "application/json" }
         }).then(res => res.json());
+    },
+
+    // ================= TOGGLE COMPLETE =================
+    toggleComplete(id, completed) {
+        // skickar PUT med ny completed-status
+        return apiFetch(`/api/tasks/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({ completed }),
+            headers: { "Content-Type": "application/json" }
+        }).then(res => res.json());
     }
 };

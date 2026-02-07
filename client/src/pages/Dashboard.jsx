@@ -50,7 +50,7 @@ function Dashboard() {
             {error && <p style={{ color: "red" }}>Fel: {error}</p>}
             {!tasksLoading && !error && tasks.length === 0 && <p>Inga tasks</p>}
 
-            {tasks.map((task) => (
+            {tasks.map(task => (
                 <TaskItem
                     key={task._id}
                     task={task}
