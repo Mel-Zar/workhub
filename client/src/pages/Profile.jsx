@@ -31,62 +31,96 @@ function Profile() {
     const [deletePassword, setDeletePassword] = useState("");
     const [loading, setLoading] = useState(false);
 
-    async function handleSubmit(e) {
+    // ================= UPDATE PROFILE =================
+    function handleSubmit(e) {
         e.preventDefault();
-        setLoading(true);
 
-        try {
-            const data = await authService.updateProfile({
-                name,
-                email,
-                currentPassword,
-                newPassword
-            });
+        toast.info(
+            ({ closeToast }) => (
+                <div>
+                    <p>Är du säker på att du vill uppdatera profilen?</p>
+                    <button
+                        onClick={async () => {
+                            closeToast();
+                            setLoading(true);
 
-            if (data.accessToken) localStorage.setItem("accessToken", data.accessToken);
+                            try {
+                                const data = await authService.updateProfile({
+                                    name,
+                                    email,
+                                    currentPassword,
+                                    newPassword
+                                });
 
-            updateUserName(data.user.name);
+                                if (data.accessToken) {
+                                    localStorage.setItem("accessToken", data.accessToken);
+                                }
 
-            toast.success("Profil uppdaterad ✅");
-            setInitialName(name);
-            setInitialEmail(email);
-            setCurrentPassword("");
-            setNewPassword("");
+                                updateUserName(data.user.name);
 
-        } catch (err) {
-            console.error(err);
-            toast.error(err.message || "Serverfel vid uppdatering");
-        } finally {
-            setLoading(false);
-        }
+                                toast.success("Profil uppdaterad ✅");
+                                setInitialName(name);
+                                setInitialEmail(email);
+                                setCurrentPassword("");
+                                setNewPassword("");
+                            } catch (err) {
+                                console.error(err);
+                                toast.error(err.message || "Serverfel vid uppdatering");
+                            } finally {
+                                setLoading(false);
+                            }
+                        }}
+                    >
+                        Ja
+                    </button>
+                    <button onClick={closeToast}>Avbryt</button>
+                </div>
+            ),
+            { autoClose: false }
+        );
     }
 
-    async function handleDeleteAccount() {
+    // ================= DELETE ACCOUNT =================
+    function handleDeleteAccount() {
         if (!deletePassword) {
             toast.error("Lösenord krävs för att radera konto");
             return;
         }
 
-        if (!window.confirm("Är du säker på att du vill radera ditt konto?")) return;
+        toast.error(
+            ({ closeToast }) => (
+                <div>
+                    <p>⚠️ Är du säker på att du vill radera kontot?</p>
+                    <button
+                        onClick={async () => {
+                            closeToast();
+                            setLoading(true);
 
-        setLoading(true);
+                            try {
+                                await authService.deleteAccount(deletePassword);
+                                toast.success("Kontot raderat");
 
-        try {
-            await authService.deleteAccount(deletePassword);
-            toast.success("Kontot raderat");
-
-            localStorage.clear();
-            setTimeout(() => (window.location.href = "/login"), 1000);
-
-        } catch (err) {
-            console.error(err);
-            toast.error(err.message || "Serverfel vid radering");
-        } finally {
-            setLoading(false);
-        }
+                                localStorage.clear();
+                                setTimeout(() => (window.location.href = "/login"), 1000);
+                            } catch (err) {
+                                console.error(err);
+                                toast.error(err.message || "Serverfel vid radering");
+                            } finally {
+                                setLoading(false);
+                            }
+                        }}
+                    >
+                        Ja, radera
+                    </button>
+                    <button onClick={closeToast}>Avbryt</button>
+                </div>
+            ),
+            { autoClose: false }
+        );
     }
 
-    const hasChanges = name !== initialName || email !== initialEmail || newPassword.length > 0;
+    const hasChanges =
+        name !== initialName || email !== initialEmail || newPassword.length > 0;
 
     return (
         <div style={{ maxWidth: 500, margin: "auto", padding: 20 }}>
@@ -94,14 +128,25 @@ function Profile() {
 
             <form onSubmit={handleSubmit}>
                 <h4>Profil info</h4>
-                <input placeholder="Namn" value={name} onChange={e => setName(e.target.value)} />
-                <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+                <input value={name} onChange={e => setName(e.target.value)} placeholder="Namn" />
+                <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
 
                 <h4>Byt lösenord</h4>
-                <input type="password" placeholder="Nytt lösenord" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+                <input
+                    type="password"
+                    placeholder="Nytt lösenord"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                />
 
                 <h4>Bekräfta identitet</h4>
-                <input type="password" placeholder="Nuvarande lösenord" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required />
+                <input
+                    type="password"
+                    placeholder="Nuvarande lösenord"
+                    value={currentPassword}
+                    onChange={e => setCurrentPassword(e.target.value)}
+                    required
+                />
 
                 <button disabled={!hasChanges || loading}>
                     {loading ? "Sparar..." : "Spara"}
@@ -111,7 +156,12 @@ function Profile() {
             <hr />
 
             <h4>Farlig zon</h4>
-            <input type="password" placeholder="Bekräfta lösenord för radering" value={deletePassword} onChange={e => setDeletePassword(e.target.value)} />
+            <input
+                type="password"
+                placeholder="Bekräfta lösenord för radering"
+                value={deletePassword}
+                onChange={e => setDeletePassword(e.target.value)}
+            />
             <button type="button" disabled={loading} onClick={handleDeleteAccount}>
                 Radera konto
             </button>
