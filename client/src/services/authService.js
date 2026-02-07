@@ -1,9 +1,7 @@
 import { request } from "../api/request";
 
 export const authService = {
-
-    // ================= LOGIN =================
-    async login(credentials) {
+    login: async credentials => {
         const data = await request("/api/auth/login", {
             method: "POST",
             body: JSON.stringify(credentials)
@@ -15,58 +13,29 @@ export const authService = {
         return data;
     },
 
-    // ================= REGISTER =================
-    async register(user) {
-        return request("/api/auth/register", {
+    register: user =>
+        request("/api/auth/register", {
             method: "POST",
             body: JSON.stringify(user)
-        });
-    },
+        }),
 
-    // ================= REFRESH ACCESS TOKEN =================
-    async refresh() {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) throw new Error("No refresh token");
-
-        const data = await request("/api/auth/refresh", {
-            method: "POST",
-            body: JSON.stringify({ refreshToken })
-        });
-
-        localStorage.setItem("accessToken", data.accessToken);
-        return data.accessToken;
-    },
-
-    // ================= UPDATE PROFILE =================
-    async updateProfile({ name, email, currentPassword, newPassword }) {
-        return request("/api/auth/profile", {
+    updateProfile: data =>
+        request("/api/auth/profile", {
             method: "PUT",
-            body: JSON.stringify({
-                name,
-                email,
-                currentPassword,
-                newPassword
-            })
-        });
-    },
+            body: JSON.stringify(data)
+        }),
 
-    // ================= DELETE ACCOUNT =================
-    async deleteAccount(currentPassword) {
-        return request("/api/auth/delete", {
+    deleteAccount: currentPassword =>
+        request("/api/auth/delete", {
             method: "DELETE",
             body: JSON.stringify({ currentPassword })
-        });
-    },
+        }),
 
-    // ================= LOGOUT =================
-    async logout() {
+    logout: async () => {
         try {
             await request("/api/auth/logout", { method: "POST" });
-        } catch {
-            // ignore backend logout errors
+        } finally {
+            localStorage.clear();
         }
-
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
     }
 };

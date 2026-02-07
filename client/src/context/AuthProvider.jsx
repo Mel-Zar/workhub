@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AuthContext } from "./AuthContext";
-import { authService } from "../services/authService";
 
 function getUserFromToken(token) {
     try {
@@ -15,55 +14,30 @@ function getUserFromToken(token) {
     }
 }
 
+function getInitialUser() {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) return null;
+    return getUserFromToken(accessToken);
+}
+
 export default function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(getInitialUser);
+    const [loading] = useState(false); // inget async → alltid false
 
-    // 🔁 SILENT REFRESH ON APP START
-    useEffect(() => {
-        const initAuth = async () => {
-            const refreshToken = localStorage.getItem("refreshToken");
-
-            if (!refreshToken) {
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const accessToken = await authService.refresh(refreshToken);
-                const userFromToken = getUserFromToken(accessToken);
-                setUser(userFromToken);
-            } catch (err) {
-                console.warn("🔐 Refresh failed, logging out", err);
-                localStorage.clear();
-                setUser(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        initAuth();
-    }, []);
-
-    // ================= LOGIN =================
     function login(accessToken, refreshToken) {
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
-
-        const userFromToken = getUserFromToken(accessToken);
-        setUser(userFromToken);
+        setUser(getUserFromToken(accessToken));
     }
 
-    // ================= LOGOUT =================
     function logout() {
         localStorage.clear();
         setUser(null);
         window.location.href = "/login";
     }
 
-    // ================= UPDATE USER NAME =================
     function updateUserName(name) {
-        setUser(prev => prev ? { ...prev, name } : prev);
+        setUser(prev => (prev ? { ...prev, name } : prev));
     }
 
     return (
@@ -77,7 +51,7 @@ export default function AuthProvider({ children }) {
                 updateUserName
             }}
         >
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 }
