@@ -1,35 +1,57 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
+import { authService } from "../services/authService";
 
-function getUserFromToken() {
-    const access = localStorage.getItem("accessToken");
-    if (!access) return null;
-
+function getUserFromToken(token) {
     try {
-        const payload = JSON.parse(atob(access.split(".")[1]));
-        return { name: payload.name };
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return {
+            id: payload.id,
+            name: payload.name,
+            email: payload.email
+        };
     } catch {
-        localStorage.clear();
         return null;
     }
 }
 
 export default function AuthProvider({ children }) {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const [user, setUser] = useState(() => getUserFromToken());
-    const [loading] = useState(false);
+    // 🔁 SILENT REFRESH ON APP START
+    useEffect(() => {
+        const initAuth = async () => {
+            const refreshToken = localStorage.getItem("refreshToken");
+
+            if (!refreshToken) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const accessToken = await authService.refresh(refreshToken);
+                const userFromToken = getUserFromToken(accessToken);
+                setUser(userFromToken);
+            } catch (err) {
+                console.warn("🔐 Refresh failed, logging out", err);
+                localStorage.clear();
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        initAuth();
+    }, []);
 
     // ================= LOGIN =================
     function login(accessToken, refreshToken) {
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
 
-        try {
-            const payload = JSON.parse(atob(accessToken.split(".")[1]));
-            setUser({ name: payload.name });
-        } catch {
-            setUser({ name: "User" });
-        }
+        const userFromToken = getUserFromToken(accessToken);
+        setUser(userFromToken);
     }
 
     // ================= LOGOUT =================
@@ -41,7 +63,7 @@ export default function AuthProvider({ children }) {
 
     // ================= UPDATE USER NAME =================
     function updateUserName(name) {
-        setUser(prev => ({ ...prev, name }));
+        setUser(prev => prev ? { ...prev, name } : prev);
     }
 
     return (
@@ -55,7 +77,7 @@ export default function AuthProvider({ children }) {
                 updateUserName
             }}
         >
-            {children}
+            {!loading && children}
         </AuthContext.Provider>
     );
 }

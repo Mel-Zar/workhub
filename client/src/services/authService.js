@@ -1,17 +1,13 @@
-import { apiFetch } from "../api/ApiFetch";
+import { request } from "../api/request";
 
 export const authService = {
 
     // ================= LOGIN =================
     async login(credentials) {
-        const res = await apiFetch("/api/auth/login", {
+        const data = await request("/api/auth/login", {
             method: "POST",
             body: JSON.stringify(credentials)
         });
-
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.error || "Login failed");
 
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
@@ -21,41 +17,56 @@ export const authService = {
 
     // ================= REGISTER =================
     async register(user) {
-        const res = await apiFetch("/api/auth/register", {
+        return request("/api/auth/register", {
             method: "POST",
             body: JSON.stringify(user)
         });
+    },
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Register failed");
+    // ================= REFRESH ACCESS TOKEN =================
+    async refresh() {
+        const refreshToken = localStorage.getItem("refreshToken");
+        if (!refreshToken) throw new Error("No refresh token");
 
-        return data;
+        const data = await request("/api/auth/refresh", {
+            method: "POST",
+            body: JSON.stringify({ refreshToken })
+        });
+
+        localStorage.setItem("accessToken", data.accessToken);
+        return data.accessToken;
     },
 
     // ================= UPDATE PROFILE =================
     async updateProfile({ name, email, currentPassword, newPassword }) {
-        const res = await apiFetch("/api/auth/profile", {
+        return request("/api/auth/profile", {
             method: "PUT",
-            body: JSON.stringify({ name, email, currentPassword, newPassword })
+            body: JSON.stringify({
+                name,
+                email,
+                currentPassword,
+                newPassword
+            })
         });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Profile update failed");
-
-        return data;
     },
 
     // ================= DELETE ACCOUNT =================
     async deleteAccount(currentPassword) {
-        const res = await apiFetch("/api/auth/delete", {
+        return request("/api/auth/delete", {
             method: "DELETE",
             body: JSON.stringify({ currentPassword })
         });
+    },
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Delete account failed");
+    // ================= LOGOUT =================
+    async logout() {
+        try {
+            await request("/api/auth/logout", { method: "POST" });
+        } catch {
+            // ignore backend logout errors
+        }
 
-        return data;
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
     }
-
 };

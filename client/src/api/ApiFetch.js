@@ -3,7 +3,12 @@ const API_BASE = import.meta.env.VITE_API_URL;
 export async function apiFetch(url, options = {}) {
     const accessToken = localStorage.getItem("accessToken");
 
-    const headers = {
+    if (!accessToken && !url.includes("/auth") && !localStorage.getItem("refreshToken")) {
+        hardLogout();
+        throw new Error("No tokens");
+    }
+
+    let headers = {
         ...(options.headers || {})
     };
 
@@ -12,32 +17,42 @@ export async function apiFetch(url, options = {}) {
     }
 
     if (accessToken) {
-        headers.Authorization = `Bearer ${accessToken}`;
+        headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
-    const fullUrl = url.startsWith("http") ? url : `${API_BASE}${url}`;
+    const fullUrl = url.startsWith("http")
+        ? url
+        : `${API_BASE}${url}`;
 
     let response;
+
     try {
-        response = await fetch(fullUrl, { ...options, headers });
+        response = await fetch(fullUrl, {
+            ...options,
+            headers
+        });
     } catch (err) {
         console.error("❌ Network error:", err);
         throw err;
     }
 
-    // AUTO REFRESH TOKEN
+    // 🔁 AUTO REFRESH
     if (response.status === 401 && !options._retry) {
         const refreshToken = localStorage.getItem("refreshToken");
+
         if (!refreshToken) {
             hardLogout();
             return response;
         }
 
-        const refreshRes = await fetch(`${API_BASE}/api/auth/refresh`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ refreshToken })
-        });
+        const refreshRes = await fetch(
+            `${API_BASE}/api/auth/refresh`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refreshToken })
+            }
+        );
 
         if (!refreshRes.ok) {
             hardLogout();
@@ -47,11 +62,14 @@ export async function apiFetch(url, options = {}) {
         const data = await refreshRes.json();
         localStorage.setItem("accessToken", data.accessToken);
 
-        // RETRY ORIGINAL REQUEST
+        // 🔁 RETRY ORIGINAL REQUEST WITH NEW TOKEN
         return apiFetch(url, {
             ...options,
             _retry: true,
-            headers: { ...headers, Authorization: `Bearer ${data.accessToken}` }
+            headers: {
+                ...(options.headers || {}),
+                "Authorization": `Bearer ${data.accessToken}`
+            }
         });
     }
 

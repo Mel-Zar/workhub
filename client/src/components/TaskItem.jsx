@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { capitalize, cleanCategory } from "../utils/formatters";
 
 function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = true, onClick }) {
+
     const original = {
         title: task.title,
         priority: task.priority || "",
@@ -50,23 +51,35 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
         setNewImages(prev => prev.filter((_, i) => i !== index));
     }
 
-    const canSave =
-        editing &&
+    // ✅ TOTALA BILDER SOM KOMMER FINNAS EFTER SAVE
+    const totalImages =
+        existingImages.length +
+        newImages.length -
+        removedImages.length;
+
+    // ✅ ALLA FÄLT MÅSTE VARA IFYLLDA + MINST 1 BILD
+    const allFieldsFilled =
         title.trim() &&
         priority &&
         category.trim() &&
         deadline &&
-        (title !== original.title ||
-            priority !== original.priority ||
-            category !== original.category ||
-            deadline !== original.deadline ||
-            newImages.length > 0 ||
-            removedImages.length > 0);
+        totalImages > 0;
+
+    const hasChanges =
+        title !== original.title ||
+        priority !== original.priority ||
+        category !== original.category ||
+        deadline !== original.deadline ||
+        newImages.length > 0 ||
+        removedImages.length > 0;
+
+    const canSave = editing && allFieldsFilled && hasChanges;
 
     // ================= SAVE =================
     const handleSave = (e) => {
         e.stopPropagation();
         if (!canSave) return;
+
         toast.info(
             <div>
                 Är du säker på att du vill ändra tasken?
@@ -81,11 +94,18 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
 
     const confirmSave = async () => {
         toast.dismiss();
+
         try {
             const res = await apiFetch(`/api/tasks/${task._id}`, {
                 method: "PUT",
-                body: JSON.stringify({ title, priority, category: cleanCategory(category), deadline })
+                body: JSON.stringify({
+                    title,
+                    priority,
+                    category: cleanCategory(category),
+                    deadline
+                })
             });
+
             if (!res.ok) throw new Error();
 
             for (let img of removedImages) {
@@ -98,7 +118,10 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
             if (newImages.length > 0) {
                 const formData = new FormData();
                 newImages.forEach(img => formData.append("images", img));
-                await apiFetch(`/api/tasks/${task._id}/images`, { method: "POST", body: formData });
+                await apiFetch(`/api/tasks/${task._id}/images`, {
+                    method: "POST",
+                    body: formData
+                });
             }
 
             const finalRes = await apiFetch(`/api/tasks/${task._id}`);
@@ -106,10 +129,12 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
 
             onUpdate?.(finalData);
             setExistingImages(finalData.images || []);
+
             toast.success("Task uppdaterad ✅");
             setEditing(false);
             setNewImages([]);
             setRemovedImages([]);
+
         } catch {
             toast.error("Kunde inte spara ändringar");
         }
@@ -118,6 +143,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
     // ================= DELETE =================
     const deleteTask = (e) => {
         e.stopPropagation();
+
         toast.info(
             <div>
                 Är du säker på att du vill radera tasken?
@@ -132,11 +158,17 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
 
     const confirmDelete = async () => {
         toast.dismiss();
+
         try {
-            const res = await apiFetch(`/api/tasks/${task._id}`, { method: "DELETE" });
+            const res = await apiFetch(`/api/tasks/${task._id}`, {
+                method: "DELETE"
+            });
+
             if (!res.ok) throw new Error();
+
             onDelete?.(task._id);
             toast.success("Task borttagen 🗑️");
+
         } catch {
             toast.error("Kunde inte ta bort task");
         }
@@ -144,6 +176,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
 
     const toggleComplete = (e) => {
         e.stopPropagation();
+
         apiFetch(`/api/tasks/${task._id}`, {
             method: "PUT",
             body: JSON.stringify({ completed: !task.completed })
@@ -164,10 +197,16 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
             }}
             onClick={() => { if (onClick && !editing) onClick(); }}
         >
-            {/* Checkbox */}
-            {showActions && <input type="checkbox" checked={task.completed} onChange={toggleComplete} onClick={(e) => e.stopPropagation()} />}
 
-            {/* EDIT MODE */}
+            {showActions &&
+                <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={toggleComplete}
+                    onClick={(e) => e.stopPropagation()}
+                />
+            }
+
             {editing && editable ? (
                 <>
                     <input value={title} onChange={e => setTitle(e.target.value)} />
@@ -177,10 +216,12 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
                         <option value="medium">Medium</option>
                         <option value="high">High</option>
                     </select>
+
                     <input value={category} onChange={e => setCategory(e.target.value)} />
                     <input type="date" min={today} value={deadline} onChange={e => setDeadline(e.target.value)} />
 
                     <h4>Bilder</h4>
+
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                         {existingImages.map((img, i) => (
                             <div key={i}>
@@ -189,6 +230,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
                                 <button onClick={(e) => { e.stopPropagation(); removeExistingImage(i); }}>❌</button>
                             </div>
                         ))}
+
                         {newImages.map((img, i) => (
                             <div key={i}>
                                 <img src={URL.createObjectURL(img)} width="80" />
@@ -198,26 +240,49 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = tru
                         ))}
                     </div>
 
-                    <input type="file" multiple accept="image/*" onChange={(e) => { e.stopPropagation(); handleAddImages(e); }} />
+                    <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={(e) => { e.stopPropagation(); handleAddImages(e); }}
+                    />
+
                     <br />
-                    <button disabled={!canSave} onClick={handleSave}>Spara</button>
-                    <button onClick={(e) => { e.stopPropagation(); resetForm(); setEditing(false); }}>Avbryt</button>
-                    <button onClick={deleteTask} style={{ background: "crimson", color: "white" }}>Ta bort</button>
+
+                    <button disabled={!canSave} onClick={handleSave}>
+                        Spara
+                    </button>
+
+                    <button onClick={(e) => { e.stopPropagation(); resetForm(); setEditing(false); }}>
+                        Avbryt
+                    </button>
+
+                    <button onClick={deleteTask} style={{ background: "crimson", color: "white" }}>
+                        Ta bort
+                    </button>
                 </>
             ) : (
                 <>
-                    {/* VIEW MODE */}
                     <h4>{capitalize(task.title)}</h4>
                     <p>{capitalize(task.priority)}</p>
                     <p>{capitalize(task.category)}</p>
+
                     {task.images?.length > 0 && (
                         <div style={{ display: "flex", gap: 8 }}>
-                            {task.images.map((img, i) => <img key={i} src={`${import.meta.env.VITE_API_URL}${img}`} width="60" />)}
+                            {task.images.map((img, i) =>
+                                <img key={i} src={`${import.meta.env.VITE_API_URL}${img}`} width="60" />
+                            )}
                         </div>
                     )}
-                    {editable && showActions && <button onClick={(e) => { e.stopPropagation(); setEditing(true); }}>Ändra</button>}
+
+                    {editable && showActions &&
+                        <button onClick={(e) => { e.stopPropagation(); setEditing(true); }}>
+                            Ändra
+                        </button>
+                    }
                 </>
             )}
+
         </div>
     );
 }
