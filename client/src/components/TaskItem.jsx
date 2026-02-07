@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { apiFetch } from "../api/ApiFetch";
+import { apiFetch } from "../api/apiFetch";
 import { toast } from "react-toastify";
 import { capitalize, cleanCategory } from "../utils/formatters";
 

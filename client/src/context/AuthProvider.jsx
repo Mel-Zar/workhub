@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 
 function getUserFromToken(token) {
@@ -14,15 +14,41 @@ function getUserFromToken(token) {
     }
 }
 
-function getInitialUser() {
-    const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken) return null;
-    return getUserFromToken(accessToken);
-}
-
 export default function AuthProvider({ children }) {
-    const [user, setUser] = useState(getInitialUser);
-    const [loading] = useState(false); // inget async → alltid false
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const initAuth = async () => {
+            const refreshToken = localStorage.getItem("refreshToken");
+
+            if (!refreshToken) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/refresh`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ refreshToken })
+                });
+
+                if (!res.ok) throw new Error("Refresh failed");
+
+                const data = await res.json();
+                localStorage.setItem("accessToken", data.accessToken);
+                setUser(getUserFromToken(data.accessToken));
+            } catch {
+                localStorage.clear();
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        initAuth();
+    }, []);
 
     function login(accessToken, refreshToken) {
         localStorage.setItem("accessToken", accessToken);
@@ -36,10 +62,6 @@ export default function AuthProvider({ children }) {
         window.location.href = "/login";
     }
 
-    function updateUserName(name) {
-        setUser(prev => (prev ? { ...prev, name } : prev));
-    }
-
     return (
         <AuthContext.Provider
             value={{
@@ -47,11 +69,10 @@ export default function AuthProvider({ children }) {
                 isLoggedIn: !!user,
                 loading,
                 login,
-                logout,
-                updateUserName
+                logout
             }}
         >
-            {children}
+            {!loading && children}
         </AuthContext.Provider>
     );
 }

@@ -1,52 +1,53 @@
 const API_BASE = import.meta.env.VITE_API_URL;
 
-export async function apiFetch(url, options = {}) {
-    const accessToken = localStorage.getItem("accessToken");
-
-    let headers = { ...(options.headers || {}) };
-
-    if (options.body && !(options.body instanceof FormData)) {
-        headers["Content-Type"] = "application/json";
-    }
-
-    if (accessToken) {
-        headers.Authorization = `Bearer ${accessToken}`;
-    }
-
-    const fullUrl = url.startsWith("http") ? url : `${API_BASE}${url}`;
-
-    const response = await fetch(fullUrl, { ...options, headers });
-
-    if (response.status !== 401 || options._retry) {
-        return response;
-    }
-
+export async function apiFetch(url, options = {}, retry = true) {
+    let accessToken = localStorage.getItem("accessToken");
     const refreshToken = localStorage.getItem("refreshToken");
-    if (!refreshToken) return hardLogout();
 
-    const refreshRes = await fetch(`${API_BASE}/api/auth/refresh`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken })
-    });
+    // ⚡️ Sätt headers
+    options.headers = {
+        ...(options.headers || {}),
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {})
+    };
 
-    if (!refreshRes.ok) return hardLogout();
+    const res = await fetch(`${API_BASE}${url}`, options);
 
-    const data = await refreshRes.json();
-    localStorage.setItem("accessToken", data.accessToken);
+    // ✅ Om inte 401, returnera direkt
+    if (res.status !== 401 || !retry) return res;
 
-    return apiFetch(url, {
-        ...options,
-        _retry: true,
-        headers: {
-            ...headers,
-            Authorization: `Bearer ${data.accessToken}`
+    // 🔁 Access token expired → försök refresh
+    if (!refreshToken) {
+        console.error("Ingen refreshToken, logga in igen!");
+        localStorage.clear();
+        window.location.href = "/login";
+        return res;
+    }
+
+    try {
+        const refreshRes = await fetch(`${API_BASE}/api/auth/refresh`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refreshToken })
+        });
+
+        if (!refreshRes.ok) {
+            console.error("Refresh-token ogiltig, logga in igen!");
+            localStorage.clear();
+            window.location.href = "/login";
+            return refreshRes;
         }
-    });
-}
 
-function hardLogout() {
-    localStorage.clear();
-    window.location.href = "/login";
-    throw new Error("Logged out");
+        const data = await refreshRes.json();
+        accessToken = data.accessToken;
+        localStorage.setItem("accessToken", accessToken);
+
+        // 🔁 Retry original request med nytt token
+        options.headers.Authorization = `Bearer ${accessToken}`;
+        return fetch(`${API_BASE}${url}`, options);
+    } catch (err) {
+        console.error("Refresh-token error:", err);
+        localStorage.clear();
+        window.location.href = "/login";
+        return res;
+    }
 }

@@ -6,36 +6,38 @@ export const authService = {
             method: "POST",
             body: JSON.stringify(credentials)
         });
-
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
-
         return data;
     },
 
-    register: user =>
-        request("/api/auth/register", {
+    register: async user => {
+        return request("/api/auth/register", {
             method: "POST",
             body: JSON.stringify(user)
-        }),
+        });
+    },
 
-    updateProfile: data =>
-        request("/api/auth/profile", {
+    updateProfile: async data => {
+        return request("/api/auth/profile", {
             method: "PUT",
             body: JSON.stringify(data)
-        }),
+        });
+    },
 
-    deleteAccount: currentPassword =>
-        request("/api/auth/delete", {
+    deleteAccount: async currentPassword => {
+        return request("/api/auth/delete", {
             method: "DELETE",
             body: JSON.stringify({ currentPassword })
-        }),
+        });
+    },
 
     logout: async () => {
         try {
             await request("/api/auth/logout", { method: "POST" });
         } finally {
             localStorage.clear();
+            window.location.href = "/login";
         }
     }
 };
