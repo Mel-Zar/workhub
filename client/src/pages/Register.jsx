@@ -5,7 +5,8 @@ import { authService } from "../services/authService";
 
 function capitalizeFirst(value) {
   if (!value) return "";
-  return value.charAt(0).toUpperCase() + value.slice(1);
+  const [first, ...rest] = value;
+  return first.toUpperCase() + rest.join("").toLowerCase();
 }
 
 function Register() {
@@ -23,9 +24,9 @@ function Register() {
 
     try {
       await authService.register({
-        name: capitalizeFirst(name),
-        email: capitalizeFirst(email),
-        password
+        name: capitalizeFirst(name), // bara namn
+        email, // direkt
+        password, // direkt
       });
 
       toast.success("Konto skapat! Logga in 🎉");
@@ -45,7 +46,7 @@ function Register() {
         <input
           placeholder="Namn"
           value={name}
-          onChange={e => setName(capitalizeFirst(e.target.value))}
+          onChange={(e) => setName(capitalizeFirst(e.target.value))}
           required
         />
 
@@ -53,7 +54,7 @@ function Register() {
           type="email"
           placeholder="Email"
           value={email}
-          onChange={e => setEmail(capitalizeFirst(e.target.value))}
+          onChange={(e) => setEmail(e.target.value.toLowerCase())} // alltid små bokstäver
           required
         />
 
@@ -61,7 +62,7 @@ function Register() {
           type={showPassword ? "text" : "password"}
           placeholder="Lösenord"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
 
@@ -70,7 +71,8 @@ function Register() {
             type="checkbox"
             checked={showPassword}
             onChange={() => setShowPassword(!showPassword)}
-          /> Visa lösenord
+          />{" "}
+          Visa lösenord
         </label>
 
         <button disabled={loading}>

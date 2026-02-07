@@ -4,11 +4,6 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
 import { authService } from "../services/authService";
 
-function capitalizeFirst(value) {
-  if (!value) return "";
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
 function Login() {
   const { login, isLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -28,7 +23,7 @@ function Login() {
 
     try {
       const data = await authService.login({
-        email: capitalizeFirst(email),
+        email: email.trim().toLowerCase(), // alltid små bokstäver
         password
       });
 
@@ -45,13 +40,13 @@ function Login() {
   return (
     <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
       <h2>Logga in</h2>
-
       <form style={{ display: "flex", flexDirection: "column", gap: 10 }} onSubmit={handleSubmit}>
+
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={e => setEmail(capitalizeFirst(e.target.value))}
+          onChange={(e) => setEmail(e.target.value.toLowerCase())} // alltid små bokstäver
           required
         />
 
@@ -59,7 +54,7 @@ function Login() {
           type={showPassword ? "text" : "password"}
           placeholder="Lösenord"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
 
@@ -68,7 +63,8 @@ function Login() {
             type="checkbox"
             checked={showPassword}
             onChange={() => setShowPassword(!showPassword)}
-          /> Visa lösenord
+          />{" "}
+          Visa lösenord
         </label>
 
         <button disabled={loading}>
