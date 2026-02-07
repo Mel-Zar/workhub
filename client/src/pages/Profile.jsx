@@ -3,6 +3,11 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
 import { authService } from "../services/authService";
 
+function capitalizeFirst(value) {
+    if (!value) return "";
+    return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 function getUserFromToken() {
     const token = localStorage.getItem("accessToken");
     if (!token) return { name: "", email: "" };
@@ -26,12 +31,17 @@ function Profile() {
     const [email, setEmail] = useState(user.email);
     const [initialName, setInitialName] = useState(user.name);
     const [initialEmail, setInitialEmail] = useState(user.email);
+
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [deletePassword, setDeletePassword] = useState("");
+
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showDeletePassword, setShowDeletePassword] = useState(false);
+
     const [loading, setLoading] = useState(false);
 
-    // ================= UPDATE PROFILE =================
     function handleSubmit(e) {
         e.preventDefault();
 
@@ -46,8 +56,8 @@ function Profile() {
 
                             try {
                                 const data = await authService.updateProfile({
-                                    name,
-                                    email,
+                                    name: capitalizeFirst(name),
+                                    email: capitalizeFirst(email),
                                     currentPassword,
                                     newPassword
                                 });
@@ -64,7 +74,6 @@ function Profile() {
                                 setCurrentPassword("");
                                 setNewPassword("");
                             } catch (err) {
-                                console.error(err);
                                 toast.error(err.message || "Serverfel vid uppdatering");
                             } finally {
                                 setLoading(false);
@@ -80,7 +89,6 @@ function Profile() {
         );
     }
 
-    // ================= DELETE ACCOUNT =================
     function handleDeleteAccount() {
         if (!deletePassword) {
             toast.error("Lösenord krävs för att radera konto");
@@ -99,11 +107,9 @@ function Profile() {
                             try {
                                 await authService.deleteAccount(deletePassword);
                                 toast.success("Kontot raderat");
-
                                 localStorage.clear();
                                 setTimeout(() => (window.location.href = "/login"), 1000);
                             } catch (err) {
-                                console.error(err);
                                 toast.error(err.message || "Serverfel vid radering");
                             } finally {
                                 setLoading(false);
@@ -128,25 +134,49 @@ function Profile() {
 
             <form onSubmit={handleSubmit}>
                 <h4>Profil info</h4>
-                <input value={name} onChange={e => setName(e.target.value)} placeholder="Namn" />
-                <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
+                <input
+                    value={name}
+                    onChange={e => setName(capitalizeFirst(e.target.value))}
+                    placeholder="Namn"
+                />
+                <input
+                    value={email}
+                    onChange={e => setEmail(capitalizeFirst(e.target.value))}
+                    placeholder="Email"
+                />
 
                 <h4>Byt lösenord</h4>
                 <input
-                    type="password"
+                    type={showNewPassword ? "text" : "password"}
                     placeholder="Nytt lösenord"
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
                 />
+                <label style={{ display: "block", marginBottom: 10 }}>
+                    <input
+                        type="checkbox"
+                        checked={showNewPassword}
+                        onChange={() => setShowNewPassword(!showNewPassword)}
+                    />{" "}
+                    Visa lösenord
+                </label>
 
                 <h4>Bekräfta identitet</h4>
                 <input
-                    type="password"
+                    type={showCurrentPassword ? "text" : "password"}
                     placeholder="Nuvarande lösenord"
                     value={currentPassword}
                     onChange={e => setCurrentPassword(e.target.value)}
                     required
                 />
+                <label style={{ display: "block", marginBottom: 10 }}>
+                    <input
+                        type="checkbox"
+                        checked={showCurrentPassword}
+                        onChange={() => setShowCurrentPassword(!showCurrentPassword)}
+                    />{" "}
+                    Visa lösenord
+                </label>
 
                 <button disabled={!hasChanges || loading}>
                     {loading ? "Sparar..." : "Spara"}
@@ -157,11 +187,20 @@ function Profile() {
 
             <h4>Farlig zon</h4>
             <input
-                type="password"
+                type={showDeletePassword ? "text" : "password"}
                 placeholder="Bekräfta lösenord för radering"
                 value={deletePassword}
                 onChange={e => setDeletePassword(e.target.value)}
             />
+            <label style={{ display: "block", marginBottom: 10 }}>
+                <input
+                    type="checkbox"
+                    checked={showDeletePassword}
+                    onChange={() => setShowDeletePassword(!showDeletePassword)}
+                />{" "}
+                Visa lösenord
+            </label>
+
             <button type="button" disabled={loading} onClick={handleDeleteAccount}>
                 Radera konto
             </button>

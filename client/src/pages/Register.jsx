@@ -3,10 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { authService } from "../services/authService";
 
+function capitalizeFirst(value) {
+  if (!value) return "";
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -16,14 +22,15 @@ function Register() {
     setLoading(true);
 
     try {
-      // 🔑 Registrera via authService
-      await authService.register({ name, email, password });
+      await authService.register({
+        name: capitalizeFirst(name),
+        email: capitalizeFirst(email),
+        password
+      });
 
       toast.success("Konto skapat! Logga in 🎉");
       navigate("/login");
-
     } catch (err) {
-      console.error(err);
       toast.error(err.message || "Registrering misslyckades");
     } finally {
       setLoading(false);
@@ -34,14 +41,11 @@ function Register() {
     <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
       <h2>Registrera</h2>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: 10 }}
-      >
+      <form style={{ display: "flex", flexDirection: "column", gap: 10 }} onSubmit={handleSubmit}>
         <input
           placeholder="Namn"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={e => setName(capitalizeFirst(e.target.value))}
           required
         />
 
@@ -49,17 +53,25 @@ function Register() {
           type="email"
           placeholder="Email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={e => setEmail(capitalizeFirst(e.target.value))}
           required
         />
 
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           placeholder="Lösenord"
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
         />
+
+        <label>
+          <input
+            type="checkbox"
+            checked={showPassword}
+            onChange={() => setShowPassword(!showPassword)}
+          /> Visa lösenord
+        </label>
 
         <button disabled={loading}>
           {loading ? "Skapar konto..." : "Registrera"}

@@ -4,12 +4,18 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../context/AuthContext";
 import { authService } from "../services/authService";
 
+function capitalizeFirst(value) {
+  if (!value) return "";
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 function Login() {
   const { login, isLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -21,17 +27,15 @@ function Login() {
     setLoading(true);
 
     try {
-      // 🔑 Login via authService
-      const data = await authService.login({ email, password });
+      const data = await authService.login({
+        email: capitalizeFirst(email),
+        password
+      });
 
-      // Uppdatera context med tokens
       login(data.accessToken, data.refreshToken);
-
       toast.success(`Välkommen tillbaka ${data.user.name}!`);
       navigate("/dashboard");
-
     } catch (err) {
-      console.error(err);
       toast.error(err.message || "Fel email eller lösenord");
     } finally {
       setLoading(false);
@@ -42,25 +46,30 @@ function Login() {
     <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
       <h2>Logga in</h2>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: 10 }}
-      >
+      <form style={{ display: "flex", flexDirection: "column", gap: 10 }} onSubmit={handleSubmit}>
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={e => setEmail(capitalizeFirst(e.target.value))}
           required
         />
 
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           placeholder="Lösenord"
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
         />
+
+        <label>
+          <input
+            type="checkbox"
+            checked={showPassword}
+            onChange={() => setShowPassword(!showPassword)}
+          /> Visa lösenord
+        </label>
 
         <button disabled={loading}>
           {loading ? "Loggar in..." : "Logga in"}
