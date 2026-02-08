@@ -1,52 +1,109 @@
-@use "../../styles/mixins" as *;
 @use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 
 .task-controls {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
-  position: relative;
 }
 
+/* wrapper */
 .control {
   position: relative;
 }
 
+/* 🔘 BUTTON */
 .control-btn {
   @include button-reset;
   @include flex-center;
 
-  min-height: 44px;
-  padding: 0.7rem 1.6rem;
+  justify-content: space-between;
+  gap: 0.6rem;
+  width: auto;
+
+  padding: 0.6rem 1.4rem;
   border-radius: 999px;
 
   background: var(--primary);
-  color: var(--on-primary);
+  color: #000;
   border: 1px solid var(--primary);
 
   font-size: 0.85rem;
   font-weight: 600;
+  letter-spacing: 0.4px;
+
   transition: $transition;
+  cursor: pointer;
 
   &:hover {
-    background: var(--primary-hover);
-    box-shadow: var(--shadow);
+    box-shadow: $shadow-gold;
   }
 }
 
+/* högerdel (counter + arrow) */
+.control-btn .right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* 🔽⬆️ CHEVRON */
+.chevron {
+  width: 7px;
+  height: 7px;
+
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+
+  transform: rotate(45deg);
+  transition: transform 0.25s ease;
+}
+
+/* uppåt */
+.chevron.up {
+  transform: rotate(-135deg);
+}
+
+/* 🟡 FILTER ACTIVE */
+.filter-btn.has-active {
+  background: var(--primary-hover);
+}
+
+/* 🔢 COUNTER */
+.filter-count {
+  background: #000;
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+/* 📦 DROPDOWN */
 .control-dropdown {
   position: absolute;
   top: calc(100% + 0.6rem);
   min-width: 240px;
   z-index: 50;
+
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: $transition;
 }
 
-/* SORT vänster */
+.control-dropdown.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ⬅ sort */
 .control:first-child .control-dropdown {
   left: 0;
 }
 
-/* FILTER höger */
+/* ➡ filter */
 .control:last-child .control-dropdown {
   right: 0;
 }
@@ -55,16 +112,11 @@
 @include mobile {
   .task-controls {
     flex-direction: column;
+    align-items: stretch;
   }
 
-  .control,
   .control-btn {
     width: 100%;
-  }
-
-  .control-btn {
-    padding: 0.9rem;
-    font-size: 0.95rem;
   }
 
   .control-dropdown {
