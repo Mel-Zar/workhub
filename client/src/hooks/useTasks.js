@@ -73,6 +73,7 @@ export function useTasks({ limit = 5 } = {}) {
     // Cascading filter options baserat på current filters
     const filteredForOptions = useMemo(() => {
         return allTasks.filter(t => {
+
             if (filters.category && t.category !== filters.category) return false;
             if (filters.priority && t.priority !== filters.priority) return false;
             if (filters.completed !== undefined && t.completed !== filters.completed) return false;

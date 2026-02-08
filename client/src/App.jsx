@@ -1,14 +1,14 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/Navbar/Navbar";
 
 
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Tasks from "./pages/Tasks";
-import Dashboard from "./pages/Dashboard";
-import Task from "./pages/Task";
-import Profile from "./pages/Profile";
+import Home from "./pages/Home/Home";
+import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
+import Tasks from "./pages/Tasks/Tasks";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import Task from "./pages/Task/Task";
+import Profile from "./pages/Profile/Profile";
 
 import PrivateRoute from "./routes/PrivateRoute";
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { authService } from "../services/authService";
+import { authService } from "../../services/authService";
 
 function capitalizeFirst(value) {
   if (!value) return "";

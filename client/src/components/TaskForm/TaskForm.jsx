@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { taskService } from "../services/taskService";
-import { capitalize, formatCategory } from "../utils/formatters";
+import { taskService } from "../../services/taskService";
+import { capitalize, formatCategory } from "../../utils/formatters";
 
 function TaskForm({ onCreate }) {
 

@@ -1,11 +1,11 @@
-import { useTasks } from "../hooks/useTasks";
-import { useAuth } from "../context/AuthContext";
+import { useTasks } from "../../hooks/useTasks";
+import { useAuth } from "../../context/AuthContext";
 
-import TaskItem from "../components/TaskItem";
-import TaskSearch from "../components/TaskSearch";
-import TaskFilters from "../components/TaskFilters";
-import TaskSort from "../components/TaskSort";
-import TaskForm from "../components/TaskForm";
+import TaskItem from "../../components/TaskItem/TaskItem";
+import TaskSearch from "../../components/TaskSearch/TaskSearch";
+import TaskFilters from "../../components/TaskFilters/TaskFilters";
+import TaskSort from "../../components/TaskSort/TaskSort";
+import TaskForm from "../../components/TaskForm/TaskForm";
 
 function Dashboard() {
     const { user, loading: authLoading } = useAuth();

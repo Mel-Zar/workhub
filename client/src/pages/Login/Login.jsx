@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { AuthContext } from "../context/AuthContext";
-import { authService } from "../services/authService";
+import { AuthContext } from "../../context/AuthContext";
+import { authService } from "../../services/authService";
 
 function Login() {
   const { login, isLoggedIn } = useContext(AuthContext);

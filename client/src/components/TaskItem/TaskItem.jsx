@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { capitalize, cleanCategory } from "../utils/formatters";
-import { taskService } from "../services/taskService";
+import { capitalize, cleanCategory } from "../../utils/formatters";
+import { taskService } from "../../services/taskService";
 
 function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = true, onClick }) {
     const original = {

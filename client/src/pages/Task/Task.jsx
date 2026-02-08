@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { taskService } from "../services/taskService";
+import { taskService } from "../../services/taskService";
 import { toast } from "react-toastify";
 
 function Task() {
