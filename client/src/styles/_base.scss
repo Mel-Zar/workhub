@@ -1,4 +1,17 @@
+@use "./themes";
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--text);
   font-family: system-ui, sans-serif;
+  transition: background 0.2s, color 0.2s;
+}
+
+button {
+  font: inherit;
 }

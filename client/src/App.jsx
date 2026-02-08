@@ -14,6 +14,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Footer from "./components/Footer/Footer";
 
 function App() {
   return (
@@ -26,8 +27,6 @@ function App() {
         pauseOnHover
         draggable
       />
-
-
 
       <Navbar />
 
@@ -69,6 +68,8 @@ function App() {
         <Route path="*" element={<Navigate to="/login" replace />} />
 
       </Routes>
+
+      <Footer />
 
     </div>
   );
