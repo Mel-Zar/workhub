@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useTasks } from "../../hooks/useTasks";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext/AuthContext";
 
 import TaskItem from "../../components/TaskItem/TaskItem";
 import TaskSearch from "../../components/TaskSearch/TaskSearch";
-import TaskFilters from "../../components/TaskFilters/TaskFilters";
-import TaskSort from "../../components/TaskSort/TaskSort";
+import TaskControls from "../../components/TaskControl/TaskControl";
+
 
 function Tasks() {
     const { user, loading: authLoading } = useAuth();
@@ -33,13 +33,20 @@ function Tasks() {
         <div>
             <h2>Tasks</h2>
 
-            <TaskSort onSortChange={(value) => { setPage(1); setSortBy(value); }} />
 
             <TaskSearch onSearch={(value) => { setPage(1); setFilters(prev => ({ ...prev, search: value })); }} />
 
-            <TaskFilters
+            <TaskControls
+                sortBy={filters.sortBy}
+                setSortBy={(value) => {
+                    setPage(1);
+                    setSortBy(value);
+                }}
                 filters={filters}
-                onChange={(data) => { setPage(1); setFilters(data); }}
+                setFilters={(data) => {
+                    setPage(1);
+                    setFilters(data);
+                }}
                 categories={categories}
                 priorities={priorities}
                 completionOptions={completionOptions}

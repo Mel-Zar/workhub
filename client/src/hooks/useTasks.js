@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { taskService } from "../services/taskService";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext/AuthContext";
 
 export function useTasks({ limit = 5 } = {}) {
     const { user, loading: authLoading } = useAuth();

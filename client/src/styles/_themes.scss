@@ -2,15 +2,15 @@
    🌞 LIGHT THEME
    ========================= */
 [data-theme="light"] {
-  --bg: #faf8f3;          /* varm beige bakgrund */
-  --surface: #ffffff;    /* cards / navbar */
-  --text: #1a1a1a;       /* nästan svart text */
+  --bg: #faf8f3;
+  --surface: #ffffff;
+  --text: #1a1a1a;
 
-  --primary: #d4af37;    /* guld accent */
+  --primary: #d4af37;
   --primary-hover: #e6c96f;
+  --on-primary: #ffffff; /* ⭐ vit text */
 
   --border: rgba(212, 175, 55, 0.35);
-
   --shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
@@ -18,14 +18,14 @@
    🌙 DARK THEME
    ========================= */
 [data-theme="dark"] {
-  --bg: #0f0f0f;          /* djup svart */
-  --surface: #1a1a1a;    /* cards / navbar */
-  --text: #f5f1e8;       /* varm ljus text */
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --text: #f5f1e8;
 
-  --primary: #d4af37;    /* samma guld */
+  --primary: #d4af37;
   --primary-hover: #e6c96f;
+  --on-primary: #000000; /* ⭐ svart text */
 
   --border: rgba(212, 175, 55, 0.4);
-
   --shadow: 0 0 18px rgba(212, 175, 55, 0.25);
 }

@@ -1,0 +1,63 @@
+@use "../../styles/mixins" as *;
+@use "../../styles/variables" as *;
+
+.task-sort {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+/* 🏷 LABEL */
+.task-sort label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(245, 241, 232, 0.7); // mjuk ljus text
+}
+
+/* 🔽 SELECT */
+.task-sort select {
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+
+  background: $surface-dark;
+  color: $text-dark;
+
+  border: 1px solid $border-color;
+  border-radius: $radius;
+
+  font-size: 0.8rem;
+  font-weight: 500;
+
+  transition: $transition;
+  cursor: pointer;
+
+  appearance: none;
+
+  /* custom arrow */
+  background-image:
+    linear-gradient(45deg, transparent 50%, $primary 50%),
+    linear-gradient(135deg, $primary 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 55%,
+    calc(100% - 13px) 55%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+
+  &:hover {
+    border-color: $primary;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
+  }
+}
+
+/* 📱 MOBILE */
+@include mobile {
+  .task-sort select {
+    padding: 0.75rem 1rem;
+  }
+}

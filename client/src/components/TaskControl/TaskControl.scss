@@ -1,0 +1,74 @@
+@use "../../styles/mixins" as *;
+@use "../../styles/variables" as *;
+
+.task-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  position: relative;
+}
+
+.control {
+  position: relative;
+}
+
+.control-btn {
+  @include button-reset;
+  @include flex-center;
+
+  min-height: 44px;
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+
+  background: var(--primary);
+  color: var(--on-primary);
+  border: 1px solid var(--primary);
+
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: $transition;
+
+  &:hover {
+    background: var(--primary-hover);
+    box-shadow: var(--shadow);
+  }
+}
+
+.control-dropdown {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  min-width: 240px;
+  z-index: 50;
+}
+
+/* SORT vänster */
+.control:first-child .control-dropdown {
+  left: 0;
+}
+
+/* FILTER höger */
+.control:last-child .control-dropdown {
+  right: 0;
+}
+
+/* 📱 MOBILE */
+@include mobile {
+  .task-controls {
+    flex-direction: column;
+  }
+
+  .control,
+  .control-btn {
+    width: 100%;
+  }
+
+  .control-btn {
+    padding: 0.9rem;
+    font-size: 0.95rem;
+  }
+
+  .control-dropdown {
+    position: static;
+    width: 100%;
+  }
+}

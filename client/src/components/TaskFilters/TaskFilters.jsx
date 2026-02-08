@@ -1,48 +1,66 @@
-function TaskFilters({ filters, onChange, categories = [], priorities = [], completionOptions = [] }) {
+import Dropdown from "../Ui/Dropdown";
+import "./TaskFilters.scss";
 
-    function handleChange(e) {
-        const { name, value } = e.target;
-
-        // completed konverteras till boolean
-        const newValue = name === "completed"
-            ? value === "" ? undefined : value === "true"
-            : value;
-
-        onChange({ ...filters, [name]: newValue });
-    }
-
-    function resetFilters() {
-        onChange({
-            priority: "",
-            category: "",
-            completed: undefined,
-            fromDate: "",
-            toDate: ""
-        });
-    }
-
+function TaskFilters({
+    filters,
+    onChange,
+    categories = [],
+    priorities = [],
+    completionOptions = []
+}) {
     return (
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <select name="category" value={filters.category || ""} onChange={handleChange}>
-                <option value="">Alla kategorier</option>
-                {categories.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+        <div className="task-filters">
 
-            <select name="priority" value={filters.priority || ""} onChange={handleChange}>
-                <option value="">Alla prioriteter</option>
-                {priorities.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
+            <Dropdown
+                placeholder="Alla kategorier"
+                value={filters.category}
+                onChange={(val) => onChange({ ...filters, category: val })}
+                options={[
+                    { label: "Alla kategorier", value: "" },
+                    ...categories.map(c => ({ label: c, value: c }))
+                ]}
+            />
 
-            <select name="completed" value={filters.completed === undefined ? "" : filters.completed} onChange={handleChange}>
-                <option value="">Alla</option>
-                {completionOptions.includes("true") && <option value="true">Klara</option>}
-                {completionOptions.includes("false") && <option value="false">Ej klara</option>}
-            </select>
+            <Dropdown
+                placeholder="Alla prioriteter"
+                value={filters.priority}
+                onChange={(val) => onChange({ ...filters, priority: val })}
+                options={[
+                    { label: "Alla prioriteter", value: "" },
+                    ...priorities.map(p => ({ label: p, value: p }))
+                ]}
+            />
 
-            <input type="date" name="fromDate" value={filters.fromDate || ""} onChange={handleChange} />
-            <input type="date" name="toDate" value={filters.toDate || ""} onChange={handleChange} />
+            <Dropdown
+                placeholder="Status"
+                value={filters.completed}
+                onChange={(val) =>
+                    onChange({
+                        ...filters,
+                        completed: val === "" ? undefined : val
+                    })
+                }
+                options={[
+                    { label: "Alla", value: "" },
+                    completionOptions.includes("true") && { label: "Klara", value: true },
+                    completionOptions.includes("false") && { label: "Ej klara", value: false }
+                ].filter(Boolean)}
+            />
 
-            <button onClick={resetFilters}>Rensa filter</button>
+            <button
+                className="reset-btn"
+                onClick={() =>
+                    onChange({
+                        priority: "",
+                        category: "",
+                        completed: undefined,
+                        fromDate: "",
+                        toDate: ""
+                    })
+                }
+            >
+                Rensa filter
+            </button>
         </div>
     );
 }
