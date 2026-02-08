@@ -1,17 +1,31 @@
-/* Light theme */
+/* =========================
+   🌞 LIGHT THEME
+   ========================= */
 [data-theme="light"] {
-  --bg: #f7f7f7;
-  --surface: #ffffff;
-  --text: #222;
-  --primary: #6c63ff;
-  --border: #ddd;
+  --bg: #faf8f3;          /* varm beige bakgrund */
+  --surface: #ffffff;    /* cards / navbar */
+  --text: #1a1a1a;       /* nästan svart text */
+
+  --primary: #d4af37;    /* guld accent */
+  --primary-hover: #e6c96f;
+
+  --border: rgba(212, 175, 55, 0.35);
+
+  --shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
-/* Dark theme */
+/* =========================
+   🌙 DARK THEME
+   ========================= */
 [data-theme="dark"] {
-  --bg: #0f172a;
-  --surface: #1e293b;
-  --text: #e5e7eb;
-  --primary: #818cf8;
-  --border: #334155;
+  --bg: #0f0f0f;          /* djup svart */
+  --surface: #1a1a1a;    /* cards / navbar */
+  --text: #f5f1e8;       /* varm ljus text */
+
+  --primary: #d4af37;    /* samma guld */
+  --primary-hover: #e6c96f;
+
+  --border: rgba(212, 175, 55, 0.4);
+
+  --shadow: 0 0 18px rgba(212, 175, 55, 0.25);
 }

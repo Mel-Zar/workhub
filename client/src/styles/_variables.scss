@@ -1,0 +1,55 @@
+/* =========================
+   🎨 COLOR SYSTEM
+   ========================= */
+
+/* Gold */
+$gold: #d4af37;
+$gold-soft: #e6c96f;
+$gold-muted: #bfa74a;
+
+/* Black */
+$black: #0f0f0f;
+$black-soft: #1a1a1a;
+
+/* Beige / White */
+$beige: #f5f1e8;
+$beige-soft: #faf8f3;
+$white: #ffffff;
+
+/* =========================
+   🌗 THEME COLORS
+   ========================= */
+
+/* Light theme */
+$bg-light: $beige-soft;
+$surface-light: $white;
+$text-light: #1a1a1a;
+
+/* Dark theme */
+$bg-dark: $black;
+$surface-dark: $black-soft;
+$text-dark: #f5f1e8;
+
+/* Accent */
+$primary: $gold;
+$primary-hover: $gold-soft;
+$border-color: rgba(212, 175, 55, 0.35);
+
+/* =========================
+   🧱 UI SYSTEM
+   ========================= */
+
+$radius: 10px;
+$radius-lg: 14px;
+$transition: 0.25s ease;
+
+/* Shadows */
+$shadow-soft: 0 8px 25px rgba(0, 0, 0, 0.15);
+$shadow-gold: 0 0 15px rgba(212, 175, 55, 0.35);
+
+/* =========================
+   📱 BREAKPOINTS
+   ========================= */
+
+$mobile: 768px;
+$tablet: 1024px;

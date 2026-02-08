@@ -1,0 +1,17 @@
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin mobile {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin button-reset {
+  background: none;
+  border: none;
+  cursor: pointer;
+}

@@ -1,0 +1,15 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.page {
+  min-height: calc(100vh - 64px);
+  padding: 2rem;
+}
+
+.center {
+  display: grid;
+  place-items: center;
+}

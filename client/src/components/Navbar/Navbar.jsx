@@ -29,30 +29,33 @@ function Navbar() {
             <nav className={`menu ${open ? "open" : ""}`}>
                 {isLoggedIn && (
                     <span className="user">
-                        👋 {user?.name}
+                        Welcome, <strong>{user?.name}</strong>
                     </span>
                 )}
 
                 {isLoggedIn ? (
                     <>
-                        <Link to="/" onClick={() => setOpen(false)}>Home</Link>
-                        <Link to="/tasks" onClick={() => setOpen(false)}>Tasks</Link>
+                        <Link to="/" onClick={() => setOpen(false)}>Overview</Link>
+                        <Link to="/tasks" onClick={() => setOpen(false)}>My Tasks</Link>
                         <Link to="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
-                        <Link to="/profile" onClick={() => setOpen(false)}>Profile</Link>
+                        <Link to="/profile" onClick={() => setOpen(false)}>Account</Link>
 
-                        <button className="icon-btn" onClick={toggleTheme}>
+                        <button
+                            className="icon-btn"
+                            onClick={toggleTheme}
+                            title="Toggle theme"
+                        >
                             {theme === "light" ? "🌙" : "☀️"}
                         </button>
 
                         <button className="logout" onClick={handleLogout}>
-                            Logga ut
+                            Sign out
                         </button>
                     </>
                 ) : (
                     <>
-                        <Link to="/">Home</Link>
-                        <Link to="/register">Register</Link>
-                        <Link to="/login">Login</Link>
+                        <Link to="/register">Create account</Link>
+                        <Link to="/login">Sign in</Link>
                     </>
                 )}
             </nav>
