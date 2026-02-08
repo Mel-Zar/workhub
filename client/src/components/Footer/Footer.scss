@@ -1,5 +1,94 @@
+@use "../../styles/mixins" as *;
+@use "../../styles/variables" as *;
+
 .footer {
-  padding: 1rem;
-  text-align: center;
+  margin-top: auto;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* 📦 Layout */
+.footer-inner {
+  @include flex-center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.2rem 2rem;
+}
+
+/* © Text */
+.copyright {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  opacity: 0.85;
+
+  strong {
+    color: var(--primary);
+    font-weight: 600;
+  }
+}
+
+/* 🔗 Links */
+.footer-links {
+  @include flex-center;
+  gap: 0.6rem;
+
+  a {
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: var(--text);
+    opacity: 0.75;
+    transition: $transition;
+
+    &:hover {
+      color: var(--primary);
+      opacity: 1;
+      text-shadow: 0 0 8px rgba(212, 175, 55, 0.35);
+    }
+  }
+
+  span {
+    opacity: 0.4;
+  }
+}
+
+/* 🏷 Version */
+.version {
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  opacity: 0.6;
+}
+
+/* ✨ Subtil gold glow on hover */
+.footer:hover {
+  box-shadow: $shadow-gold;
+}
+
+/* 📱 MOBILE */
+@include mobile {
+  .footer-inner {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .footer-links {
+    order: 2;
+  }
+
+  .version {
+    order: 3;
+  }
+}
+
+.tagline {
+  font-size: 0.8rem;
+  color: var(--text);
   opacity: 0.7;
+  letter-spacing: 0.3px;
 }
