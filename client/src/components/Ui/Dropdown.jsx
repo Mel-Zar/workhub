@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import "./Dropdown.scss";
 
-function Dropdown({ label, value, options = [], onChange, placeholder }) {
+function Dropdown({ value, options = [], onChange, placeholder }) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
 
@@ -16,27 +16,25 @@ function Dropdown({ label, value, options = [], onChange, placeholder }) {
             document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const selected =
-        options.find(o => o.value === value)?.label || placeholder;
+    const selectedOption = options.find(opt => opt.value === value);
+    const label = selectedOption ? selectedOption.label : placeholder;
 
     return (
         <div className={`dropdown ${open ? "is-open" : ""}`} ref={ref}>
-            {label && <span className="dropdown-label">{label}</span>}
-
             <button
                 type="button"
                 className="dropdown-trigger"
-                onClick={() => setOpen(!open)}
+                onClick={() => setOpen(o => !o)}
             >
-                <span className="dropdown-text">{selected}</span>
-                <span className="arrow" />
+                <span className="dropdown-text">{label}</span>
+                <span className={`arrow ${open ? "up" : "down"}`} />
             </button>
 
             {open && (
                 <div className="dropdown-menu">
                     {options.map(opt => (
                         <button
-                            key={opt.value ?? "all"}
+                            key={opt.value}
                             className={`dropdown-item ${opt.value === value ? "active" : ""
                                 }`}
                             onClick={() => {
@@ -44,7 +42,8 @@ function Dropdown({ label, value, options = [], onChange, placeholder }) {
                                 setOpen(false);
                             }}
                         >
-                            {opt.label}
+                            <span>{opt.label}</span>
+                            {opt.value === value && <span className="check">✓</span>}
                         </button>
                     ))}
                 </div>

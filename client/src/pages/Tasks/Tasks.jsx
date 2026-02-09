@@ -33,9 +33,6 @@ function Tasks() {
         <div>
             <h2>Tasks</h2>
 
-
-            <TaskSearch onSearch={(value) => { setPage(1); setFilters(prev => ({ ...prev, search: value })); }} />
-
             <TaskControls
                 sortBy={filters.sortBy}
                 setSortBy={(value) => {

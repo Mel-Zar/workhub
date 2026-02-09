@@ -1,15 +1,17 @@
 import { useState } from "react";
+import "./TaskSearch.scss";
 
 function TaskSearch({ onSearch }) {
-    const [search, setSearch] = useState("");
+    const [value, setValue] = useState("");
 
     return (
         <input
+            className="task-search-input"
             type="text"
-            placeholder="Sök tasks..."
-            value={search}
+            placeholder="Search tasks..."
+            value={value}
             onChange={e => {
-                setSearch(e.target.value);
+                setValue(e.target.value);
                 onSearch(e.target.value);
             }}
         />

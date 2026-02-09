@@ -2,7 +2,6 @@ import { useTasks } from "../../hooks/useTasks";
 import { useAuth } from "../../context/AuthContext/AuthContext";
 
 import TaskItem from "../../components/TaskItem/TaskItem";
-import TaskSearch from "../../components/TaskSearch/TaskSearch";
 import TaskControls from "../../components/TaskControl/TaskControl";
 import TaskForm from "../../components/TaskForm/TaskForm";
 
@@ -21,12 +20,11 @@ function Dashboard() {
         completionOptions,
         setPage,
         setFilters,
-        setSortBy,
         refreshTasks
     } = useTasks({ limit: 5 });
 
-    if (authLoading) return <p>Laddar användare...</p>;
-    if (!user) return <p>Ej inloggad</p>;
+    if (authLoading) return <p>Loading user...</p>;
+    if (!user) return <p>Not logged in</p>;
 
     return (
         <div>
@@ -35,21 +33,8 @@ function Dashboard() {
             {/* CREATE TASK */}
             <TaskForm onCreate={refreshTasks} />
 
-            {/* SEARCH */}
-            <TaskSearch
-                onSearch={(value) => {
-                    setPage(1);
-                    setFilters(prev => ({ ...prev, search: value }));
-                }}
-            />
-
-            {/* SORT + FILTER CONTROLS (TVÅ KNAPPAR) */}
+            {/* SEARCH / SORT / FILTER */}
             <TaskControls
-                sortBy={filters.sortBy}
-                setSortBy={(value) => {
-                    setPage(1);
-                    setSortBy(value);
-                }}
                 filters={filters}
                 setFilters={(data) => {
                     setPage(1);
@@ -58,14 +43,18 @@ function Dashboard() {
                 categories={categories}
                 priorities={priorities}
                 completionOptions={completionOptions}
+                onSearch={(value) =>
+                    setFilters(prev => ({
+                        ...prev,
+                        search: value
+                    }))
+                }
             />
 
-
-
             {/* TASK LIST */}
-            {tasksLoading && <p>Laddar tasks...</p>}
-            {error && <p style={{ color: "red" }}>Fel: {error}</p>}
-            {!tasksLoading && !error && tasks.length === 0 && <p>Inga tasks</p>}
+            {tasksLoading && <p>Loading tasks...</p>}
+            {error && <p style={{ color: "red" }}>Error: {error}</p>}
+            {!tasksLoading && !error && tasks.length === 0 && <p>No tasks</p>}
 
             {tasks.map(task => (
                 <TaskItem
@@ -85,18 +74,18 @@ function Dashboard() {
                         disabled={page <= 1}
                         onClick={() => setPage(p => p - 1)}
                     >
-                        ⬅ Föregående
+                        ⬅ Previous
                     </button>
 
                     <span style={{ margin: "0 10px" }}>
-                        Sida {page} av {pages}
+                        Page {page} of {pages}
                     </span>
 
                     <button
                         disabled={page >= pages}
                         onClick={() => setPage(p => p + 1)}
                     >
-                        Nästa ➡
+                        Next ➡
                     </button>
                 </div>
             )}

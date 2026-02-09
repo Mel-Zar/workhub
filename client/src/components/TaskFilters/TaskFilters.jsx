@@ -12,21 +12,21 @@ function TaskFilters({
         <div className="task-filters">
 
             <Dropdown
-                placeholder="Alla kategorier"
+                placeholder="All categories"
                 value={filters.category}
                 onChange={(val) => onChange({ ...filters, category: val })}
                 options={[
-                    { label: "Alla kategorier", value: "" },
+                    { label: "All categories", value: "" },
                     ...categories.map(c => ({ label: c, value: c }))
                 ]}
             />
 
             <Dropdown
-                placeholder="Alla prioriteter"
+                placeholder="All priorities"
                 value={filters.priority}
                 onChange={(val) => onChange({ ...filters, priority: val })}
                 options={[
-                    { label: "Alla prioriteter", value: "" },
+                    { label: "All priorities", value: "" },
                     ...priorities.map(p => ({ label: p, value: p }))
                 ]}
             />
@@ -41,9 +41,9 @@ function TaskFilters({
                     })
                 }
                 options={[
-                    { label: "Alla", value: "" },
-                    completionOptions.includes("true") && { label: "Klara", value: true },
-                    completionOptions.includes("false") && { label: "Ej klara", value: false }
+                    { label: "All", value: "" },
+                    completionOptions.includes("true") && { label: "Completed", value: true },
+                    completionOptions.includes("false") && { label: "Not completed", value: false }
                 ].filter(Boolean)}
             />
 
@@ -59,7 +59,7 @@ function TaskFilters({
                     })
                 }
             >
-                Rensa filter
+                Reset filters
             </button>
         </div>
     );

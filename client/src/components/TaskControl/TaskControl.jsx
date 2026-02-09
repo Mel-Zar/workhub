@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import TaskFilters from "../TaskFilters/TaskFilters";
 import TaskSort from "../TaskSort/TaskSort";
+import TaskSearch from "../TaskSearch/TaskSearch";
 import "./TaskControl.scss";
 
 function TaskControls({
@@ -9,12 +10,14 @@ function TaskControls({
     categories,
     priorities,
     completionOptions,
-    sortBy,
-    setSortBy
+    onSearch
 }) {
-    const [open, setOpen] = useState(null);
+    const [open, setOpen] = useState(null); // "filter" | "sort" | null
     const ref = useRef(null);
 
+    /* =====================
+       CLICK OUTSIDE
+       ===================== */
     useEffect(() => {
         function handleClickOutside(e) {
             if (ref.current && !ref.current.contains(e.target)) {
@@ -22,64 +25,44 @@ function TaskControls({
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        return () =>
+            document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const activeFilterCount = useMemo(() => {
-        let count = 0;
-        if (filters.category) count++;
-        if (filters.priority) count++;
-        if (filters.completed !== undefined) count++;
-        if (filters.fromDate) count++;
-        if (filters.toDate) count++;
-        return count;
-    }, [filters]);
+    /* =====================
+       COUNTERS
+       ===================== */
+    const activeFiltersCount = Object.entries(filters)
+        .filter(([key, value]) =>
+            key !== "sortBy" && value !== "" && value !== undefined
+        ).length;
+
+    const hasSort = Boolean(filters.sortBy);
 
     return (
         <div className="task-controls" ref={ref}>
-
-            {/* SORT */}
-            <div className="control">
+            {/* =====================
+               FILTER
+               ===================== */}
+            <div className="control left">
                 <button
-                    className={`control-btn ${open === "sort" ? "active" : ""}`}
-                    onClick={() => setOpen(open === "sort" ? null : "sort")}
+                    className={`control-btn ${activeFiltersCount ? "is-active" : ""} ${open === "filter" ? "open" : ""}`}
+                    onClick={() =>
+                        setOpen(open === "filter" ? null : "filter")
+                    }
                 >
-                    <span>Sort</span>
-                    <span className={`chevron ${open === "sort" ? "up" : ""}`} />
-                </button>
-
-                <div className={`control-dropdown ${open === "sort" ? "open" : ""}`}>
-                    {open === "sort" && (
-                        <TaskSort
-                            sortBy={sortBy}
-                            onSortChange={(val) => {
-                                setSortBy(val);
-                                setOpen(null);
-                            }}
-                        />
-                    )}
-                </div>
-            </div>
-
-            {/* FILTER */}
-            <div className="control">
-                <button
-                    className={`control-btn filter-btn ${activeFilterCount > 0 ? "has-active" : ""
-                        } ${open === "filter" ? "active" : ""}`}
-                    onClick={() => setOpen(open === "filter" ? null : "filter")}
-                >
-                    <span>Filter</span>
-
-                    <div className="right">
-                        {activeFilterCount > 0 && (
-                            <span className="filter-count">{activeFilterCount}</span>
+                    <span>
+                        Filter
+                        {activeFiltersCount > 0 && (
+                            <span className="count">{activeFiltersCount}</span>
                         )}
-                        <span className={`chevron ${open === "filter" ? "up" : ""}`} />
-                    </div>
+                    </span>
+
+                    <span className={`arrow ${open === "filter" ? "up" : "down"}`} />
                 </button>
 
-                <div className={`control-dropdown ${open === "filter" ? "open" : ""}`}>
-                    {open === "filter" && (
+                {open === "filter" && (
+                    <div className="dropdown-panel">
                         <TaskFilters
                             filters={filters}
                             onChange={setFilters}
@@ -87,10 +70,51 @@ function TaskControls({
                             priorities={priorities}
                             completionOptions={completionOptions}
                         />
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
+            {/* =====================
+               SEARCH
+               ===================== */}
+            <div className="search-wrapper">
+                <TaskSearch onSearch={onSearch} />
+            </div>
+
+            {/* =====================
+               SORT
+               ===================== */}
+            <div className="control right">
+                <button
+                    className={`control-btn ${hasSort ? "is-active" : ""} ${open === "sort" ? "open" : ""}`}
+                    onClick={() =>
+                        setOpen(open === "sort" ? null : "sort")
+                    }
+                >
+                    <span>Sort</span>
+                    <span className={`arrow ${open === "sort" ? "up" : "down"}`} />
+                </button>
+
+                {open === "sort" && (
+                    <div className="dropdown-panel">
+                        <TaskSort
+                            value={filters.sortBy}
+                            onChange={(value) =>
+                                setFilters(prev => ({
+                                    ...prev,
+                                    sortBy: value
+                                }))
+                            }
+                            onReset={() =>
+                                setFilters(prev => ({
+                                    ...prev,
+                                    sortBy: ""
+                                }))
+                            }
+                        />
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
