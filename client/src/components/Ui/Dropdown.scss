@@ -1,77 +1,100 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
 .dropdown {
   position: relative;
   width: 100%;
   font-size: 0.85rem;
+
+  &.is-open {
+    .dropdown-trigger {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
+    }
+
+    .arrow {
+      transform: rotate(180deg);
+    }
+  }
 }
 
-/* TRIGGER */
+/* =========================
+   TRIGGER
+   ========================= */
+
 .dropdown-trigger {
+  @include flex-between;
+  @include button-reset;
+
   width: 100%;
   height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 0 1rem;
-  border-radius: 0.8rem;
+  border-radius: $radius;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: $transition;
 }
 
-.dropdown.is-open .dropdown-trigger {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
-}
+/* =========================
+   ARROW
+   ========================= */
 
-/* ARROW */
-.dropdown-trigger .arrow {
+.arrow {
   width: 0;
   height: 0;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
   border-top: 6px solid currentColor;
-  transition: transform 0.25s ease;
+  transition: transform $transition;
 }
 
-.dropdown.is-open .arrow {
-  transform: rotate(180deg);
-}
+/* =========================
+   MENU
+   ========================= */
 
-/* MENU */
 .dropdown-menu {
   position: absolute;
   top: calc(100% + 0.4rem);
   left: 0;
   right: 0;
   background: var(--surface);
-  border-radius: 0.9rem;
+  border-radius: $radius-lg;
   padding: 0.4rem;
-  box-shadow: var(--shadow);
+  box-shadow: $shadow-soft;
   z-index: 100;
 }
 
-/* ITEMS */
+/* =========================
+   ITEMS
+   ========================= */
+
 .dropdown-item {
+  @include flex-between;
+  @include button-reset;
+
   width: 100%;
   padding: 0.55rem 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   border-radius: 0.6rem;
-  background: transparent;
-  border: none;
   color: var(--text);
-  cursor: pointer;
+  transition: background $transition;
+
+  &:hover {
+    background: rgba(212, 175, 55, 0.15);
+  }
+
+  &.active {
+    background: var(--primary);
+    color: #000;
+    font-weight: 500;
+  }
 }
 
-.dropdown-item:hover {
-  background: rgba(212, 175, 55, 0.15);
-}
+/* =========================
+   CHECK
+   ========================= */
 
-.dropdown-item.active {
-  background: var(--primary);
-  color: #000;
-  font-weight: 500;
+.check {
+  font-size: 0.85rem;
 }

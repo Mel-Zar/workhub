@@ -53,8 +53,9 @@ function TaskControls({
                 >
                     <span>
                         Filter
+
                         {activeFiltersCount > 0 && (
-                            <span className="count">{activeFiltersCount}</span>
+                            <span className="count">({activeFiltersCount})</span>
                         )}
                     </span>
 

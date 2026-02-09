@@ -63,6 +63,7 @@
 }
 
 
+/* CONTROL BUTTON */
 .control-btn {
   height: 42px;
   padding: 0 1.1rem;
@@ -76,24 +77,29 @@
   gap: 0.4rem;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
+/* ACTIVE (filter or sort selected) */
 .control-btn.is-active {
   border-color: var(--primary);
   color: var(--primary);
 }
 
+/* OPEN (dropdown opened) */
 .control-btn.open {
+  border-color: var(--primary);
+  color: var(--primary);
   box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
 }
 
-/* PIL */
+/* ARROW */
 .arrow {
   width: 6px;
   height: 6px;
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
-  transition: 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .arrow.down {

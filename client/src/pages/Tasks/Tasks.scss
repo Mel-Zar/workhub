@@ -1,0 +1,64 @@
+.tasks-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.tasks-header {
+    margin-bottom: 16px;
+}
+
+.tasks-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.tasks-controls {
+    background: #f8f9fb;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.tasks-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.status-text {
+    text-align: center;
+    color: #555;
+}
+
+.error-text {
+    text-align: center;
+    color: #d32f2f;
+    font-weight: 500;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.pagination button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    background: #1976d2;
+    color: white;
+    cursor: pointer;
+}
+
+.pagination button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.pagination span {
+    font-weight: 500;
+}

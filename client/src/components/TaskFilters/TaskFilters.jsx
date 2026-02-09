@@ -10,30 +10,49 @@ function TaskFilters({
 }) {
     return (
         <div className="task-filters">
-
+            {/* CATEGORY */}
             <Dropdown
-                placeholder="All categories"
                 value={filters.category}
-                onChange={(val) => onChange({ ...filters, category: val })}
+                placeholder="All categories"
+                onChange={(val) =>
+                    onChange({
+                        ...filters,
+                        category: val,
+                        priority: "" // reset child
+                    })
+                }
                 options={[
                     { label: "All categories", value: "" },
-                    ...categories.map(c => ({ label: c, value: c }))
+                    ...categories.map(c => ({
+                        label: c,
+                        value: c
+                    }))
                 ]}
             />
 
+            {/* PRIORITY */}
             <Dropdown
-                placeholder="All priorities"
                 value={filters.priority}
-                onChange={(val) => onChange({ ...filters, priority: val })}
+                placeholder="All priorities"
+                onChange={(val) =>
+                    onChange({
+                        ...filters,
+                        priority: val
+                    })
+                }
                 options={[
                     { label: "All priorities", value: "" },
-                    ...priorities.map(p => ({ label: p, value: p }))
+                    ...priorities.map(p => ({
+                        label: p,
+                        value: p
+                    }))
                 ]}
             />
 
+            {/* STATUS */}
             <Dropdown
+                value={filters.completed ?? ""}
                 placeholder="Status"
-                value={filters.completed}
                 onChange={(val) =>
                     onChange({
                         ...filters,
@@ -42,8 +61,14 @@ function TaskFilters({
                 }
                 options={[
                     { label: "All", value: "" },
-                    completionOptions.includes("true") && { label: "Completed", value: true },
-                    completionOptions.includes("false") && { label: "Not completed", value: false }
+                    completionOptions.includes("true") && {
+                        label: "Completed",
+                        value: true
+                    },
+                    completionOptions.includes("false") && {
+                        label: "Not completed",
+                        value: false
+                    }
                 ].filter(Boolean)}
             />
 
@@ -51,11 +76,10 @@ function TaskFilters({
                 className="reset-btn"
                 onClick={() =>
                     onChange({
-                        priority: "",
+                        search: "",
                         category: "",
-                        completed: undefined,
-                        fromDate: "",
-                        toDate: ""
+                        priority: "",
+                        completed: undefined
                     })
                 }
             >
