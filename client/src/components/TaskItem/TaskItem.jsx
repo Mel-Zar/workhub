@@ -9,6 +9,7 @@ const PRIORITY_OPTIONS = ["low", "medium", "high"];
 function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = false }) {
     const [activeImage, setActiveImage] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+
     const [formData, setFormData] = useState({
         title: task?.title || "",
         category: task?.category || "",
@@ -17,38 +18,58 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
     });
 
     const [oldImages, setOldImages] = useState(task?.images || []);
+
+    // { file, preview }
     const [newImages, setNewImages] = useState([]);
+
     const [imagesToRemove, setImagesToRemove] = useState([]);
-    const [draggedIndex, setDraggedIndex] = useState(null);
+    const [dragged, setDragged] = useState({ type: null, index: null });
 
     if (!task) return null;
+
+    /* =========================
+       VALIDATION
+    ========================= */
+
+    const allInputsFilled =
+        formData.title.trim() &&
+        formData.category.trim() &&
+        formData.priority &&
+        formData.deadline;
+
+    const hasAtLeastOneImage =
+        oldImages.length + newImages.length > 0;
 
     const hasChanges =
         formData.title !== task.title ||
         formData.category !== task.category ||
         formData.priority !== task.priority ||
         formData.deadline !== task.deadline ||
-        newImages.length > 0 ||
-        imagesToRemove.length > 0;
+        imagesToRemove.length > 0 ||
+        newImages.length > 0;
 
     const canSave =
-        hasChanges &&
-        formData.title.trim() &&
-        formData.category.trim() &&
-        formData.priority;
+        allInputsFilled &&
+        hasAtLeastOneImage &&
+        hasChanges;
+
+    /* =========================
+       HANDLERS
+    ========================= */
 
     const toggleComplete = async (e) => {
         e.stopPropagation();
         try {
-            await taskService.toggleComplete(task._id, !task.completed);
+            await taskService.toggleComplete(task._id);
             onUpdate?.();
         } catch {
-            toast.error("Could not update task status");
+            toast.error("Could not update task");
         }
     };
 
     const handleEditToggle = (e) => {
         e.stopPropagation();
+
         if (!isEditing) {
             setFormData({
                 title: task.title || "",
@@ -60,11 +81,11 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
             setNewImages([]);
             setImagesToRemove([]);
         } else {
-            // Avbryt: återställ bilder
             setOldImages(task.images || []);
             setNewImages([]);
             setImagesToRemove([]);
         }
+
         setIsEditing(prev => !prev);
     };
 
@@ -73,33 +94,68 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    /* =========================
+       NEW IMAGES
+    ========================= */
+
     const handleNewImages = (e) => {
         const files = Array.from(e.target.files);
-        setNewImages(prev => [...prev, ...files]);
+
+        const withPreview = files.map(file => ({
+            file,
+            preview: URL.createObjectURL(file),
+        }));
+
+        setNewImages(prev => [...prev, ...withPreview]);
+        e.target.value = "";
     };
 
-    // ✅ Ta bort bild direkt från skärmen och markera för servern
+    /* =========================
+       IMAGE REMOVE
+    ========================= */
+
     const removeOldImage = (img) => {
         setOldImages(prev => prev.filter(i => i !== img));
         setImagesToRemove(prev => [...prev, img]);
     };
 
-    const removeNewImage = (index) =>
+    const removeNewImage = (index) => {
         setNewImages(prev => prev.filter((_, i) => i !== index));
-
-    const handleDragStart = (index) => setDraggedIndex(index);
-
-    const handleDragOver = (index, e) => {
-        e.preventDefault();
-        if (draggedIndex === null || draggedIndex === index) return;
-
-        const reordered = [...oldImages];
-        const [moved] = reordered.splice(draggedIndex, 1);
-        reordered.splice(index, 0, moved);
-
-        setOldImages(reordered);
-        setDraggedIndex(index);
     };
+
+    /* =========================
+       DRAG & DROP
+    ========================= */
+
+    const handleDragStart = (type, index) => {
+        setDragged({ type, index });
+    };
+
+    const handleDragOver = (type, index, e) => {
+        e.preventDefault();
+        if (!dragged.type) return;
+        if (dragged.type !== type || dragged.index === index) return;
+
+        if (type === "old") {
+            const updated = [...oldImages];
+            const [moved] = updated.splice(dragged.index, 1);
+            updated.splice(index, 0, moved);
+            setOldImages(updated);
+        }
+
+        if (type === "new") {
+            const updated = [...newImages];
+            const [moved] = updated.splice(dragged.index, 1);
+            updated.splice(index, 0, moved);
+            setNewImages(updated);
+        }
+
+        setDragged({ type, index });
+    };
+
+    /* =========================
+       SAVE  ✅ FIX HÄR
+    ========================= */
 
     const handleSave = async () => {
         if (!canSave) return;
@@ -107,27 +163,35 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
         try {
             await taskService.update(task._id, formData);
 
-            // Ta bort markerade bilder
             for (const img of imagesToRemove) {
                 await taskService.removeImage(task._id, img);
             }
 
-            // Lägg till nya bilder
             if (newImages.length > 0) {
                 const fd = new FormData();
-                newImages.forEach(img => fd.append("images", img));
+                newImages.forEach(img => fd.append("images", img.file));
                 await taskService.addImages(task._id, fd);
+
+                // ✅ NYTT: visa nya bilder DIREKT efter save
+                setOldImages(prev => [
+                    ...prev,
+                    ...newImages.map(img => img.preview)
+                ]);
             }
 
             toast.success("Task updated");
             setIsEditing(false);
             setImagesToRemove([]);
             setNewImages([]);
-            onUpdate?.();
+            onUpdate?.(); // backend-sync
         } catch {
             toast.error("Failed to save task");
         }
     };
+
+    /* =========================
+       RENDER
+    ========================= */
 
     return (
         <>
@@ -140,9 +204,9 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                             onChange={toggleComplete}
                         />
                     )}
+
                     {isEditing ? (
                         <input
-                            type="text"
                             name="title"
                             value={formData.title}
                             onChange={handleChange}
@@ -162,6 +226,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                                 onChange={handleChange}
                                 placeholder="Category"
                             />
+
                             <select
                                 name="priority"
                                 value={formData.priority}
@@ -174,6 +239,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                                     </option>
                                 ))}
                             </select>
+
                             <input
                                 type="date"
                                 name="deadline"
@@ -204,14 +270,21 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                             key={img + i}
                             className="image-wrapper"
                             draggable={isEditing}
-                            onDragStart={() => handleDragStart(i)}
-                            onDragOver={(e) => handleDragOver(i, e)}
+                            onDragStart={() => handleDragStart("old", i)}
+                            onDragOver={(e) => handleDragOver("old", i, e)}
                         >
                             <img
-                                src={`${import.meta.env.VITE_API_URL}${img}`}
-                                alt="Task"
+                                src={img.startsWith("blob:")
+                                    ? img
+                                    : `${import.meta.env.VITE_API_URL}${img}`}
+                                alt=""
                                 onClick={() =>
-                                    !isEditing && setActiveImage(`${import.meta.env.VITE_API_URL}${img}`)
+                                    !isEditing &&
+                                    setActiveImage(
+                                        img.startsWith("blob:")
+                                            ? img
+                                            : `${import.meta.env.VITE_API_URL}${img}`
+                                    )
                                 }
                             />
                             {isEditing && (
@@ -225,33 +298,59 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                         </div>
                     ))}
 
-                    {newImages.map((file, i) => (
-                        <div key={i} className="image-wrapper">
-                            <img src={URL.createObjectURL(file)} alt="New" />
-                            <button className="remove-btn" onClick={() => removeNewImage(i)}>X</button>
+                    {newImages.map((img, i) => (
+                        <div
+                            key={img.preview}
+                            className="image-wrapper"
+                            draggable={isEditing}
+                            onDragStart={() => handleDragStart("new", i)}
+                            onDragOver={(e) => handleDragOver("new", i, e)}
+                        >
+                            <img src={img.preview} alt="new" />
+                            <button
+                                className="remove-btn"
+                                onClick={() => removeNewImage(i)}
+                            >
+                                X
+                            </button>
                         </div>
                     ))}
 
-                    {isEditing && <input type="file" multiple onChange={handleNewImages} />}
+                    {isEditing && (
+                        <input type="file" multiple onChange={handleNewImages} />
+                    )}
                 </section>
 
                 {showActions && editable && (
                     <footer className="task-actions">
                         {isEditing ? (
                             <>
-                                <button className="edit" onClick={handleSave} disabled={!canSave}>
+                                <button
+                                    className="edit"
+                                    onClick={handleSave}
+                                    disabled={!canSave}
+                                >
                                     Save
                                 </button>
-                                <button className="danger" onClick={handleEditToggle}>
+                                <button
+                                    className="danger"
+                                    onClick={handleEditToggle}
+                                >
                                     Cancel
                                 </button>
                             </>
                         ) : (
                             <>
-                                <button className="edit" onClick={handleEditToggle}>
+                                <button
+                                    className="edit"
+                                    onClick={handleEditToggle}
+                                >
                                     Edit
                                 </button>
-                                <button className="danger" onClick={() => onDelete(task._id)}>
+                                <button
+                                    className="danger"
+                                    onClick={() => onDelete(task._id)}
+                                >
                                     Delete
                                 </button>
                             </>
@@ -261,8 +360,11 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
             </article>
 
             {activeImage && (
-                <div className="image-modal" onClick={() => setActiveImage(null)}>
-                    <img src={activeImage} alt="Preview" />
+                <div
+                    className="image-modal"
+                    onClick={() => setActiveImage(null)}
+                >
+                    <img src={activeImage} alt="preview" />
                 </div>
             )}
         </>
