@@ -1,0 +1,96 @@
+/* =====================
+   TASK IMAGES – POLISH
+   ===================== */
+
+.task-images {
+  position: relative;
+}
+
+/* IMAGE WRAPPER */
+.image-wrapper {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+
+  &:hover {
+    .image-overlay {
+      opacity: 1;
+    }
+  }
+}
+
+/* IMAGE */
+.task-images img {
+  display: block;
+  background: var(--surface);
+}
+
+/* DRAG STATE */
+.image-wrapper[draggable="true"] {
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* REMOVE BUTTON – FINARE */
+.remove-btn {
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, background 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+/* FILE INPUT – CUSTOM LOOK */
+.task-images input[type="file"] {
+  grid-column: 1 / -1;
+  padding: 0.9rem;
+  border-radius: 14px;
+  border: 1px dashed var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: border 0.2s ease, background 0.2s ease;
+
+  &::file-selector-button {
+    margin-right: 1rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid var(--primary);
+    background: transparent;
+    color: var(--primary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--primary);
+  }
+
+  &:hover::file-selector-button {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+}
+
+/* EDIT MODE – SUBTIL OVERLAY */
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.35),
+    rgba(0, 0, 0, 0)
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}

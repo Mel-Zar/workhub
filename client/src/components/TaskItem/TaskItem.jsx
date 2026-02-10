@@ -110,8 +110,11 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                 );
 
                 if (exists) {
-                    toast.warn(`"${file.name}" är redan vald`);
-                    continue;
+                    toast.warn(`"${file.name}" är redan vald`, {
+                        toastId: `duplicate-${file.name}`,
+                        autoClose: 2000,
+                    });
+                    continue; // ⬅️ DETTA VAR DET SOM SAKNADES
                 }
 
                 next.push({

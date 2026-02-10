@@ -1,3 +1,5 @@
+import "./TaskImages.scss";
+
 function TaskImages({
     oldImages,
     newImages,
