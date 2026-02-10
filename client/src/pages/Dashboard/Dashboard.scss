@@ -1,0 +1,135 @@
+@use "../../styles/mixins" as *;
+
+/* =====================
+   PAGE
+===================== */
+.dashboard-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  min-height: calc(100vh - 64px);
+}
+
+/* PAGE HEADER */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.page-header-text {
+  h1 {
+    font-size: 2.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin-top: 0.3rem;
+    font-size: 0.9rem;
+    opacity: 0.65;
+  }
+}
+
+/* SECTIONS */
+.tasks-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* CONTROLS */
+.tasks-controls {
+  background: var(--surface);
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+}
+
+/* TASK CONTENT */
+.tasks-content {
+  min-height: 250px;
+}
+
+/* GRID */
+.tasks-layout.grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  opacity: 0.7;
+
+  p {
+    font-weight: 600;
+  }
+
+  span {
+    font-size: 0.75rem;
+  }
+}
+
+/* STATUS TEXTS */
+.status-text {
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.error-text {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #ff6b6b;
+}
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+
+  button {
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    &:not(:disabled):hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+  }
+
+  span {
+    font-size: 0.75rem;
+    opacity: 0.6;
+  }
+}
+
+/* MOBILE */
+@include mobile {
+  .tasks-layout.grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tasks-controls {
+    padding: 0.75rem;
+  }
+}

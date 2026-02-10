@@ -1,17 +1,18 @@
 import { useTasks } from "../../hooks/useTasks";
 import { useAuth } from "../../context/AuthContext/AuthContext";
+import { taskService } from "../../services/taskService";
 
 import TaskItem from "../../components/TaskItem/TaskItem";
-import TaskSearch from "../../components/TaskSearch/TaskSearch";
 import TaskControls from "../../components/TaskControl/TaskControl";
 import TaskForm from "../../components/TaskForm/TaskForm";
 
+import "./Dashboard.scss";
+
 function Dashboard() {
     const { user, loading: authLoading } = useAuth();
-
     const {
         tasks,
-        loading: tasksLoading,
+        loading,
         error,
         page,
         pages,
@@ -21,80 +22,77 @@ function Dashboard() {
         completionOptions,
         setPage,
         setFilters,
-        setSortBy,
-        refreshTasks
-    } = useTasks({ limit: 5 });
+        refreshTasks,
+    } = useTasks({ limit: 6 });
 
-    if (authLoading) return <p>Laddar användare...</p>;
-    if (!user) return <p>Ej inloggad</p>;
+    if (authLoading) return <p className="status-text">Loading user…</p>;
+    if (!user) return <p className="status-text">Not logged in</p>;
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Do you want to delete this task?")) return;
+        await taskService.remove(id);
+        refreshTasks();
+    };
 
     return (
-        <div>
-            <h2>Dashboard</h2>
-
-            {/* CREATE TASK */}
-            <TaskForm onCreate={refreshTasks} />
-
-
-
-            {/* SORT + FILTER CONTROLS (TVÅ KNAPPAR) */}
-            <TaskControls
-                sortBy={filters.sortBy}
-                setSortBy={(value) => {
-                    setPage(1);
-                    setSortBy(value);
-                }}
-                filters={filters}
-                setFilters={(data) => {
-                    setPage(1);
-                    setFilters(data);
-                }}
-                categories={categories}
-                priorities={priorities}
-                completionOptions={completionOptions}
-            />
-
-
-
-            {/* TASK LIST */}
-            {tasksLoading && <p>Laddar tasks...</p>}
-            {error && <p style={{ color: "red" }}>Fel: {error}</p>}
-            {!tasksLoading && !error && tasks.length === 0 && <p>Inga tasks</p>}
-
-            {tasks.map(task => (
-                <TaskItem
-                    key={task._id}
-                    task={task}
-                    showActions
-                    editable
-                    onUpdate={refreshTasks}
-                    onDelete={refreshTasks}
-                />
-            ))}
-
-            {/* PAGINATION */}
-            {pages > 1 && (
-                <div style={{ marginTop: 20 }}>
-                    <button
-                        disabled={page <= 1}
-                        onClick={() => setPage(p => p - 1)}
-                    >
-                        ⬅ Föregående
-                    </button>
-
-                    <span style={{ margin: "0 10px" }}>
-                        Sida {page} av {pages}
-                    </span>
-
-                    <button
-                        disabled={page >= pages}
-                        onClick={() => setPage(p => p + 1)}
-                    >
-                        Nästa ➡
-                    </button>
+        <main className="dashboard-page">
+            <header className="page-header">
+                <div className="page-header-text">
+                    <h1>Dashboard</h1>
+                    <p>Overview of your tasks & quick actions</p>
                 </div>
+            </header>
+
+            <section className="tasks-section">
+                <TaskForm onCreate={refreshTasks} />
+            </section>
+
+            <section className="tasks-section">
+                <div className="tasks-controls">
+                    <TaskControls
+                        filters={filters}
+                        setFilters={(data) => { setPage(1); setFilters(data); }}
+                        categories={categories}
+                        priorities={priorities}
+                        completionOptions={completionOptions}
+                    />
+                </div>
+            </section>
+
+            <section className="tasks-section">
+                <div className="tasks-content">
+                    {loading && <p className="status-text">Loading tasks…</p>}
+                    {error && <p className="error-text">{error}</p>}
+                    {!loading && tasks.length === 0 && (
+                        <div className="empty-state">
+                            <p>No tasks</p>
+                            <span>Try creating a new task or adjusting filters</span>
+                        </div>
+                    )}
+
+                    <div className="tasks-layout grid">
+                        {tasks.map(task => (
+                            <TaskItem
+                                key={task._id}
+                                task={task}
+                                showActions
+                                editable
+                                onUpdate={refreshTasks}
+                                onDelete={handleDelete}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {pages > 1 && (
+                <footer className="pagination">
+                    <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Prev</button>
+                    <span>{page} / {pages}</span>
+                    <button disabled={page >= pages} onClick={() => setPage(p => p + 1)}>Next</button>
+                </footer>
             )}
-        </div>
+        </main>
     );
 }
 

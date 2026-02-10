@@ -118,7 +118,41 @@
 .task-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
 }
+
+.task-actions .edit {
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  background: transparent;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+}
+
+.task-actions .danger {
+  border: 1px solid crimson;
+  color: crimson;
+  background: transparent;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: crimson;
+    color: white;
+  }
+}
+
 
 .task-actions .danger {
   border: 1px solid crimson;

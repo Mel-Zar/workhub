@@ -2,8 +2,7 @@ import Task from "../models/Task.js";
 import fs from "fs";
 import path from "path";
 
-/* ===== HELPERS ===== */
-
+/* ================= HELPERS ================= */
 const buildQuery = (userId, search, priority, completed, category) => {
     const query = { user: userId };
 
@@ -23,49 +22,26 @@ const buildQuery = (userId, search, priority, completed, category) => {
     return query;
 };
 
-/* ===== GET TASKS ===== */
-
+/* ================= TASKS ================= */
 export const getTasks = async (req, res) => {
     try {
-        const {
-            search,
-            priority,
-            category,
-            completed,
-            page = 1,
-            limit = 5
-        } = req.query;
+        const { search, priority, category, completed, page = 1, limit = 5 } = req.query;
 
-        const query = buildQuery(
-            req.user.id,
-            search,
-            priority,
-            completed,
-            category
-        );
-
+        const query = buildQuery(req.user.id, search, priority, completed, category);
         const skip = (page - 1) * limit;
-        const total = await Task.countDocuments(query);
 
+        const total = await Task.countDocuments(query);
         const tasks = await Task.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(Number(limit));
 
-        res.json({
-            tasks,
-            page: Number(page),
-            pages: Math.ceil(total / limit),
-            total
-        });
-
+        res.json({ tasks, page: Number(page), pages: Math.ceil(total / limit), total });
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500).json({ error: "Server error" });
     }
 };
-
-/* ===== GET SINGLE ===== */
 
 export const getTask = async (req, res) => {
     try {
@@ -74,17 +50,16 @@ export const getTask = async (req, res) => {
             user: req.user.id
         });
 
-        if (!task)
+        if (!task) {
             return res.status(404).json({ error: "Task not found" });
+        }
 
         res.json(task);
-
     } catch (err) {
+        console.error("GET TASK ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
-
-/* ===== CREATE ===== */
 
 export const createTask = async (req, res) => {
     try {
@@ -92,51 +67,37 @@ export const createTask = async (req, res) => {
             return res.status(400).json({ error: "Title is required" });
         }
 
-        const imagePaths = req.files
-            ? req.files.map(file => `/uploads/${file.filename}`)
-            : [];
+        const images = req.files?.map(f => `/uploads/${f.filename}`) || [];
 
         const task = await Task.create({
             title: req.body.title,
+            category: req.body.category || "general",
             priority: req.body.priority || "medium",
-            category: req.body.category || "",
             deadline: req.body.deadline || null,
-            images: imagePaths,
+            images,
             user: req.user.id
         });
 
         res.status(201).json(task);
-
     } catch (err) {
         console.error("CREATE ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ===== UPDATE TEXT ===== */
-
-/* ===== UPDATE TASK ===== */
 export const updateTask = async (req, res) => {
     try {
-        const updateData = {
-            title: req.body.title,
-            priority: req.body.priority,
-            category: req.body.category,
-            deadline: req.body.deadline
-        };
+        const task = await Task.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
 
-        // ✅ Lägg till completed om det skickas
-        if (typeof req.body.completed === "boolean") {
-            updateData.completed = req.body.completed;
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
         }
 
-        const task = await Task.findOneAndUpdate(
-            { _id: req.params.id, user: req.user.id },
-            updateData,
-            { new: true }
-        );
-
-        if (!task) return res.status(404).json({ error: "Task not found" });
+        Object.assign(task, req.body);
+        await task.save();
 
         res.json(task);
     } catch (err) {
@@ -145,9 +106,7 @@ export const updateTask = async (req, res) => {
     }
 };
 
-
-/* ===== ADD IMAGES ===== */
-
+/* ================= IMAGES ================= */
 export const addImages = async (req, res) => {
     try {
         const task = await Task.findOne({
@@ -155,32 +114,26 @@ export const addImages = async (req, res) => {
             user: req.user.id
         });
 
-        if (!task)
+        if (!task) {
             return res.status(404).json({ error: "Task not found" });
+        }
 
-        const newImages = req.files.map(
-            file => `/uploads/${file.filename}`
-        );
+        const images = req.files.map(f => `/uploads/${f.filename}`);
+        task.images.push(...images);
 
-        task.images.push(...newImages);
         await task.save();
-
         res.json(task);
-
     } catch (err) {
         console.error("ADD IMAGE ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-/* ===== REMOVE IMAGE ===== */
-
 export const removeImage = async (req, res) => {
     try {
-        const { image } = req.body;
-
-        if (!image) {
-            return res.status(400).json({ error: "No image provided" });
+        const imagePath = req.query.image;
+        if (!imagePath) {
+            return res.status(400).json({ error: "Image query param missing" });
         }
 
         const task = await Task.findOne({
@@ -188,27 +141,37 @@ export const removeImage = async (req, res) => {
             user: req.user.id
         });
 
-        if (!task) return res.status(404).json({ error: "Task not found" });
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
+        }
 
-        task.images = task.images.filter(img => img !== image);
+        const filename = path.basename(imagePath);
+
+        const exists = task.images.some(
+            img => path.basename(img) === filename
+        );
+
+        if (!exists) {
+            return res.status(404).json({ error: "Image not found on task" });
+        }
+
+        task.images = task.images.filter(
+            img => path.basename(img) !== filename
+        );
+
         await task.save();
 
-        const filePath = path.join(process.cwd(), image.replace("/uploads", "uploads"));
-        fs.unlink(filePath, err => {
-            if (err) console.log("File delete warning:", err.message);
-        });
+        const filePath = path.join(process.cwd(), "uploads", filename);
+        fs.unlink(filePath, () => { });
 
         res.json(task);
-
     } catch (err) {
-        console.log("REMOVE IMAGE ERROR:", err);
+        console.error("REMOVE IMAGE ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
-
-/* ===== DELETE TASK ===== */
-
+/* ================= OTHER ================= */
 export const deleteTask = async (req, res) => {
     try {
         const task = await Task.findOneAndDelete({
@@ -216,17 +179,15 @@ export const deleteTask = async (req, res) => {
             user: req.user.id
         });
 
-        if (!task)
+        if (!task) {
             return res.status(404).json({ error: "Task not found" });
+        }
 
         res.json({ message: "Task deleted" });
-
     } catch (err) {
         res.status(500).json({ error: "Server error" });
     }
 };
-
-/* ===== TOGGLE COMPLETE ===== */
 
 export const toggleComplete = async (req, res) => {
     try {
@@ -235,14 +196,14 @@ export const toggleComplete = async (req, res) => {
             user: req.user.id
         });
 
-        if (!task)
+        if (!task) {
             return res.status(404).json({ error: "Task not found" });
+        }
 
         task.completed = !task.completed;
         await task.save();
 
         res.json(task);
-
     } catch (err) {
         res.status(500).json({ error: "Server error" });
     }

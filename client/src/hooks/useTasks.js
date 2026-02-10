@@ -10,16 +10,13 @@ export function useTasks({ limit = 5 } = {}) {
         search: "",
         category: "",
         priority: "",
-        completed: undefined
+        completed: undefined,
+        sortBy: ""
     });
-
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    /* =====================
-       FETCH
-       ===================== */
     const refreshTasks = useCallback(async () => {
         if (!user) return;
         try {
@@ -39,12 +36,9 @@ export function useTasks({ limit = 5 } = {}) {
         refreshTasks();
     }, [user, authLoading, refreshTasks]);
 
-    /* =====================
-       FILTER TASKS
-       ===================== */
     const filteredTasks = useMemo(() => {
         return allTasks.filter(t => {
-            if (filters.search && !t.title?.toLowerCase().includes(filters.search.toLowerCase())) return false;
+            if (filters.search && !t.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
             if (filters.category && t.category !== filters.category) return false;
             if (filters.priority && t.priority !== filters.priority) return false;
             if (filters.completed !== undefined && t.completed !== filters.completed) return false;
@@ -52,50 +46,9 @@ export function useTasks({ limit = 5 } = {}) {
         });
     }, [allTasks, filters]);
 
-    /* =====================
-       CASCADING OPTIONS
-       ===================== */
-
-    // categories depend ONLY on other filters (not category itself)
-    const categories = useMemo(() => {
-        return [
-            ...new Set(
-                allTasks
-                    .filter(t => {
-                        if (filters.priority && t.priority !== filters.priority) return false;
-                        if (filters.completed !== undefined && t.completed !== filters.completed) return false;
-                        return true;
-                    })
-                    .map(t => t.category)
-                    .filter(Boolean)
-            )
-        ];
-    }, [allTasks, filters.priority, filters.completed]);
-
-    // priorities depend on selected category
-    const priorities = useMemo(() => {
-        return [
-            ...new Set(
-                allTasks
-                    .filter(t => {
-                        if (filters.category && t.category !== filters.category) return false;
-                        if (filters.completed !== undefined && t.completed !== filters.completed) return false;
-                        return true;
-                    })
-                    .map(t => t.priority)
-                    .filter(Boolean)
-            )
-        ];
-    }, [allTasks, filters.category, filters.completed]);
-
-    const completionOptions = useMemo(() => {
-        const hasDone = filteredTasks.some(t => t.completed);
-        const hasTodo = filteredTasks.some(t => !t.completed);
-        return [
-            hasDone && "true",
-            hasTodo && "false"
-        ].filter(Boolean);
-    }, [filteredTasks]);
+    const categories = useMemo(() => [...new Set(allTasks.map(t => t.category).filter(Boolean))], [allTasks]);
+    const priorities = useMemo(() => [...new Set(allTasks.map(t => t.priority).filter(Boolean))], [allTasks]);
+    const completionOptions = ["true", "false"];
 
     const pages = Math.ceil(filteredTasks.length / limit);
     const tasks = filteredTasks.slice((page - 1) * limit, page * limit);
