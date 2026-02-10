@@ -1,14 +1,17 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTasks } from "../../hooks/useTasks";
 import { useAuth } from "../../context/AuthContext/AuthContext";
 
 import TaskItem from "../../components/TaskItem/TaskItem";
 import TaskControls from "../../components/TaskControl/TaskControl";
-import "./Tasks.scss"
+
+import "./Tasks.scss";
 
 function Tasks() {
     const { user, loading: authLoading } = useAuth();
     const navigate = useNavigate();
+    const [view, setView] = useState("grid");
 
     const {
         tasks,
@@ -21,26 +24,42 @@ function Tasks() {
         priorities,
         completionOptions,
         setPage,
-        setFilters,
-        setSortBy
-    } = useTasks({ limit: 5 });
+        setFilters
+    } = useTasks({ limit: 6 });
 
-    if (authLoading) return <p className="status-text">Laddar användare...</p>;
-    if (!user) return <p className="status-text">Ej inloggad</p>;
+    if (authLoading) return <p className="status-text">Loading user…</p>;
+    if (!user) return <p className="status-text">Not logged in</p>;
 
     return (
-        <div className="tasks-container">
+        <div className="tasks-page">
+            {/* HEADER */}
             <header className="tasks-header">
-                <h2>Mina Tasks</h2>
+                <h2>My Tasks</h2>
+                <p>Browse and manage your tasks</p>
             </header>
 
-            <div className="tasks-controls">
+            {/* FILTERS + VIEW */}
+            <section className="tasks-section">
+                <div className="controls-header">
+                    <h3 className="section-title">Filters</h3>
+
+                    <div className="view-toggle">
+                        <button
+                            className={view === "list" ? "active" : ""}
+                            onClick={() => setView("list")}
+                        >
+                            List
+                        </button>
+                        <button
+                            className={view === "grid" ? "active" : ""}
+                            onClick={() => setView("grid")}
+                        >
+                            Grid
+                        </button>
+                    </div>
+                </div>
+
                 <TaskControls
-                    sortBy={filters.sortBy}
-                    setSortBy={(value) => {
-                        setPage(1);
-                        setSortBy(value);
-                    }}
                     filters={filters}
                     setFilters={(data) => {
                         setPage(1);
@@ -49,43 +68,47 @@ function Tasks() {
                     categories={categories}
                     priorities={priorities}
                     completionOptions={completionOptions}
+                    onSearch={(value) =>
+                        setFilters(prev => ({ ...prev, search: value }))
+                    }
                 />
-            </div>
+            </section>
 
-            <div className="tasks-content">
-                {loading && <p className="status-text">Laddar...</p>}
-                {error && <p className="error-text">Fel: {error}</p>}
-                {!loading && !error && tasks.length === 0 && (
-                    <p className="status-text">Inga tasks</p>
-                )}
+            {/* TASKS */}
+            <section className="tasks-section">
+                {loading && <p className="status-text">Loading tasks…</p>}
+                {error && <p className="error-text">{error}</p>}
 
-                {tasks.map(task => (
-                    <TaskItem
-                        key={task._id}
-                        task={task}
-                        showActions={false}
-                        editable={false}
-                        onClick={() => navigate(`/task/${task._id}`)}
-                    />
-                ))}
-            </div>
+                <div className={`tasks-wrapper ${view}`}>
+                    {tasks.map(task => (
+                        <TaskItem
+                            key={task._id}
+                            task={task}
+                            showActions={false}
+                            editable={false}
+                            onClick={() => navigate(`/task/${task._id}`)}
+                        />
+                    ))}
+                </div>
+            </section>
 
+            {/* PAGINATION */}
             {pages > 1 && (
                 <div className="pagination">
                     <button
                         disabled={page <= 1}
                         onClick={() => setPage(p => p - 1)}
                     >
-                        ⬅ Föregående
+                        Prev
                     </button>
 
-                    <span>Sida {page} av {pages}</span>
+                    <span>{page} / {pages}</span>
 
                     <button
                         disabled={page >= pages}
                         onClick={() => setPage(p => p + 1)}
                     >
-                        Nästa ➡
+                        Next
                     </button>
                 </div>
             )}
