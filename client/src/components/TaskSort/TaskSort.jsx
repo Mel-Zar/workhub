@@ -1,4 +1,5 @@
 import Dropdown from "../Ui/Dropdown";
+import "./TaskSort.scss";
 
 function TaskSort({ value, onChange, onReset }) {
     return (
@@ -17,6 +18,7 @@ function TaskSort({ value, onChange, onReset }) {
 
             {value && (
                 <button
+                    type="button"
                     className="reset-btn"
                     onClick={onReset}
                 >

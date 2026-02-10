@@ -6,37 +6,38 @@ function Dropdown({ value, options = [], onChange, placeholder }) {
     const ref = useRef(null);
 
     useEffect(() => {
-        function handleClickOutside(e) {
+        const handler = (e) => {
             if (ref.current && !ref.current.contains(e.target)) {
                 setOpen(false);
             }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () =>
-            document.removeEventListener("mousedown", handleClickOutside);
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
     }, []);
 
-    const selectedOption = options.find(opt => opt.value === value);
-    const label = selectedOption ? selectedOption.label : placeholder;
+    const selected = options.find(o => o.value === value);
+    const isActive = value !== "" && value !== undefined;
 
     return (
-        <div className={`dropdown ${open ? "is-open" : ""}`} ref={ref}>
+        <div
+            ref={ref}
+            className={`dropdown ${open ? "open" : ""} ${isActive ? "active" : ""}`}
+        >
             <button
                 type="button"
                 className="dropdown-trigger"
                 onClick={() => setOpen(o => !o)}
             >
-                <span className="dropdown-text">{label}</span>
-                <span className={`arrow ${open ? "up" : "down"}`} />
+                <span>{selected ? selected.label : placeholder}</span>
+                <span className="dropdown-chevron" />
             </button>
 
             {open && (
                 <div className="dropdown-menu">
                     {options.map(opt => (
                         <button
-                            key={opt.value}
-                            className={`dropdown-item ${opt.value === value ? "active" : ""
-                                }`}
+                            key={String(opt.value)}
+                            className={`dropdown-item ${opt.value === value ? "active" : ""}`}
                             onClick={() => {
                                 onChange(opt.value);
                                 setOpen(false);
