@@ -94,6 +94,63 @@
   font-size: 0.65rem;
 }
 
+/* =====================
+   DARK MODE FIXES
+===================== */
+
+/* Default text i dark mode */
+[data-theme="dark"] .dropdown-trigger {
+  color: var(--text);
+}
+
+/* ÖPPEN dropdown – text ska vara VIT */
+[data-theme="dark"] .dropdown.open .dropdown-trigger {
+  color: #fff;
+}
+
+/* Dropdown menu text */
+[data-theme="dark"] .dropdown-menu {
+  color: #fff;
+}
+
+/* Items – normal */
+[data-theme="dark"] .dropdown-item {
+  color: #fff;
+}
+
+/* Hover item */
+[data-theme="dark"] .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* =====================
+   SELECTED / ACTIVE STATE
+===================== */
+
+/* När ett värde är valt → trigger blir GULD */
+.dropdown.active .dropdown-trigger {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #000; /* svart text på guld */
+}
+
+/* Chevron följer textfärg */
+.dropdown.active .dropdown-chevron {
+  color: #000;
+}
+
+/* Vald item i listan */
+.dropdown-item.active {
+  background: var(--primary);
+  color: #000;
+}
+
+/* Checkmark syns tydligt */
+.dropdown-item.active .check {
+  color: #000;
+}
+
+
 /* MOBILE */
 @media (max-width: 600px) {
   .dropdown-menu {
@@ -102,3 +159,4 @@
     box-shadow: none;
   }
 }
+
