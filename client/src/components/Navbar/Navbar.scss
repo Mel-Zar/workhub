@@ -1,43 +1,94 @@
 @use "../../styles/mixins" as *;
 @use "../../styles/variables" as *;
 
+/* =========================
+   🔝 Navbar Base
+   ========================= */
+
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 100;
-
-  @include flex-center;
-  justify-content: space-between;
-
+  z-index: 1000;
+  @include flex-between;
   padding: 1rem 2rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow);
+
+  background: #ffffff; /* 👈 tvingar vit i light mode */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06); /* mjukare */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* mycket lättare */
+
+  transition: background 0.3s ease;
+  isolation: isolate;
 }
 
-/* 🏷 Brand */
+/* Dark mode finjustering */
+[data-theme="dark"] .navbar {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+/* Subtle inner glow */
+.navbar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* =========================
+   🏷 Brand
+   ========================= */
+
 .brand {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: 1px;
-  color: var(--primary);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  a {
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
-/* 📦 Menu */
+/* =========================
+   📂 Menu
+   ========================= */
+
 .menu {
   display: flex;
   align-items: center;
   gap: 1.4rem;
+  transition: all 0.25s ease;
+
+  a,
+  .icon-btn,
+  .logout {
+    white-space: nowrap;
+  }
 }
 
-/* 👤 User */
+/* =========================
+   👤 User
+   ========================= */
+
 .user {
   font-size: 0.9rem;
-  opacity: 0.85;
+  opacity: 0.75;
   margin-right: 0.4rem;
 }
 
-/* 🔗 Links */
+/* =========================
+   🔗 Links
+   ========================= */
+
 .menu a {
   font-size: 0.95rem;
   font-weight: 500;
@@ -45,16 +96,21 @@
   text-decoration: none;
   position: relative;
   padding: 0.2rem 0;
+  transition: color 0.25s ease;
 
   &::after {
     content: "";
     position: absolute;
     left: 0;
-    bottom: -4px;
+    bottom: -3px;
     width: 0;
     height: 2px;
     background: var(--primary);
-    transition: width $transition;
+    transition: width 0.25s ease;
+  }
+
+  &:hover {
+    color: var(--primary);
   }
 
   &:hover::after {
@@ -62,33 +118,37 @@
   }
 }
 
-/* 🌓 Theme button */
+/* =========================
+   🌗 Theme Button
+   ========================= */
+
 .icon-btn {
   @include button-reset;
-
   font-size: 1rem;
   padding: 0.45rem;
   border-radius: 50%;
   border: 1px solid var(--border);
   color: var(--text);
-  transition: $transition;
+  transition: all 0.25s ease;
 
   &:hover {
     background: rgba(212, 175, 55, 0.12);
-    box-shadow: $shadow-gold;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
   }
 }
 
-/* 🚪 Logout */
+/* =========================
+   🚪 Logout
+   ========================= */
+
 .logout {
   @include button-reset;
-
   font-size: 0.9rem;
   padding: 0.45rem 0.9rem;
   border-radius: 20px;
   border: 1px solid var(--primary);
   color: var(--primary);
-  transition: $transition;
+  transition: all 0.25s ease;
 
   &:hover {
     background: var(--primary);
@@ -96,47 +156,196 @@
   }
 }
 
-/* 🍔 Burger */
+/* =========================
+   🍔 Burger
+   ========================= */
+
 .burger {
   display: none;
   @include button-reset;
 
-  font-size: 1.7rem;
-  color: var(--text);
+  width: 28px;
+  height: 22px;
+  position: relative;
+  cursor: pointer;
+  z-index: 1100;
+
+  span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--text);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  span:nth-child(1) {
+    top: 0;
+  }
+  span:nth-child(2) {
+    top: 9px;
+  }
+  span:nth-child(3) {
+    bottom: 0;
+  }
+
+  &:hover span {
+    background: var(--primary);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+  }
+
+  &.active span:nth-child(1) {
+    transform: rotate(45deg);
+    top: 9px;
+  }
+
+  &.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  &.active span:nth-child(3) {
+    transform: rotate(-45deg);
+    bottom: 10px;
+  }
 }
 
-/* 📱 MOBILE */
+/* =========================
+   📱 MOBILE / TABLET
+   ========================= */
+
 @include mobile {
   .burger {
     display: block;
   }
 
   .menu {
-    position: absolute;
-    top: 100%;
-    right: 1rem;
-
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 260px;
+    padding: 2rem 1.5rem;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 1.5rem;
 
-    background: var(--surface);
-    padding: 1.2rem;
-    width: 240px;
+    background: color-mix(in srgb, var(--surface) 95%, transparent);
 
-    border-radius: $radius-lg;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    box-shadow:
+      -8px 0 35px rgba(0, 0, 0, 0.12),
+      0 0 25px rgba(212, 175, 55, 0.15);
 
-    transform: translateY(-10px);
+    transform: translateX(100%);
     opacity: 0;
     pointer-events: none;
-    transition: $transition;
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease;
+    overflow-y: auto;
+    border-left: 1px solid var(--border);
+    z-index: 1050;
   }
 
   .menu.open {
-    transform: translateY(0);
+    transform: translateX(0);
     opacity: 1;
     pointer-events: auto;
+  }
+
+  /* 🌫 Premium overlay */
+  .menu::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .menu.open::before {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* =========================
+   👤 Username Premium
+   ========================= */
+
+.username {
+  font-weight: 700;
+  position: relative;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+/* 🌞 Light mode */
+[data-theme="light"] .username {
+  color: #a67c1f;
+}
+
+[data-theme="light"] .username:hover {
+  text-shadow: 0 0 6px rgba(166, 124, 31, 0.4);
+}
+
+/* 🌙 Dark mode */
+[data-theme="dark"] .username {
+  color: var(--primary);
+}
+
+[data-theme="dark"] .username:hover {
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+}
+
+/* ✨ Shine */
+.username::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  transform: skewX(-20deg);
+  opacity: 0;
+}
+
+[data-theme="light"] .username::after {
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 215, 120, 0.85),
+    transparent
+  );
+}
+
+[data-theme="dark"] .username::after {
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+}
+
+.username:hover::after {
+  animation: shine 0.8s ease forwards;
+}
+
+@keyframes shine {
+  0% {
+    left: -75%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    left: 125%;
+    opacity: 0;
   }
 }

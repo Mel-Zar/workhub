@@ -2,29 +2,94 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { taskService } from "../../services/taskService";
 import { capitalize, formatCategory } from "../../utils/formatters";
+import TaskImages from "../TaskItem/TaskImages"; // använder samma komponent som TaskItem
+import "./TaskForm.scss";
+
+const PRIORITY_OPTIONS = ["low", "medium", "high"];
 
 function TaskForm({ onCreate }) {
-
     const [title, setTitle] = useState("");
     const [priority, setPriority] = useState("");
     const [category, setCategory] = useState("");
     const [deadline, setDeadline] = useState("");
-    const [images, setImages] = useState([]);
+    const [oldImages, setOldImages] = useState([]); // här kan vi ha gamla om vi vill stödja redigering
+    const [newImages, setNewImages] = useState([]);
+    const [dragged, setDragged] = useState({ type: null, index: null });
 
-    function handleSelectImages(e) {
-        const selected = Array.from(e.target.files);
-        setImages(prev => [...prev, ...selected]);
-        e.target.value = null;
-    }
+    const today = new Date().toISOString().split("T")[0];
 
-    function removeImage(index) {
-        setImages(prev => prev.filter((_, i) => i !== index));
-    }
+    /* =========================
+       IMAGES
+    ========================= */
 
-    async function handleSubmit(e) {
+    const handleNewImages = (e) => {
+        const files = Array.from(e.target.files);
+
+        setNewImages((prev) => {
+            const next = [...prev];
+
+            for (const file of files) {
+                const exists = next.some(
+                    (img) =>
+                        img.file.name === file.name &&
+                        img.file.size === file.size &&
+                        img.file.lastModified === file.lastModified
+                );
+
+                if (exists) {
+                    toast.warn(`"${file.name}" är redan vald`, {
+                        toastId: `duplicate-${file.name}`,
+                        autoClose: 2000,
+                    });
+                    continue;
+                }
+
+                next.push({ file, preview: URL.createObjectURL(file) });
+            }
+
+            return next;
+        });
+
+        e.target.value = "";
+    };
+
+    const removeNewImage = (index) => {
+        setNewImages((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const handleDragStart = (type, index) => {
+        setDragged({ type, index });
+    };
+
+    const handleDragOver = (type, index, e) => {
+        e.preventDefault();
+        if (!dragged.type || dragged.type !== type || dragged.index === index) return;
+
+        if (type === "new") {
+            const updated = [...newImages];
+            const [moved] = updated.splice(dragged.index, 1);
+            updated.splice(index, 0, moved);
+            setNewImages(updated);
+        }
+
+        setDragged({ type, index });
+    };
+
+    /* =========================
+       SUBMIT
+    ========================= */
+
+    const canSubmit =
+        title.trim() &&
+        priority &&
+        category.trim() &&
+        deadline &&
+        (oldImages.length + newImages.length > 0);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!title || !priority || !category || !deadline || images.length === 0) {
+        if (!canSubmit) {
             toast.error("Alla fält och minst en bild krävs");
             return;
         }
@@ -35,7 +100,7 @@ function TaskForm({ onCreate }) {
             formData.append("priority", priority.toLowerCase());
             formData.append("category", formatCategory(category));
             formData.append("deadline", deadline);
-            images.forEach(img => formData.append("images", img));
+            newImages.forEach((img) => formData.append("images", img.file));
 
             await taskService.create(formData);
 
@@ -45,62 +110,66 @@ function TaskForm({ onCreate }) {
             setPriority("");
             setCategory("");
             setDeadline("");
-            setImages([]);
+            setOldImages([]);
+            setNewImages([]);
+            setDragged({ type: null, index: null });
 
             onCreate?.();
-
         } catch {
             toast.error("Kunde inte skapa task");
         }
-    }
-
-    const today = new Date().toISOString().split("T")[0];
+    };
 
     return (
-        <form onSubmit={handleSubmit}>
-
+        <form className="task-form" onSubmit={handleSubmit}>
             <h3>Skapa Task</h3>
 
             <input
                 placeholder="Titel"
                 value={title}
-                onChange={e => setTitle(capitalize(e.target.value))}
+                onChange={(e) => setTitle(capitalize(e.target.value))}
             />
 
-            <select value={priority} onChange={e => setPriority(e.target.value)}>
+            <select value={priority} onChange={(e) => setPriority(e.target.value)}>
                 <option value="">Choose priority</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                {PRIORITY_OPTIONS.map((p) => (
+                    <option key={p} value={p}>
+                        {capitalize(p)}
+                    </option>
+                ))}
             </select>
 
             <input
                 placeholder="Kategori"
                 value={category}
-                onChange={e => setCategory(formatCategory(e.target.value))}
+                onChange={(e) => setCategory(formatCategory(e.target.value))}
             />
 
             <input
                 type="date"
                 min={today}
                 value={deadline}
-                onChange={e => setDeadline(e.target.value)}
+                onChange={(e) => setDeadline(e.target.value)}
             />
 
-            <input type="file" multiple accept="image/*" onChange={handleSelectImages} />
+            {/* =========================
+          IMAGE HANDLER
+      ========================= */}
+            <TaskImages
+                oldImages={oldImages}
+                newImages={newImages}
+                isEditing={true}
+                onRemoveOld={(img) => setOldImages((prev) => prev.filter((i) => i !== img))}
+                onRemoveNew={removeNewImage}
+                onPreview={() => { }}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onNewImages={handleNewImages}
+            />
 
-            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                {images.map((img, i) => (
-                    <div key={i}>
-                        <img src={URL.createObjectURL(img)} width="70" />
-                        <br />
-                        <button type="button" onClick={() => removeImage(i)}>❌</button>
-                    </div>
-                ))}
-            </div>
-
-            <button type="submit">Skapa Task</button>
-
+            <button type="submit" disabled={!canSubmit}>
+                Skapa Task
+            </button>
         </form>
     );
 }

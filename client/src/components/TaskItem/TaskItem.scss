@@ -1,206 +1,186 @@
-@use "../../styles/mixins" as *;
+@use "../../styles/mixins" as *; // ← viktigt! måste finnas högst upp
+@use "../../styles/variables" as *;
 
-/* =====================
-   CARD
-   ===================== */
+// =====================
+// TASK ITEM
+// =====================
+
 .task-item {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 1.4rem;
+  padding: 1.5rem;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
   }
-}
-
-/* =====================
-   HEADER
-   ===================== */
-.task-header {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.85rem;
-  align-items: center;
-
-  input[type="text"] {
-    width: 100%;
-  }
-}
-
-.task-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-/* =====================
-   META
-   ===================== */
-.task-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
 
   input,
-  select {
-    min-width: 120px;
-  }
-}
-
-/* =====================
-   FORM INPUTS (EDIT MODE)
-   ===================== */
-
-.task-item {
-
-  input[type="text"],
-  input[type="date"],
   select {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 0.55rem 0.8rem;
+    padding: 0.6rem 0.9rem;
     font-size: 0.75rem;
     color: var(--text);
     outline: none;
     transition:
       border 0.2s ease,
-      box-shadow 0.2s ease,
-      background 0.2s ease;
-
-    &::placeholder {
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    &:hover {
-      border-color: var(--primary);
-    }
+      box-shadow 0.2s ease;
 
     &:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
-      background: rgba(255, 255, 255, 0.02);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+    }
+
+    &::placeholder {
+      color: var(--text-muted);
     }
   }
 
-  /* TITLE INPUT (LITE STÖRRE) */
-  .task-header input[type="text"] {
-    font-size: 0.85rem;
+  /* =====================
+     FILE INPUT / UPLOAD
+  ===================== */
+  input[type="file"] {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.75rem;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    cursor: pointer;
+    transition:
+      border 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+      outline: none;
+    }
+
+    &::file-selector-button {
+      cursor: pointer;
+      border: 1px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      padding: 0.4rem 0.8rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+    }
+  }
+
+  .task-header {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.8rem;
+    align-items: center;
+
+    input[type="text"] {
+      width: 100%;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+  }
+
+  .task-meta {
+    display: flex;
+    flex-direction: column; /* Stacka vertikalt */
+    gap: 0.5rem;
+
+    input,
+    select {
+      width: 100%; /* Fyll hela bredden */
+      min-width: 0; /* ta bort tidigare min-width */
+    }
+
+    /* EDIT MODE SPECIFIKT */
+    &.editing {
+      gap: 0.75rem; /* lite mer luft mellan fälten */
+    }
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
     font-weight: 600;
+    border: 1px solid var(--border);
   }
 
-  /* SELECT – PIL FIX */
-  select {
-    appearance: none;
-    background-image: linear-gradient(
-        45deg,
-        transparent 50%,
-        var(--text-muted) 50%
-      ),
-      linear-gradient(
-        135deg,
-        var(--text-muted) 50%,
-        transparent 50%
-      );
-    background-position:
-      calc(100% - 16px) 55%,
-      calc(100% - 10px) 55%;
-    background-size: 6px 6px;
-    background-repeat: no-repeat;
-    padding-right: 2rem;
-    cursor: pointer;
+  .priority.low {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+  }
+  .priority.medium {
+    background: rgba(255, 193, 7, 0.18);
+    color: #ffc107;
+  }
+  .priority.high {
+    background: rgba(244, 67, 54, 0.18);
+    color: #f44336;
   }
 
-  /* DATE INPUT – SER LIKADAN UT SOM TEXT */
-  input[type="date"] {
-    cursor: pointer;
-  }
-}
+  .task-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 
+    button {
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
 
-.badge {
-  font-size: 0.7rem;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  font-weight: 600;
-  border: 1px solid var(--border);
-}
+    .edit {
+      border: 1px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      &:hover:not(:disabled) {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+      &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+    }
 
-/* PRIORITY COLORS */
-.priority.low {
-  background: rgba(76, 175, 80, 0.15);
-  color: #4caf50;
-}
-
-.priority.medium {
-  background: rgba(255, 193, 7, 0.18);
-  color: #ffc107;
-}
-
-.priority.high {
-  background: rgba(244, 67, 54, 0.18);
-  color: #f44336;
-}
-
-/* =====================
-   IMAGES
-   ===================== */
-.task-images {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.75rem;
-}
-
-.image-wrapper {
-  position: relative;
-}
-
-.task-images img {
-  width: 100%;
-  height: 170px;
-  object-fit: cover;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  cursor: zoom-in;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-  &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+    .danger {
+      border: 1px solid crimson;
+      color: crimson;
+      background: transparent;
+      &:hover {
+        background: crimson;
+        color: #fff;
+      }
+    }
   }
 }
 
-.remove-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: rgba(0, 0, 0, 0.65);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  font-size: 0.75rem;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-
-  &:hover {
-    background: crimson;
-  }
-}
-
-/* =====================
-   IMAGE MODAL
-   ===================== */
+/* IMAGE MODAL */
 .image-modal {
   position: fixed;
   inset: 0;
@@ -217,83 +197,116 @@
   }
 }
 
-/* =====================
-   ACTIONS
-   ===================== */
-.task-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.task-actions .edit {
-  border: 1px solid var(--primary);
-  color: var(--primary);
-  background: transparent;
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: var(--primary);
-    color: var(--on-primary);
-  }
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-}
-
-.task-actions .danger {
-  border: 1px solid crimson;
-  color: crimson;
-  background: transparent;
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: crimson;
-    color: white;
-  }
-}
-
-/* =====================
-   MOBILE
-   ===================== */
+/* RESPONSIVE */
 @include mobile {
   .task-item {
     padding: 1rem;
   }
-
   .task-header {
     grid-template-columns: 1fr;
   }
-
   .task-meta {
     flex-direction: column;
     gap: 0.5rem;
   }
+  .task-actions {
+    justify-content: stretch;
+    button {
+      flex: 1;
+    }
+  }
+}
 
-  .task-images {
-    grid-template-columns: 1fr;
+/* =====================
+   EDIT MODE STYLING
+===================== */
+.task-item.editing {
+  cursor: default; /* ingen hover-effekt */
+
+  .task-header {
+    grid-template-columns: 1fr; /* title input full-width */
+    gap: 0.75rem;
+
+    input[type="text"] {
+      width: 100%;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.65rem 0.9rem;
+    }
   }
 
-  .task-images img {
-    height: 220px;
+  .task-meta {
+    flex-direction: column; /* alla fält under varandra */
+    gap: 0.75rem;
+
+    input,
+    select,
+    input[type="file"] {
+      /* filinput också full-width */
+      width: 100%;
+      min-width: 0;
+      font-size: 0.85rem;
+      padding: 0.6rem 0.9rem;
+    }
   }
 
   .task-actions {
-    justify-content: stretch;
+    flex-direction: column; /* knappar under varandra */
+    gap: 0.5rem;
 
     button {
-      flex: 1;
+      width: 100%;
+    }
+  }
+}
+
+/* =====================
+   EDIT MODE RESPONSIVE
+===================== */
+@include mobile {
+  .task-item.editing {
+    .task-header {
+      gap: 0.5rem;
+    }
+
+    .task-meta {
+      gap: 0.5rem;
+    }
+
+    .task-actions {
+      gap: 0.5rem;
+      button {
+        flex: 1;
+        width: 100%;
+      }
+    }
+  }
+}
+
+/* Optional: större skärmar (desktop) kan ha fält bredvid varandra om du vill */
+@media (min-width: 768px) {
+  .task-item.editing {
+    .task-meta {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+
+      input,
+      select,
+      input[type="file"] {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 120px;
+      }
+    }
+
+    .task-actions {
+      flex-direction: row;
+      gap: 0.5rem;
+
+      button {
+        width: auto;
+      }
     }
   }
 }

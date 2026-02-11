@@ -1,4 +1,5 @@
 @use "../../styles/mixins" as *;
+@use "../../styles/variables" as *;
 
 /* =====================
    PAGE
@@ -8,7 +9,6 @@
   margin: 0 auto;
   padding: 2.5rem 1rem;
   min-height: calc(100vh - 64px);
-
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
@@ -22,19 +22,18 @@
   justify-content: space-between;
   align-items: flex-end;
   gap: 1rem;
-}
 
-.page-header-text {
-  h1 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-  }
-
-  p {
-    margin-top: 0.35rem;
-    font-size: 0.9rem;
-    opacity: 0.6;
+  .page-header-text {
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    p {
+      margin-top: 0.35rem;
+      font-size: 0.9rem;
+      opacity: 0.6;
+    }
   }
 }
 
@@ -56,7 +55,6 @@
   border-radius: 18px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-
   transition: box-shadow 0.25s ease;
 
   &:hover {
@@ -80,6 +78,32 @@
   gap: 1.4rem;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   align-items: stretch;
+
+  /* Större bilder i TaskItem */
+  .task-item {
+    .task-images {
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+
+    @include mobile {
+      .task-images {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @include breakpoint(768px, 1199px) {
+      .task-images {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+    }
+
+    @include breakpoint(1200px) {
+      .task-images {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      }
+    }
+  }
 }
 
 /* =====================
@@ -127,35 +151,34 @@
   align-items: center;
   gap: 0.75rem;
   margin-top: 1rem;
-}
 
-.pagination button {
-  padding: 0.5rem 1.1rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  cursor: pointer;
+  button {
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
 
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
 
-  &:disabled {
-    opacity: 0.4;
-    cursor: default;
+    &:not(:disabled):hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+      transform: translateY(-1px);
+    }
   }
 
-  &:not(:disabled):hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
-    transform: translateY(-1px);
+  span {
+    font-size: 0.75rem;
+    opacity: 0.6;
   }
-}
-
-.pagination span {
-  font-size: 0.75rem;
-  opacity: 0.6;
 }
 
 /* =====================
@@ -177,7 +200,7 @@
 }
 
 /* =====================
-   MOBILE
+   RESPONSIVE / MOBILE
 ===================== */
 @include mobile {
   .dashboard-page {
@@ -186,6 +209,7 @@
 
   .tasks-layout.grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .tasks-controls {

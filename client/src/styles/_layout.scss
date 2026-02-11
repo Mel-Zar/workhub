@@ -1,15 +1,63 @@
+@use "./variables" as *;
+
+/* =========================
+   LAYOUT
+   ========================= */
+
 .container {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 2rem 1.2rem;
 }
 
 .page {
   min-height: calc(100vh - 64px);
-  padding: 2rem;
+  padding: 2rem 0;
 }
 
 .center {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   PREMIUM CARD
+   ========================= */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: $radius-lg;
+  padding: 1.5rem;
+
+  box-shadow: var(--shadow);
+  transition: all $transition;
+
+  backdrop-filter: blur(6px);
+
+  &:hover {
+    border-color: var(--primary);
+    box-shadow: 0 14px 38px rgba(212, 175, 55, 0.18);
+    transform: translateY(-2px);
+  }
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.2rem;
+  }
+
+  .page {
+    padding: 1.5rem 0;
+  }
+
+  .card {
+    padding: 1.2rem;
+  }
 }

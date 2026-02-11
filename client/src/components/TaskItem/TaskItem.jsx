@@ -4,6 +4,7 @@ import { taskService } from "../../services/taskService";
 import { capitalize } from "../../utils/formatters";
 import TaskImages from "./TaskImages";
 import "./TaskItem.scss";
+import Dropdown from "../Ui/Dropdown";
 
 const PRIORITY_OPTIONS = ["low", "medium", "high"];
 
@@ -262,7 +263,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
 
     return (
         <>
-            <article className="task-item">
+            <article className={`task-item ${isEditing ? 'editing' : ''}`}>
                 <header className="task-header">
                     {showActions && (
                         <input
@@ -294,18 +295,12 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                                 placeholder="Category"
                             />
 
-                            <select
-                                name="priority"
+                            <Dropdown
                                 value={formData.priority}
-                                onChange={handleChange}
-                            >
-                                <option value="">Select priority</option>
-                                {PRIORITY_OPTIONS.map(p => (
-                                    <option key={p} value={p}>
-                                        {capitalize(p)}
-                                    </option>
-                                ))}
-                            </select>
+                                options={PRIORITY_OPTIONS.map(p => ({ value: p, label: capitalize(p) }))}
+                                placeholder="Select priority"
+                                onChange={(val) => setFormData(prev => ({ ...prev, priority: val }))}
+                            />
 
                             <input
                                 type="date"

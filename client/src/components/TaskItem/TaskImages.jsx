@@ -21,30 +21,32 @@ function TaskImages({
                     onDragStart={() => onDragStart("old", i)}
                     onDragOver={(e) => onDragOver("old", i, e)}
                 >
-                    <img
-                        src={
-                            img.startsWith("blob:")
-                                ? img
-                                : `${import.meta.env.VITE_API_URL}${img}`
-                        }
-                        alt=""
-                        onClick={() =>
-                            !isEditing &&
-                            onPreview(
+                    <div className="img-inner">
+                        <img
+                            src={
                                 img.startsWith("blob:")
                                     ? img
                                     : `${import.meta.env.VITE_API_URL}${img}`
-                            )
-                        }
-                    />
-                    {isEditing && (
-                        <button
-                            className="remove-btn"
-                            onClick={() => onRemoveOld(img)}
-                        >
-                            X
-                        </button>
-                    )}
+                            }
+                            alt=""
+                            onClick={() =>
+                                !isEditing &&
+                                onPreview(
+                                    img.startsWith("blob:")
+                                        ? img
+                                        : `${import.meta.env.VITE_API_URL}${img}`
+                                )
+                            }
+                        />
+                        {isEditing && (
+                            <button
+                                className="remove-btn"
+                                onClick={() => onRemoveOld(img)}
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
                 </div>
             ))}
 
@@ -56,19 +58,16 @@ function TaskImages({
                     onDragStart={() => onDragStart("new", i)}
                     onDragOver={(e) => onDragOver("new", i, e)}
                 >
-                    <img src={img.preview} alt="new" />
-                    <button
-                        className="remove-btn"
-                        onClick={() => onRemoveNew(i)}
-                    >
-                        X
-                    </button>
+                    <div className="img-inner">
+                        <img src={img.preview} alt="new" />
+                        <button className="remove-btn" onClick={() => onRemoveNew(i)}>
+                            ✕
+                        </button>
+                    </div>
                 </div>
             ))}
 
-            {isEditing && (
-                <input type="file" multiple onChange={onNewImages} />
-            )}
+            {isEditing && <input type="file" multiple onChange={onNewImages} />}
         </section>
     );
 }
