@@ -25,6 +25,9 @@ function Dashboard() {
         refreshTasks,
     } = useTasks();
 
+    const incompleteTasks = tasks.filter(t => !t.completed);
+    const completedTasks = tasks.filter(t => t.completed);
+
     if (authLoading) return <p className="status-text">Loading user…</p>;
     if (!user) return <p className="status-text">Not logged in</p>;
 
@@ -69,6 +72,7 @@ function Dashboard() {
                 <div className="tasks-content">
                     {loading && <p className="status-text">Loading tasks…</p>}
                     {error && <p className="error-text">{error}</p>}
+
                     {!loading && tasks.length === 0 && (
                         <div className="empty-state">
                             <p>No tasks</p>
@@ -76,17 +80,50 @@ function Dashboard() {
                         </div>
                     )}
 
-                    <div className="tasks-layout grid">
-                        {tasks.map(task => (
-                            <TaskItem
-                                key={task._id}
-                                task={task}
-                                showActions
-                                editable
-                                onUpdate={refreshTasks}
-                                onDelete={handleDelete}
-                            />
-                        ))}
+                    <div className="tasks-layout">
+
+                        {/* INCOMPLETE TASKS */}
+                        {incompleteTasks.length > 0 && (
+                            <section className="task-group">
+                                <h3 className="task-group-title">To Do</h3>
+
+                                {/* FIX: måste vara tasks-layout grid */}
+                                <div className="tasks-layout grid">
+                                    {incompleteTasks.map(task => (
+                                        <TaskItem
+                                            key={task._id}
+                                            task={task}
+                                            showActions
+                                            editable
+                                            onUpdate={refreshTasks}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {/* COMPLETED TASKS */}
+                        {completedTasks.length > 0 && (
+                            <section className="task-group completed-group">
+                                <h3 className="task-group-title">Completed</h3>
+
+                                {/* FIX: samma här */}
+                                <div className="tasks-layout grid">
+                                    {completedTasks.map(task => (
+                                        <TaskItem
+                                            key={task._id}
+                                            task={task}
+                                            showActions
+                                            editable
+                                            onUpdate={refreshTasks}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
                     </div>
                 </div>
             </section>

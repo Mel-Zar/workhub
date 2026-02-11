@@ -222,3 +222,31 @@
     gap: 0.5rem;
   }
 }
+
+/* =========================
+   TASK GROUPS
+========================= */
+
+.tasks-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.task-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task-group-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.completed-group {
+  opacity: 0.9;
+}

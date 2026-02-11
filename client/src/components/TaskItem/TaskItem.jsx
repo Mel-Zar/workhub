@@ -263,7 +263,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
 
     return (
         <>
-            <article className={`task-item ${isEditing ? 'editing' : ''}`}>
+            <article className={`task-item ${isEditing ? 'editing' : ''} ${task.completed ? 'completed' : ''}`}>
                 <header className="task-header">
                     {showActions && (
                         <input

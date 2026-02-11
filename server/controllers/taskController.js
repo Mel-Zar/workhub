@@ -26,7 +26,7 @@ export const getTasks = async (req, res) => {
         const { search, priority, category, completed, sortBy } = req.query;
 
         const page = Number(req.query.page) || 1;
-        const DEFAULT_LIMIT = 6;
+        const DEFAULT_LIMIT = 9;
         const MAX_LIMIT = 50;
 
         const limit = Math.min(
