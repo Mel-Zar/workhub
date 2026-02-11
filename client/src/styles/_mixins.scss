@@ -1,19 +1,9 @@
+@use "./variables" as *;
+
 @mixin flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-@mixin mobile {
-  @media (max-width: 768px) {
-    @content;
-  }
-}
-
-@mixin button-reset {
-  background: none;
-  border: none;
-  cursor: pointer;
 }
 
 @mixin flex-between {
@@ -22,12 +12,10 @@
   justify-content: space-between;
 }
 
-@mixin card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: $radius-lg;
-  padding: 1.5rem;
-  box-shadow: var(--shadow);
+@mixin mobile {
+  @media (max-width: 768px) {
+    @content;
+  }
 }
 
 @mixin breakpoint($min, $max: null) {
@@ -40,4 +28,18 @@
       @content;
     }
   }
+}
+
+@mixin button-reset {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@mixin card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: $radius-lg;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
 }

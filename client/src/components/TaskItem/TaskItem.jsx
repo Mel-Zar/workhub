@@ -8,7 +8,13 @@ import Dropdown from "../Ui/Dropdown";
 
 const PRIORITY_OPTIONS = ["low", "medium", "high"];
 
-function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = false }) {
+function TaskItem({
+    task,
+    onUpdate,
+    onDelete,
+    showActions = true,
+    editable = false,
+}) {
     const [activeImage, setActiveImage] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
@@ -27,8 +33,8 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
     if (!task) return null;
 
     /* =========================
-       VALIDATION
-    ========================= */
+      VALIDATION
+      ========================= */
 
     const allInputsFilled =
         formData.title.trim() &&
@@ -36,8 +42,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
         formData.priority &&
         formData.deadline;
 
-    const hasAtLeastOneImage =
-        oldImages.length + newImages.length > 0;
+    const hasAtLeastOneImage = oldImages.length + newImages.length > 0;
 
     const hasChanges =
         formData.title !== task.title ||
@@ -47,14 +52,11 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
         imagesToRemove.length > 0 ||
         newImages.length > 0;
 
-    const canSave =
-        allInputsFilled &&
-        hasAtLeastOneImage &&
-        hasChanges;
+    const canSave = allInputsFilled && hasAtLeastOneImage && hasChanges;
 
     /* =========================
-       HANDLERS
-    ========================= */
+         HANDLERS
+      ========================= */
 
     const toggleComplete = async (e) => {
         e.stopPropagation();
@@ -85,29 +87,30 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
             setImagesToRemove([]);
         }
 
-        setIsEditing(prev => !prev);
+        setIsEditing((prev) => !prev);
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     /* =========================
-       IMAGES
-    ========================= */
+         IMAGES
+      ========================= */
 
     const handleNewImages = (e) => {
         const files = Array.from(e.target.files);
 
-        setNewImages(prev => {
+        setNewImages((prev) => {
             const next = [...prev];
 
             for (const file of files) {
-                const exists = next.some(img =>
-                    img.file.name === file.name &&
-                    img.file.size === file.size &&
-                    img.file.lastModified === file.lastModified
+                const exists = next.some(
+                    (img) =>
+                        img.file.name === file.name &&
+                        img.file.size === file.size &&
+                        img.file.lastModified === file.lastModified,
                 );
 
                 if (exists) {
@@ -130,19 +133,18 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
         e.target.value = "";
     };
 
-
     const removeOldImage = (img) => {
-        setOldImages(prev => prev.filter(i => i !== img));
-        setImagesToRemove(prev => [...prev, img]);
+        setOldImages((prev) => prev.filter((i) => i !== img));
+        setImagesToRemove((prev) => [...prev, img]);
     };
 
     const removeNewImage = (index) => {
-        setNewImages(prev => prev.filter((_, i) => i !== index));
+        setNewImages((prev) => prev.filter((_, i) => i !== index));
     };
 
     /* =========================
-       DRAG & DROP (EDIT MODE)
-    ========================= */
+         DRAG & DROP (EDIT MODE)
+      ========================= */
 
     const handleDragStart = (type, index) => {
         if (!isEditing) return;
@@ -174,8 +176,8 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
     };
 
     /* =========================
-       SAVE
-    ========================= */
+         SAVE
+      ========================= */
 
     const handleSave = async () => {
         if (!canSave) return;
@@ -191,16 +193,16 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
             // 📤 upload new images
             if (newImages.length > 0) {
                 const fd = new FormData();
-                newImages.forEach(img => fd.append("images", img.file));
+                newImages.forEach((img) => fd.append("images", img.file));
                 await taskService.addImages(task._id, fd);
             }
 
             // ✅ OPTIMISTIC UI UPDATE
-            const uploadedPreviews = newImages.map(img => img.preview);
+            const uploadedPreviews = newImages.map((img) => img.preview);
 
-            setOldImages(prev => [
-                ...prev.filter(img => !imagesToRemove.includes(img)),
-                ...uploadedPreviews
+            setOldImages((prev) => [
+                ...prev.filter((img) => !imagesToRemove.includes(img)),
+                ...uploadedPreviews,
             ]);
 
             toast.success("Task updated");
@@ -214,8 +216,6 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
             toast.error("Failed to save task");
         }
     };
-
-
 
     const confirmSave = () => {
         toast.info(
@@ -231,13 +231,13 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                 </button>
                 <button onClick={() => toast.dismiss()}>No</button>
             </div>,
-            { autoClose: false }
+            { autoClose: false },
         );
     };
 
     /* =========================
-       DELETE
-    ========================= */
+         DELETE
+      ========================= */
 
     const confirmDelete = () => {
         toast.error(
@@ -253,17 +253,19 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                 </button>
                 <button onClick={() => toast.dismiss()}>No</button>
             </div>,
-            { autoClose: false }
+            { autoClose: false },
         );
     };
 
     /* =========================
-       RENDER
-    ========================= */
+         RENDER
+      ========================= */
 
     return (
         <>
-            <article className={`task-item ${isEditing ? 'editing' : ''} ${task.completed ? 'completed' : ''}`}>
+            <article
+                className={`task-item ${isEditing ? "editing" : ""} ${task.completed ? "completed" : ""}`}
+            >
                 <header className="task-header">
                     {showActions && (
                         <input
@@ -297,9 +299,14 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
 
                             <Dropdown
                                 value={formData.priority}
-                                options={PRIORITY_OPTIONS.map(p => ({ value: p, label: capitalize(p) }))}
+                                options={PRIORITY_OPTIONS.map((p) => ({
+                                    value: p,
+                                    label: capitalize(p),
+                                }))}
                                 placeholder="Select priority"
-                                onChange={(val) => setFormData(prev => ({ ...prev, priority: val }))}
+                                onChange={(val) =>
+                                    setFormData((prev) => ({ ...prev, priority: val }))
+                                }
                             />
 
                             <input
@@ -338,7 +345,6 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                     onNewImages={handleNewImages}
                 />
 
-
                 {showActions && editable && (
                     <footer className="task-actions">
                         {isEditing ? (
@@ -350,25 +356,16 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
                                 >
                                     Save
                                 </button>
-                                <button
-                                    className="danger"
-                                    onClick={handleEditToggle}
-                                >
+                                <button className="danger" onClick={handleEditToggle}>
                                     Cancel
                                 </button>
                             </>
                         ) : (
                             <>
-                                <button
-                                    className="edit"
-                                    onClick={handleEditToggle}
-                                >
+                                <button className="edit" onClick={handleEditToggle}>
                                     Edit
                                 </button>
-                                <button
-                                    className="danger"
-                                    onClick={confirmDelete}
-                                >
+                                <button className="danger" onClick={confirmDelete}>
                                     Delete
                                 </button>
                             </>
@@ -378,10 +375,7 @@ function TaskItem({ task, onUpdate, onDelete, showActions = true, editable = fal
             </article>
 
             {activeImage && (
-                <div
-                    className="image-modal"
-                    onClick={() => setActiveImage(null)}
-                >
+                <div className="image-modal" onClick={() => setActiveImage(null)}>
                     <img src={activeImage} alt="preview" />
                 </div>
             )}

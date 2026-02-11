@@ -1,4 +1,4 @@
-@use "../../styles/mixins" as *; // ← viktigt! måste finnas högst upp
+@use "../../styles/mixins" as *;
 @use "../../styles/variables" as *;
 
 // =====================
@@ -103,7 +103,7 @@
 
   .task-meta {
     display: flex;
-    flex-direction: column; /* Stacka vertikalt */
+    flex-direction: column;
     gap: 0.5rem;
 
     input,

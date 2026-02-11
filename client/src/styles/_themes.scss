@@ -1,9 +1,9 @@
 /* =========================
    🌞 LIGHT THEME
-   ========================= */
+========================= */
 [data-theme="light"] {
   --bg: #ffffff;
-  --surface: #fafafa; /* 🔥 mjuk kontrast */
+  --surface: #fafafa;
   --text: #1a1a1a;
 
   --primary: #d4af37;
@@ -16,7 +16,7 @@
 
 /* =========================
    🌙 DARK THEME
-   ========================= */
+========================= */
 [data-theme="dark"] {
   --bg: #0f0f0f;
   --surface: #161616;
@@ -28,4 +28,39 @@
 
   --border: rgba(212, 175, 55, 0.25);
   --shadow: 0 10px 30px rgba(212, 175, 55, 0.15);
+}
+
+/* =========================
+   DATE INPUT STYLING
+========================= */
+
+input[type="date"] {
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s ease;
+}
+
+input[type="date"]:hover {
+  border-color: var(--primary);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator {
+  filter: invert(73%) sepia(38%) saturate(750%) hue-rotate(3deg) brightness(95%)
+    contrast(92%);
+}
+
+[data-theme="dark"]
+  input[type="date"]:hover::-webkit-calendar-picker-indicator {
+  filter: invert(73%) sepia(38%) saturate(750%) hue-rotate(3deg) brightness(95%)
+    contrast(92%);
 }

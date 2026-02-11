@@ -5,6 +5,7 @@
   width: 100%;
   max-width: 540px;
   margin: 2rem auto;
+
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
@@ -94,7 +95,7 @@
 
 /* =========================
    IMAGE PREVIEW
-   ========================= */
+========================= */
 
 .task-images {
   display: grid;
@@ -146,12 +147,23 @@
 }
 
 /* =========================
+   DASHBOARD CONTEXT FIX
+   (Gör form 100% responsiv i dashboard)
+========================= */
+
+.dashboard-page .task-form {
+  max-width: 100%;
+  margin: 0;
+}
+
+/* =========================
    RESPONSIVE
-   ========================= */
+========================= */
+
 @include mobile {
   .task-form {
     padding: 1.2rem;
-    margin: 1rem;
+    margin: 0;
   }
 
   .task-images {
