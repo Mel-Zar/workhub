@@ -3,7 +3,6 @@ const API_BASE = import.meta.env.VITE_API_URL;
 export async function apiFetch(url, options = {}, retry = true) {
     let accessToken = localStorage.getItem("accessToken");
     const refreshToken = localStorage.getItem("refreshToken");
-
     const isFormData = options.body instanceof FormData;
 
     options.headers = {
@@ -12,21 +11,35 @@ export async function apiFetch(url, options = {}, retry = true) {
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {})
     };
 
-    const res = await fetch(`${API_BASE}${url}`, options);
+    let res;
+    try {
+        res = await fetch(`${API_BASE}${url}`, {
+            ...options,
+            signal: options.signal,
+        });
+    } catch (err) {
+        if (err.name === "AbortError") throw err; // ✅ Viktigt
+        throw err;
+    }
 
-    // ✅ SUCCESS
     if (res.ok) {
         if (res.status === 204) return null;
         return res.json();
     }
 
-    // ❌ Inte auth-fel
     if (res.status !== 401 || !retry) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Request failed");
+        let errMsg = "Request failed";
+        try {
+            const err = await res.json();
+            errMsg = err.error || errMsg;
+        } catch {
+            const text = await res.text().catch(() => "");
+            if (text) errMsg = text;
+        }
+        throw new Error(errMsg);
     }
 
-    // 🔁 Refresh token
+    // Refresh token
     if (!refreshToken) {
         localStorage.clear();
         window.location.href = "/login";
@@ -51,10 +64,20 @@ export async function apiFetch(url, options = {}, retry = true) {
 
     options.headers.Authorization = `Bearer ${accessToken}`;
 
-    const retryRes = await fetch(`${API_BASE}${url}`, options);
+    const retryRes = await fetch(`${API_BASE}${url}`, {
+        ...options,
+        signal: options.signal,
+    });
     if (!retryRes.ok) {
-        const err = await retryRes.json().catch(() => ({}));
-        throw new Error(err.error || "Request failed");
+        let errMsg = "Request failed";
+        try {
+            const err = await retryRes.json();
+            errMsg = err.error || errMsg;
+        } catch {
+            const text = await retryRes.text().catch(() => "");
+            if (text) errMsg = text;
+        }
+        throw new Error(errMsg);
     }
 
     return retryRes.json();

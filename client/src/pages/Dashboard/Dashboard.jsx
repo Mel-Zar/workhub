@@ -51,10 +51,16 @@ function Dashboard() {
                 <div className="tasks-controls">
                     <TaskControls
                         filters={filters}
-                        setFilters={(data) => { setPage(1); setFilters(data); }}
+                        setFilters={(data) => {
+                            setPage(1);
+                            setFilters(data);
+                        }}
                         categories={categories}
                         priorities={priorities}
                         completionOptions={completionOptions}
+                        onSearch={(value) =>
+                            setFilters(prev => ({ ...prev, search: value }))
+                        }
                     />
                 </div>
             </section>

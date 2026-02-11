@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { taskService } from "../services/taskService";
 import { useAuth } from "../context/AuthContext/AuthContext";
 
@@ -30,29 +30,42 @@ export function useTasks({ limit } = {}) {
         return () => clearTimeout(timeout);
     }, [filters.search]);
 
+    const abortControllerRef = useRef(null);
+
     const refreshTasks = useCallback(async () => {
-        console.log("Fetching tasks...");
 
         if (!user) return;
 
+        // 🛑 Avbryt tidigare request
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
         try {
             setLoading(true);
+            setError(null);
 
-            const data = await taskService.getAll({
-                page,
-                ...(limit && { limit }),
-                ...(debouncedSearch && { search: debouncedSearch }),
-                ...(filters.category && { category: filters.category }),
-                ...(filters.priority && { priority: filters.priority }),
-                ...(filters.completed !== undefined && { completed: filters.completed }),
-                ...(filters.sortBy && { sortBy: filters.sortBy })
-            });
-
+            const data = await taskService.getAll(
+                {
+                    page,
+                    ...(limit && { limit }),
+                    ...(debouncedSearch && { search: debouncedSearch }),
+                    ...(filters.category && { category: filters.category }),
+                    ...(filters.priority && { priority: filters.priority }),
+                    ...(filters.completed !== undefined && { completed: filters.completed }),
+                    ...(filters.sortBy && { sortBy: filters.sortBy })
+                },
+                controller.signal // 👈 viktigt
+            );
 
             setAllTasks(data.tasks);
             setPages(data.pages);
 
         } catch (err) {
+            if (err.name === "AbortError") return;
             setError(err.message || "Failed to load tasks");
             setAllTasks([]);
         } finally {
@@ -68,6 +81,14 @@ export function useTasks({ limit } = {}) {
         filters.completed,
         filters.sortBy
     ]);
+
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (!user || authLoading) return;
