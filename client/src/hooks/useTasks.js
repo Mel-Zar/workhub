@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { taskService } from "../services/taskService";
 import { useAuth } from "../context/AuthContext/AuthContext";
 
-export function useTasks({ limit = 5 } = {}) {
+export function useTasks({ limit } = {}) {
 
     const { user, loading: authLoading } = useAuth();
 
@@ -19,7 +19,20 @@ export function useTasks({ limit = 5 } = {}) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setDebouncedSearch(filters.search);
+            setPage(1);
+        }, 400);
+
+        return () => clearTimeout(timeout);
+    }, [filters.search]);
+
     const refreshTasks = useCallback(async () => {
+        console.log("Fetching tasks...");
+
         if (!user) return;
 
         try {
@@ -27,12 +40,14 @@ export function useTasks({ limit = 5 } = {}) {
 
             const data = await taskService.getAll({
                 page,
-                limit,
-                search: filters.search,
-                category: filters.category,
-                priority: filters.priority,
-                completed: filters.completed
+                ...(limit && { limit }),
+                ...(debouncedSearch && { search: debouncedSearch }),
+                ...(filters.category && { category: filters.category }),
+                ...(filters.priority && { priority: filters.priority }),
+                ...(filters.completed !== undefined && { completed: filters.completed }),
+                ...(filters.sortBy && { sortBy: filters.sortBy })
             });
+
 
             setAllTasks(data.tasks);
             setPages(data.pages);
@@ -43,14 +58,21 @@ export function useTasks({ limit = 5 } = {}) {
         } finally {
             setLoading(false);
         }
-    }, [user, page, limit, filters]);
-
+    }, [
+        user,
+        page,
+        limit,
+        debouncedSearch,
+        filters.category,
+        filters.priority,
+        filters.completed,
+        filters.sortBy
+    ]);
 
     useEffect(() => {
         if (!user || authLoading) return;
         refreshTasks();
     }, [user, authLoading, refreshTasks]);
-
 
 
     const categories = useMemo(() => [...new Set(allTasks.map(t => t.category).filter(Boolean))], [allTasks]);

@@ -45,4 +45,11 @@ const taskSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
+taskSchema.index({ user: 1, createdAt: -1 });
+taskSchema.index({ user: 1, priority: 1 });
+taskSchema.index({ user: 1, category: 1 });
+taskSchema.index({ user: 1, deadline: 1 });
+taskSchema.index({ title: "text", category: "text" });
+
+
 export default mongoose.model("Task", taskSchema);

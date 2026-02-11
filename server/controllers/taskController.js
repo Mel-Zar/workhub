@@ -7,17 +7,15 @@ const buildQuery = (userId, search, priority, completed, category) => {
     const query = { user: userId };
 
     if (search) {
-        query.$or = [
-            { title: { $regex: search, $options: "i" } },
-            { category: { $regex: search, $options: "i" } }
-        ];
+        query.$text = { $search: search };
     }
 
     if (priority) query.priority = priority;
     if (category) query.category = category;
 
-    if (completed === "true") query.completed = true;
-    if (completed === "false") query.completed = false;
+    if (completed !== undefined) {
+        query.completed = completed === "true" || completed === true;
+    }
 
     return query;
 };
@@ -25,18 +23,37 @@ const buildQuery = (userId, search, priority, completed, category) => {
 /* ================= TASKS ================= */
 export const getTasks = async (req, res) => {
     try {
-        const { search, priority, category, completed, page = 1, limit = 5 } = req.query;
+        const { search, priority, category, completed, sortBy } = req.query;
 
+        const page = Number(req.query.page) || 1;
+        const DEFAULT_LIMIT = 6;
+        const MAX_LIMIT = 50;
+
+        const limit = Math.min(
+            Number(req.query.limit) || DEFAULT_LIMIT,
+            MAX_LIMIT
+        );
         const query = buildQuery(req.user.id, search, priority, completed, category);
         const skip = (page - 1) * limit;
 
-        const total = await Task.countDocuments(query);
-        const tasks = await Task.find(query)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(Number(limit));
+        let sortOption = { createdAt: -1 };
 
-        res.json({ tasks, page: Number(page), pages: Math.ceil(total / limit), total });
+        const allowedSortFields = ["createdAt", "deadline", "priority", "title"];
+
+        if (sortBy && allowedSortFields.includes(sortBy)) {
+            sortOption = { [sortBy]: 1 };
+        }
+        console.log("REQ QUERY:", req.query);
+
+        const total = await Task.countDocuments(query);
+
+        const tasks = await Task.find(query)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        res.json({ tasks, page, pages: Math.ceil(total / limit), total });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });

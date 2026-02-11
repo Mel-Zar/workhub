@@ -23,7 +23,7 @@ function Dashboard() {
         setPage,
         setFilters,
         refreshTasks,
-    } = useTasks({ limit: 6 });
+    } = useTasks();
 
     if (authLoading) return <p className="status-text">Loading user…</p>;
     if (!user) return <p className="status-text">Not logged in</p>;
