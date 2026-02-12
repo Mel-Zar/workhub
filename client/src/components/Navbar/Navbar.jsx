@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { useTheme } from "../../hooks/useTheme";
+import logo from "../../../public/workhub-logo.png"
 import "./Navbar.scss";
 
 function Navbar() {
@@ -39,7 +40,9 @@ function Navbar() {
     return (
         <header className="navbar" ref={menuRef}>
             <div className="brand">
-                <Link to="/"><span>WorkHub</span></Link>
+                <Link to="/">
+                    <img src={logo} alt="WorkHub Logo" className="logo" />
+                </Link>
             </div>
             <button
                 className={`burger ${open ? "active" : ""}`}

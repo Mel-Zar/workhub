@@ -348,3 +348,14 @@
     opacity: 0;
   }
 }
+.brand {
+  display: flex;
+  align-items: center;
+
+  .logo {
+    height: 50px; // rimlig grundstorlek på desktop
+    width: auto; // behåll proportioner
+    object-fit: contain;
+    transition: height 0.2s ease;
+  }
+}
