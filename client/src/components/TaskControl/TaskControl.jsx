@@ -92,8 +92,8 @@ function TaskControls({
                         setOpen(open === "sort" ? null : "sort")
                     }
                 >
-                    <span>Sort</span>
                     <span className={`arrow ${open === "sort" ? "up" : "down"}`} />
+                    <span>Sort</span>
                 </button>
 
                 {open === "sort" && (

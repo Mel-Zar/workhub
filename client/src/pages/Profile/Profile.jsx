@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { authService } from "../../services/authService";
+import "./Profile.scss"
 
 function capitalizeFirst(value) {
     if (!value) return "";
@@ -134,84 +135,136 @@ function Profile() {
         name !== initialName || email !== initialEmail || newPassword.length > 0;
 
     return (
-        <div style={{ maxWidth: 500, margin: "auto", padding: 20 }}>
-            <h2>Profil</h2>
+        <div className="profile-page page">
 
-            <form onSubmit={handleSubmit}>
-                <h4>Profil info</h4>
-                <input
-                    value={name}
-                    onChange={e => setName(capitalizeFirst(e.target.value))}
-                    placeholder="Namn"
-                />
-                <input
-                    value={email}
-                    onChange={e => setEmail(e.target.value.toLowerCase())}
-                    placeholder="Email"
-                />
+            <div className="profile-card card">
+                <div className="profile-header">
+                    <h2>Profile Settings</h2>
+                    <p>Manage your account information and security</p>
+                </div>
 
-                <h4>Byt lösenord</h4>
-                <input
-                    type={showNewPassword ? "text" : "password"}
-                    placeholder="Nytt lösenord"
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                />
-                <label style={{ display: "block", marginBottom: 10 }}>
-                    <input
-                        type="checkbox"
-                        checked={showNewPassword}
-                        onChange={() => setShowNewPassword(!showNewPassword)}
-                    />{" "}
-                    Visa lösenord
-                </label>
+                <form className="profile-form" onSubmit={handleSubmit}>
 
-                <h4>Bekräfta identitet</h4>
-                <input
-                    type={showCurrentPassword ? "text" : "password"}
-                    placeholder="Nuvarande lösenord"
-                    value={currentPassword}
-                    onChange={e => setCurrentPassword(e.target.value)}
-                    required={newPassword.length > 0}
+                    <div className="form-section">
+                        <h4>Profile Information</h4>
 
-                />
-                <label style={{ display: "block", marginBottom: 10 }}>
-                    <input
-                        type="checkbox"
-                        checked={showCurrentPassword}
-                        onChange={() => setShowCurrentPassword(!showCurrentPassword)}
-                    />{" "}
-                    Visa lösenord
-                </label>
+                        <div className="input-group">
+                            <label>Name</label>
+                            <input
+                                value={name}
+                                onChange={e => setName(capitalizeFirst(e.target.value))}
+                                placeholder="Name"
+                            />
+                        </div>
 
-                <button disabled={!hasChanges || loading}>
-                    {loading ? "Sparar..." : "Spara"}
-                </button>
-            </form>
+                        <div className="input-group">
+                            <label>Email</label>
+                            <input
+                                value={email}
+                                onChange={e => setEmail(e.target.value.toLowerCase())}
+                                placeholder="Email"
+                            />
+                        </div>
+                    </div>
 
-            <hr />
+                    <div className="form-section">
+                        <h4>Change Password</h4>
 
-            <h4>Farlig zon</h4>
-            <input
-                type={showDeletePassword ? "text" : "password"}
-                placeholder="Bekräfta lösenord för radering"
-                value={deletePassword}
-                onChange={e => setDeletePassword(e.target.value)}
-            />
-            <label style={{ display: "block", marginBottom: 10 }}>
-                <input
-                    type="checkbox"
-                    checked={showDeletePassword}
-                    onChange={() => setShowDeletePassword(!showDeletePassword)}
-                />{" "}
-                Visa lösenord
-            </label>
+                        <div className="input-group">
+                            <label>New Password</label>
+                            <input
+                                type={showNewPassword ? "text" : "password"}
+                                value={newPassword}
+                                onChange={e => setNewPassword(e.target.value)}
+                                placeholder="New password"
+                            />
+                        </div>
 
-            <button type="button" disabled={loading} onClick={handleDeleteAccount}>
-                Radera konto
-            </button>
+                        <div className="checkbox-row">
+                            <input
+                                type="checkbox"
+                                checked={showNewPassword}
+                                onChange={() => setShowNewPassword(!showNewPassword)}
+                            />
+                            <span>Show password</span>
+                        </div>
+                    </div>
+
+                    <div className="form-section">
+                        <h4>Confirm Identity</h4>
+
+                        <div className="input-group">
+                            <label>Current Password</label>
+                            <input
+                                type={showCurrentPassword ? "text" : "password"}
+                                value={currentPassword}
+                                onChange={e => setCurrentPassword(e.target.value)}
+                                required={newPassword.length > 0}
+                                placeholder="Current password"
+                            />
+                        </div>
+
+                        <div className="checkbox-row">
+                            <input
+                                type="checkbox"
+                                checked={showCurrentPassword}
+                                onChange={() => setShowCurrentPassword(!showCurrentPassword)}
+                            />
+                            <span>Show password</span>
+                        </div>
+                    </div>
+
+                    <button
+                        className="primary-button"
+                        disabled={!hasChanges || loading}
+                    >
+                        {loading ? "Saving..." : "Save changes"}
+                    </button>
+
+                </form>
+            </div>
+
+            <div className="danger-zone card">
+                <div className="danger-header">
+                    <h4>Danger Zone</h4>
+                    <p>This action cannot be undone</p>
+                </div>
+
+                <div className="form-section">
+                    <div className="input-group">
+                        <label>Confirm Password</label>
+                        <input
+                            type={showDeletePassword ? "text" : "password"}
+                            value={deletePassword}
+                            onChange={e => setDeletePassword(e.target.value)}
+                            placeholder="Password"
+                        />
+                    </div>
+
+                    <div className="checkbox-row">
+                        <input
+                            type="checkbox"
+                            checked={showDeletePassword}
+                            onChange={() => setShowDeletePassword(!showDeletePassword)}
+                        />
+                        <span>Show password</span>
+                    </div>
+
+                    <button
+                        type="button"
+                        className="danger-button"
+                        disabled={loading}
+                        onClick={handleDeleteAccount}
+                    >
+                        Delete Account
+                    </button>
+                </div>
+            </div>
+
         </div>
     );
+
+
 }
 
 export default Profile;

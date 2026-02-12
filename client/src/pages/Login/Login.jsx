@@ -41,20 +41,22 @@ function Login() {
 
   return (
     <main className="login-page">
-      <div className="login-container">
+      <section className="login-container">
+        <article className="login-card">
 
-        <div className="login-card">
-
-          <div className="login-header">
+          {/* HEADER */}
+          <header className="login-header">
             <h1>Welcome Back</h1>
             <p>Sign in to continue organizing your tasks</p>
-          </div>
+          </header>
 
+          {/* FORM */}
           <form className="login-form" onSubmit={handleSubmit}>
 
             <div className="form-group">
-              <label>Email</label>
+              <label htmlFor="email">Email</label>
               <input
+                id="email"
                 type="email"
                 placeholder="your@email.com"
                 value={email}
@@ -64,8 +66,9 @@ function Login() {
             </div>
 
             <div className="form-group">
-              <label>Password</label>
+              <label htmlFor="password">Password</label>
               <input
+                id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Your password"
                 value={password}
@@ -76,32 +79,43 @@ function Login() {
 
             <div className="password-toggle">
               <input
+                id="showPassword"
                 type="checkbox"
                 checked={showPassword}
                 onChange={() => setShowPassword(!showPassword)}
               />
-              <span>Show password</span>
+              <label htmlFor="showPassword">Show password</label>
             </div>
 
-            <button className="login-button" disabled={loading}>
+            <button
+              type="submit"
+              className="login-button"
+              disabled={loading}
+            >
               {loading ? "Signing in..." : "Sign In"}
             </button>
 
           </form>
 
-          <div className="login-footer">
+          {/* FOOTER */}
+          <footer className="login-footer">
             <p>
               Don't have an account?{" "}
-              <span onClick={() => navigate("/register")}>
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate("/register")}
+                onKeyDown={(e) => e.key === "Enter" && navigate("/register")}
+              >
                 Create account
               </span>
             </p>
-          </div>
+          </footer>
 
-        </div>
-
-      </div>
+        </article>
+      </section>
     </main>
+
   );
 }
 
