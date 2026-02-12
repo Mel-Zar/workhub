@@ -2,17 +2,22 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { taskService } from "../../services/taskService";
 import { capitalize, formatCategory } from "../../utils/formatters";
-import TaskImages from "../TaskItem/TaskImages"; // använder samma komponent som TaskItem
+import Dropdown from "../Ui/Dropdown";
+import TaskImages from "../TaskItem/TaskImages";
 import "./TaskForm.scss";
 
 const PRIORITY_OPTIONS = ["low", "medium", "high"];
+const PRIORITY_DROPDOWN = PRIORITY_OPTIONS.map(p => ({
+    value: p,
+    label: capitalize(p)
+}));
 
 function TaskForm({ onCreate }) {
     const [title, setTitle] = useState("");
     const [priority, setPriority] = useState("");
     const [category, setCategory] = useState("");
     const [deadline, setDeadline] = useState("");
-    const [oldImages, setOldImages] = useState([]); // här kan vi ha gamla om vi vill stödja redigering
+    const [oldImages, setOldImages] = useState([]);
     const [newImages, setNewImages] = useState([]);
     const [dragged, setDragged] = useState({ type: null, index: null });
 
@@ -130,14 +135,13 @@ function TaskForm({ onCreate }) {
                 onChange={(e) => setTitle(capitalize(e.target.value))}
             />
 
-            <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-                <option value="">Choose priority</option>
-                {PRIORITY_OPTIONS.map((p) => (
-                    <option key={p} value={p}>
-                        {capitalize(p)}
-                    </option>
-                ))}
-            </select>
+            <Dropdown
+                value={priority}
+                options={PRIORITY_DROPDOWN}
+                onChange={setPriority}
+                placeholder="Choose priority"
+            />
+
 
             <input
                 placeholder="Kategori"

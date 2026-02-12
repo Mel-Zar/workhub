@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { authService } from "../../services/authService";
-import "./Profile.scss"
+import "./Profile.scss";
 
 function capitalizeFirst(value) {
     if (!value) return "";
@@ -49,7 +49,7 @@ function Profile() {
         toast.info(
             ({ closeToast }) => (
                 <div>
-                    <p>Är du säker på att du vill uppdatera profilen?</p>
+                    <p>Are you sure you want to update your profile?</p>
                     <button
                         onClick={async () => {
                             closeToast();
@@ -74,21 +74,21 @@ function Profile() {
 
                                 setUser(data.user);
 
-                                toast.success("Profil uppdaterad ✅");
+                                toast.success("Profile updated ✅");
                                 setInitialName(name);
                                 setInitialEmail(email);
                                 setCurrentPassword("");
                                 setNewPassword("");
                             } catch (err) {
-                                toast.error(err.message || "Serverfel vid uppdatering");
+                                toast.error(err.message || "Server error during update");
                             } finally {
                                 setLoading(false);
                             }
                         }}
                     >
-                        Ja
+                        Yes
                     </button>
-                    <button onClick={closeToast}>Avbryt</button>
+                    <button onClick={closeToast}>Cancel</button>
                 </div>
             ),
             { autoClose: false }
@@ -97,14 +97,14 @@ function Profile() {
 
     function handleDeleteAccount() {
         if (!deletePassword) {
-            toast.error("Lösenord krävs för att radera konto");
+            toast.error("Password required to delete account");
             return;
         }
 
         toast.error(
             ({ closeToast }) => (
                 <div>
-                    <p>⚠️ Är du säker på att du vill radera kontot?</p>
+                    <p>⚠️ Are you sure you want to delete your account?</p>
                     <button
                         onClick={async () => {
                             closeToast();
@@ -112,19 +112,19 @@ function Profile() {
 
                             try {
                                 await authService.deleteAccount(deletePassword);
-                                toast.success("Kontot raderat");
+                                toast.success("Account deleted");
                                 localStorage.clear();
                                 setTimeout(() => (window.location.href = "/login"), 1000);
                             } catch (err) {
-                                toast.error(err.message || "Serverfel vid radering");
+                                toast.error(err.message || "Server error during deletion");
                             } finally {
                                 setLoading(false);
                             }
                         }}
                     >
-                        Ja, radera
+                        Yes, delete
                     </button>
-                    <button onClick={closeToast}>Avbryt</button>
+                    <button onClick={closeToast}>Cancel</button>
                 </div>
             ),
             { autoClose: false }
@@ -167,59 +167,65 @@ function Profile() {
                         </div>
                     </div>
 
+                    <div className="section-divider" />
+
                     <div className="form-section">
                         <h4>Change Password</h4>
 
                         <div className="input-group">
                             <label>New Password</label>
-                            <input
-                                type={showNewPassword ? "text" : "password"}
-                                value={newPassword}
-                                onChange={e => setNewPassword(e.target.value)}
-                                placeholder="New password"
-                            />
-                        </div>
-
-                        <div className="checkbox-row">
-                            <input
-                                type="checkbox"
-                                checked={showNewPassword}
-                                onChange={() => setShowNewPassword(!showNewPassword)}
-                            />
-                            <span>Show password</span>
+                            <div className="password-field">
+                                <input
+                                    type={showNewPassword ? "text" : "password"}
+                                    value={newPassword}
+                                    onChange={e => setNewPassword(e.target.value)}
+                                    placeholder="New password"
+                                />
+                                <button
+                                    type="button"
+                                    className="eye-toggle"
+                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                >
+                                    {showNewPassword ? "🙈" : "👁"}
+                                </button>
+                            </div>
                         </div>
                     </div>
+
+                    <div className="section-divider" />
 
                     <div className="form-section">
                         <h4>Confirm Identity</h4>
 
                         <div className="input-group">
                             <label>Current Password</label>
-                            <input
-                                type={showCurrentPassword ? "text" : "password"}
-                                value={currentPassword}
-                                onChange={e => setCurrentPassword(e.target.value)}
-                                required={newPassword.length > 0}
-                                placeholder="Current password"
-                            />
-                        </div>
-
-                        <div className="checkbox-row">
-                            <input
-                                type="checkbox"
-                                checked={showCurrentPassword}
-                                onChange={() => setShowCurrentPassword(!showCurrentPassword)}
-                            />
-                            <span>Show password</span>
+                            <div className="password-field">
+                                <input
+                                    type={showCurrentPassword ? "text" : "password"}
+                                    value={currentPassword}
+                                    onChange={e => setCurrentPassword(e.target.value)}
+                                    required={newPassword.length > 0}
+                                    placeholder="Current password"
+                                />
+                                <button
+                                    type="button"
+                                    className="eye-toggle"
+                                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                >
+                                    {showCurrentPassword ? "🙈" : "👁"}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <button
-                        className="primary-button"
-                        disabled={!hasChanges || loading}
-                    >
-                        {loading ? "Saving..." : "Save changes"}
-                    </button>
+                    <div className="sticky-save">
+                        <button
+                            className="primary-button"
+                            disabled={!hasChanges || loading}
+                        >
+                            {loading ? "Saving..." : "Save changes"}
+                        </button>
+                    </div>
 
                 </form>
             </div>
@@ -231,23 +237,24 @@ function Profile() {
                 </div>
 
                 <div className="form-section">
+
                     <div className="input-group">
                         <label>Confirm Password</label>
-                        <input
-                            type={showDeletePassword ? "text" : "password"}
-                            value={deletePassword}
-                            onChange={e => setDeletePassword(e.target.value)}
-                            placeholder="Password"
-                        />
-                    </div>
-
-                    <div className="checkbox-row">
-                        <input
-                            type="checkbox"
-                            checked={showDeletePassword}
-                            onChange={() => setShowDeletePassword(!showDeletePassword)}
-                        />
-                        <span>Show password</span>
+                        <div className="password-field">
+                            <input
+                                type={showDeletePassword ? "text" : "password"}
+                                value={deletePassword}
+                                onChange={e => setDeletePassword(e.target.value)}
+                                placeholder="Password"
+                            />
+                            <button
+                                type="button"
+                                className="eye-toggle"
+                                onClick={() => setShowDeletePassword(!showDeletePassword)}
+                            >
+                                {showDeletePassword ? "🙈" : "👁"}
+                            </button>
+                        </div>
                     </div>
 
                     <button
@@ -258,13 +265,12 @@ function Profile() {
                     >
                         Delete Account
                     </button>
+
                 </div>
             </div>
 
         </div>
     );
-
-
 }
 
 export default Profile;

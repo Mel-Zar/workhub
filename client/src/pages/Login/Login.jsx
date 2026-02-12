@@ -18,7 +18,6 @@ function Login() {
     if (isLoggedIn) navigate("/dashboard");
   }, [isLoggedIn, navigate]);
 
-
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
@@ -67,24 +66,26 @@ function Login() {
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
 
-            <div className="password-toggle">
-              <input
-                id="showPassword"
-                type="checkbox"
-                checked={showPassword}
-                onChange={() => setShowPassword(!showPassword)}
-              />
-              <label htmlFor="showPassword">Show password</label>
+              <div className="password-field">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+
+                <button
+                  type="button"
+                  className="eye-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? "🙈" : "👁"}
+                </button>
+              </div>
             </div>
 
             <button
@@ -115,7 +116,6 @@ function Login() {
         </article>
       </section>
     </main>
-
   );
 }
 

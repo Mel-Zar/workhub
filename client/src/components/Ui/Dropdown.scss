@@ -22,7 +22,9 @@
   color: var(--text);
   cursor: pointer;
 
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .dropdown-trigger:hover {
@@ -150,7 +152,6 @@
   color: #000;
 }
 
-
 /* MOBILE */
 @media (max-width: 600px) {
   .dropdown-menu {
@@ -159,4 +160,3 @@
     box-shadow: none;
   }
 }
-

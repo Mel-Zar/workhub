@@ -86,6 +86,13 @@ function Navbar() {
                     </>
                 ) : (
                     <>
+                        <button
+                            className="icon-btn"
+                            onClick={toggleTheme}
+                            title="Toggle theme"
+                        >
+                            {theme === "light" ? "🌙" : "☀️"}
+                        </button>
                         <Link to="/register" onClick={() => setOpen(false)}>Create account</Link>
                         <Link to="/login" onClick={() => setOpen(false)}>Sign in</Link>
                     </>

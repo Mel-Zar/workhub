@@ -75,22 +75,26 @@ function Register() {
 
             <div className="form-group">
               <label>Password</label>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
 
-            <div className="password-toggle">
-              <input
-                type="checkbox"
-                checked={showPassword}
-                onChange={() => setShowPassword(!showPassword)}
-              />
-              <span>Show password</span>
+              <div className="password-field">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="At least 6 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+
+                <button
+                  type="button"
+                  className="eye-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? "🙈" : "👁"}
+                </button>
+              </div>
+
             </div>
 
             <button className="register-button" disabled={loading}>
