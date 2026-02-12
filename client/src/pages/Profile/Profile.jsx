@@ -59,12 +59,13 @@ function Profile() {
                                 const payload = {
                                     name: capitalizeFirst(name),
                                     email: email.toLowerCase(),
+                                    currentPassword: currentPassword,
                                 };
 
                                 if (newPassword) {
-                                    payload.currentPassword = currentPassword;
                                     payload.newPassword = newPassword;
                                 }
+
 
                                 const data = await authService.updateProfile(payload);
 
@@ -132,7 +133,8 @@ function Profile() {
     }
 
     const hasChanges =
-        name !== initialName || email !== initialEmail || newPassword.length > 0;
+        (name !== initialName || email !== initialEmail || newPassword.length > 0) && currentPassword;
+
 
     return (
         <div className="profile-page page">
@@ -204,7 +206,7 @@ function Profile() {
                                     type={showCurrentPassword ? "text" : "password"}
                                     value={currentPassword}
                                     onChange={e => setCurrentPassword(e.target.value)}
-                                    required={newPassword.length > 0}
+                                    required
                                     placeholder="Current password"
                                 />
                                 <button
@@ -260,7 +262,7 @@ function Profile() {
                     <button
                         type="button"
                         className="danger-button"
-                        disabled={loading}
+                        disabled={!deletePassword || loading}
                         onClick={handleDeleteAccount}
                     >
                         Delete Account
@@ -269,7 +271,7 @@ function Profile() {
                 </div>
             </div>
 
-        </div>
+        </div >
     );
 }
 

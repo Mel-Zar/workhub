@@ -99,8 +99,9 @@ const updateUser = async (req, res) => {
         const userId = req.user.id;
         const { name, email, currentPassword, newPassword } = req.body;
 
+        // ✅ Always require current password for any change
         if (!currentPassword)
-            return res.status(400).json({ error: "Current password required" });
+            return res.status(400).json({ error: "Current password required to update profile" });
 
         const user = await User.findById(userId);
         if (!user)
@@ -110,20 +111,20 @@ const updateUser = async (req, res) => {
         if (!match)
             return res.status(401).json({ error: "Wrong password" });
 
-        // update fields
+        // Uppdatera fält
         if (name) user.name = name;
         if (email) user.email = email;
 
         if (newPassword) {
             if (newPassword.length < 6)
                 return res.status(400).json({ error: "Password must be at least 6 characters" });
-
             user.password = await bcrypt.hash(newPassword, 10);
         }
 
+        // Spara ändringarna
         await user.save();
 
-        // ✅ new access token so frontend updates name/email
+        // ✅ Skapa ny access token så frontend uppdaterar name/email
         const newAccessToken = createAccessToken(user);
 
         res.json({
@@ -140,6 +141,7 @@ const updateUser = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
+
 
 // ================= DELETE ACCOUNT =================
 const deleteAccount = async (req, res) => {
