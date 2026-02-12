@@ -23,6 +23,7 @@ const createRefreshToken = (user) => {
 const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
+        const normalizedEmail = email.toLowerCase().trim();
 
         if (!name || !email || !password)
             return res.status(400).json({ error: "All fields are required" });
@@ -34,14 +35,17 @@ const registerUser = async (req, res) => {
         if (password.length < 6)
             return res.status(400).json({ error: "Password must be at least 6 characters" });
 
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email: normalizedEmail });
         if (existingUser)
             return res.status(400).json({ error: "User already exists" });
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = new User({ name, email, password: hashedPassword });
-        await user.save();
+        const user = new User({
+            name,
+            email: normalizedEmail,
+            password: hashedPassword,
+        }); await user.save();
 
         res.status(201).json({ message: "User registered successfully" });
     } catch (err) {
@@ -54,11 +58,12 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
+        const normalizedEmail = email.toLowerCase().trim();
 
         if (!email || !password)
             return res.status(400).json({ error: "Email and password required" });
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: normalizedEmail });
         if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
         const isMatch = await bcrypt.compare(password, user.password);

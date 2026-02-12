@@ -23,7 +23,7 @@ function Dashboard() {
         setPage,
         setFilters,
         refreshTasks,
-    } = useTasks();
+    } = useTasks({ limit: 12 });
 
     const incompleteTasks = tasks.filter(t => !t.completed);
     const completedTasks = tasks.filter(t => t.completed);

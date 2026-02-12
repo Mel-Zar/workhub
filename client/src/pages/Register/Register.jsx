@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { authService } from "../../services/authService";
+import "./Register.scss";
 
 function capitalizeFirst(value) {
   if (!value) return "";
@@ -24,62 +25,93 @@ function Register() {
 
     try {
       await authService.register({
-        name: capitalizeFirst(name), // bara namn
-        email, // direkt
-        password, // direkt
+        name: capitalizeFirst(name),
+        email,
+        password,
       });
 
-      toast.success("Konto skapat! Logga in 🎉");
+      toast.success("Account created! Please sign in 🎉");
       navigate("/login");
     } catch (err) {
-      toast.error(err.message || "Registrering misslyckades");
+      toast.error(err.message || "Registration failed");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
-      <h2>Registrera</h2>
+    <main className="register-page">
+      <div className="register-container">
 
-      <form style={{ display: "flex", flexDirection: "column", gap: 10 }} onSubmit={handleSubmit}>
-        <input
-          placeholder="Namn"
-          value={name}
-          onChange={(e) => setName(capitalizeFirst(e.target.value))}
-          required
-        />
+        <div className="register-card">
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value.toLowerCase())} // alltid små bokstäver
-          required
-        />
+          <div className="register-header">
+            <h1>Create Account</h1>
+            <p>Start organizing your tasks professionally</p>
+          </div>
 
-        <input
-          type={showPassword ? "text" : "password"}
-          placeholder="Lösenord"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+          <form className="register-form" onSubmit={handleSubmit}>
 
-        <label>
-          <input
-            type="checkbox"
-            checked={showPassword}
-            onChange={() => setShowPassword(!showPassword)}
-          />{" "}
-          Visa lösenord
-        </label>
+            <div className="form-group">
+              <label>Name</label>
+              <input
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(capitalizeFirst(e.target.value))}
+                required
+              />
+            </div>
 
-        <button disabled={loading}>
-          {loading ? "Skapar konto..." : "Registrera"}
-        </button>
-      </form>
-    </div>
+            <div className="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value.toLowerCase())}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="At least 6 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="password-toggle">
+              <input
+                type="checkbox"
+                checked={showPassword}
+                onChange={() => setShowPassword(!showPassword)}
+              />
+              <span>Show password</span>
+            </div>
+
+            <button className="register-button" disabled={loading}>
+              {loading ? "Creating account..." : "Register"}
+            </button>
+
+          </form>
+
+          <div className="register-footer">
+            <p>
+              Already have an account?{" "}
+              <span onClick={() => navigate("/login")}>
+                Sign in
+              </span>
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
   );
 }
 

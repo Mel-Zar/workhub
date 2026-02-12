@@ -26,7 +26,7 @@ function Tasks() {
         completionOptions,
         setPage,
         setFilters
-    } = useTasks();
+    } = useTasks({ limit: 12 });
 
     if (authLoading) return <p className="status-text">Loading user…</p>;
     if (!user) return <p className="status-text">Not logged in</p>;

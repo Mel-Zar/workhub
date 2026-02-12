@@ -5,15 +5,15 @@
    PAGE
 ===================== */
 .dashboard-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2.5rem 1rem;
-  min-height: calc(100vh - 64px);
+  width: 100%;
+  min-height: 100vh;
+  padding: 4rem 10rem 4rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
-}
+  gap: 2rem;
 
+  background: var(--bg);
+}
 /* =====================
    PAGE HEADER
 ===================== */

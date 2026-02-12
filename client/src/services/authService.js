@@ -1,12 +1,14 @@
-import { request } from "../api/request";
+import { apiFetch } from "../api/apiFetch";
 
 export const authService = {
     login: async (credentials) => {
-        const data = await request("/api/auth/login", {
+        const data = await apiFetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(credentials),
         });
+
+
 
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
@@ -15,7 +17,7 @@ export const authService = {
     },
 
     register: async (user) => {
-        return request("/api/auth/register", {
+        return apiFetch("/api/auth/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(user),
@@ -23,7 +25,7 @@ export const authService = {
     },
 
     updateProfile: async (data) => {
-        return request("/api/auth/profile", {
+        return apiFetch("/api/auth/profile", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -31,7 +33,7 @@ export const authService = {
     },
 
     deleteAccount: async (currentPassword) => {
-        return request("/api/auth/delete", {
+        return apiFetch("/api/auth/delete", {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ currentPassword }),
@@ -40,7 +42,13 @@ export const authService = {
 
     logout: async () => {
         try {
-            await request("/api/auth/logout", { method: "POST" });
+            const refreshToken = localStorage.getItem("refreshToken");
+
+            await apiFetch("/api/auth/logout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refreshToken }),
+            });
         } finally {
             localStorage.clear();
             window.location.href = "/login";

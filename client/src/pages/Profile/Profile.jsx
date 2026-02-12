@@ -24,7 +24,7 @@ function getUserFromToken() {
 }
 
 function Profile() {
-    const { updateUserName } = useContext(AuthContext);
+    const { setUser } = useContext(AuthContext);
     const user = getUserFromToken();
 
     const [name, setName] = useState(user.name);
@@ -55,18 +55,23 @@ function Profile() {
                             setLoading(true);
 
                             try {
-                                const data = await authService.updateProfile({
+                                const payload = {
                                     name: capitalizeFirst(name),
-                                    email: capitalizeFirst(email),
-                                    currentPassword,
-                                    newPassword
-                                });
+                                    email: email.toLowerCase(),
+                                };
+
+                                if (newPassword) {
+                                    payload.currentPassword = currentPassword;
+                                    payload.newPassword = newPassword;
+                                }
+
+                                const data = await authService.updateProfile(payload);
 
                                 if (data.accessToken) {
                                     localStorage.setItem("accessToken", data.accessToken);
                                 }
 
-                                updateUserName(data.user.name);
+                                setUser(data.user);
 
                                 toast.success("Profil uppdaterad ✅");
                                 setInitialName(name);
@@ -141,7 +146,7 @@ function Profile() {
                 />
                 <input
                     value={email}
-                    onChange={e => setEmail(capitalizeFirst(e.target.value))}
+                    onChange={e => setEmail(e.target.value.toLowerCase())}
                     placeholder="Email"
                 />
 
@@ -167,7 +172,8 @@ function Profile() {
                     placeholder="Nuvarande lösenord"
                     value={currentPassword}
                     onChange={e => setCurrentPassword(e.target.value)}
-                    required
+                    required={newPassword.length > 0}
+
                 />
                 <label style={{ display: "block", marginBottom: 10 }}>
                     <input
