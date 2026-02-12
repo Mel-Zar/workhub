@@ -28,7 +28,7 @@ function TaskImages({
                                     ? img
                                     : `${import.meta.env.VITE_API_URL}${img}`
                             }
-                            alt=""
+                            alt="Task image"
                             onClick={() =>
                                 !isEditing &&
                                 onPreview(
@@ -40,8 +40,10 @@ function TaskImages({
                         />
                         {isEditing && (
                             <button
+                                type="button"
                                 className="remove-btn"
                                 onClick={() => onRemoveOld(img)}
+                                aria-label="Remove image"
                             >
                                 ✕
                             </button>
@@ -59,15 +61,27 @@ function TaskImages({
                     onDragOver={(e) => onDragOver("new", i, e)}
                 >
                     <div className="img-inner">
-                        <img src={img.preview} alt="new" />
-                        <button className="remove-btn" onClick={() => onRemoveNew(i)}>
+                        <img src={img.preview} alt="New task image preview" />
+                        <button
+                            type="button"
+                            className="remove-btn"
+                            onClick={() => onRemoveNew(i)}
+                            aria-label="Remove image"
+                        >
                             ✕
                         </button>
                     </div>
                 </div>
             ))}
 
-            {isEditing && <input type="file" multiple onChange={onNewImages} />}
+            {isEditing && (
+                <input
+                    type="file"
+                    multiple
+                    onChange={onNewImages}
+                    aria-label="Upload images"
+                />
+            )}
         </section>
     );
 }

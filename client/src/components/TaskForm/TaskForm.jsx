@@ -42,7 +42,7 @@ function TaskForm({ onCreate }) {
                 );
 
                 if (exists) {
-                    toast.warn(`"${file.name}" är redan vald`, {
+                    toast.warn(`"${file.name}" is already selected`, {
                         toastId: `duplicate-${file.name}`,
                         autoClose: 2000,
                     });
@@ -95,7 +95,7 @@ function TaskForm({ onCreate }) {
         e.preventDefault();
 
         if (!canSubmit) {
-            toast.error("Alla fält och minst en bild krävs");
+            toast.error("All fields and at least one image are required.");
             return;
         }
 
@@ -109,7 +109,7 @@ function TaskForm({ onCreate }) {
 
             await taskService.create(formData);
 
-            toast.success("Task skapad ✅");
+            toast.success("Task created successfully ✅");
 
             setTitle("");
             setPriority("");
@@ -121,16 +121,16 @@ function TaskForm({ onCreate }) {
 
             onCreate?.();
         } catch {
-            toast.error("Kunde inte skapa task");
+            toast.error("Unable to create task.");
         }
     };
 
     return (
         <form className="task-form" onSubmit={handleSubmit}>
-            <h3>Skapa Task</h3>
+            <h3>Create Task</h3>
 
             <input
-                placeholder="Titel"
+                placeholder="Title"
                 value={title}
                 onChange={(e) => setTitle(capitalize(e.target.value))}
             />
@@ -142,9 +142,8 @@ function TaskForm({ onCreate }) {
                 placeholder="Choose priority"
             />
 
-
             <input
-                placeholder="Kategori"
+                placeholder="Category"
                 value={category}
                 onChange={(e) => setCategory(formatCategory(e.target.value))}
             />
@@ -157,8 +156,8 @@ function TaskForm({ onCreate }) {
             />
 
             {/* =========================
-          IMAGE HANDLER
-      ========================= */}
+               IMAGE HANDLER
+            ========================= */}
             <TaskImages
                 oldImages={oldImages}
                 newImages={newImages}
@@ -172,7 +171,7 @@ function TaskForm({ onCreate }) {
             />
 
             <button type="submit" disabled={!canSubmit}>
-                Skapa Task
+                Create Task
             </button>
         </form>
     );
