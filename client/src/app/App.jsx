@@ -31,6 +31,8 @@ function App() {
 
       <Navbar />
 
+
+
       <Routes>
 
         <Route path="/" element={
@@ -69,6 +71,7 @@ function App() {
         <Route path="*" element={<Navigate to="/login" replace />} />
 
       </Routes>
+
 
       <Footer />
 

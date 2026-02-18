@@ -1,114 +1,285 @@
+/* =========================================
+   HOME PAGE CONTAINER
+========================================= */
 .home-page {
-  display: flex;
-  flex-direction: column;
-  gap: 4rem;
-  padding: 1rem 2rem;
-}
+  width: 100%;
 
-/* ================= HERO ================= */
+  max-width: 1500px;
 
-.home-hero {
-  text-align: center;
-  max-width: 700px;
   margin: 0 auto;
 
-  h1 {
-    font-size: 2.8rem;
-    font-weight: 700;
-  }
+  padding-top: clamp(2rem, 6vh, 6rem);
 
-  p {
-    margin-top: 1rem;
-    opacity: 0.7;
-    font-size: 1.1rem;
-  }
+  padding-bottom: clamp(4rem, 10vh, 10rem);
 
-  .cta {
-    margin-top: 2rem;
-    padding: 0.9rem 2rem;
-    border-radius: 30px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    background: var(--primary);
-    color: var(--on-primary);
-    transition: all 0.3s ease;
+  padding-left: clamp(1.5rem, 4vw, 4rem);
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
-    }
-  }
+  padding-right: clamp(1.5rem, 4vw, 4rem);
 }
 
-/* ================= STATS ================= */
+/* MAIN WIDTH CONTAINER */
 
-.home-stats {
+.home-container {
+  width: 100%;
+
+  max-width: 1400px;
+
+  margin: 0 auto;
+
   display: flex;
-  justify-content: center;
-  gap: 4rem;
-  text-align: center;
 
-  .stat h3 {
-    font-size: 2rem;
-    color: var(--primary);
-  }
+  flex-direction: column;
 
-  .stat p {
-    opacity: 0.7;
-  }
+  gap: clamp(4rem, 8vh, 8rem);
 }
 
-/* ================= CAROUSEL ================= */
+/* HERO INNER */
+
+.hero-content {
+  max-width: 700px;
+
+  margin: 0 auto;
+}
+
+/* STATS WRAPPER */
+
+.stats-container {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  gap: clamp(1.5rem, 4vw, 4rem);
+}
+
+/* =========================================
+   CAROUSEL
+========================================= */
 
 .home-carousel {
   position: relative;
-  height: 420px;
+
+  width: 100%;
+
+  height: clamp(280px, 50vw, 600px);
+
   overflow: hidden;
-  border-radius: 20px;
+
+  border-radius: 28px;
+
+  background: black;
+
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
+
+/* SLIDE */
 
 .slide {
   position: absolute;
-  inset: 0;
-  opacity: 0;
-  transform: scale(1.05);
-  transition: all 0.8s ease;
-}
 
-.slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 20px;
+  inset: 0;
+
+  opacity: 0;
+
+  transform: scale(1.12);
+
+  transition:
+    opacity 1.2s cubic-bezier(0.77, 0, 0.18, 1),
+    transform 8s cubic-bezier(0.77, 0, 0.18, 1);
 }
 
 .slide.active {
   opacity: 1;
+
   transform: scale(1);
 }
 
-.overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+/* IMAGE */
+
+.slide img {
   width: 100%;
-  padding: 2rem;
-  backdrop-filter: blur(12px);
-  background: rgba(0, 0, 0, 0.4);
-  color: white;
-  border-radius: 0 0 20px 20px;
+
+  height: 100%;
+
+  object-fit: cover;
 }
 
-/* ================= MOBILE ================= */
+/* DARK GRADIENT OVERLAY */
+
+.overlay {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: flex-end;
+
+  padding: clamp(1.5rem, 4vw, 4rem);
+
+  font-size: clamp(1.2rem, 2.5vw, 2.4rem);
+
+  font-weight: 600;
+
+  color: white;
+
+  background: linear-gradient(
+    to top,
+
+    rgba(0, 0, 0, 0.75) 0%,
+
+    rgba(0, 0, 0, 0.4) 40%,
+
+    rgba(0, 0, 0, 0.1) 70%,
+
+    transparent 100%
+  );
+}
+
+/* =========================================
+   HERO SECTION
+========================================= */
+
+.home-hero {
+  text-align: center;
+
+  max-width: 800px;
+
+  margin: 0 auto;
+}
+
+/* TITLE */
+
+.home-hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+
+  font-weight: 700;
+
+  letter-spacing: -0.02em;
+}
+
+/* SUBTITLE */
+
+.home-hero p {
+  margin-top: 1rem;
+
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+
+  opacity: 0.7;
+}
+
+/* BUTTON */
+
+.cta {
+  margin-top: 2.5rem;
+
+  padding: 1rem 3rem;
+
+  border-radius: 100px;
+
+  border: none;
+
+  font-weight: 600;
+
+  font-size: 1rem;
+
+  cursor: pointer;
+
+  background: linear-gradient(135deg, var(--primary), #d4af37);
+
+  color: var(--on-primary);
+
+  transition: all 0.35s cubic-bezier(0.77, 0, 0.18, 1);
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.cta:hover {
+  transform: translateY(-6px) scale(1.04);
+
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+}
+
+/* =========================================
+   STATS
+========================================= */
+
+.home-stats {
+  display: flex;
+
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap: clamp(1.5rem, 4vw, 4rem);
+}
+
+/* CARD */
+
+.stat {
+  min-width: 200px;
+
+  padding: 2.5rem 3rem;
+
+  border-radius: 24px;
+
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.01)
+  );
+
+  backdrop-filter: blur(20px);
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  text-align: center;
+
+  transition: all 0.4s cubic-bezier(0.77, 0, 0.18, 1);
+}
+
+.stat:hover {
+  transform: translateY(-10px) scale(1.03);
+
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
+}
+
+/* NUMBER */
+.stat h3 {
+  font-size: clamp(2rem, 4vw, 3rem);
+
+  font-weight: 700;
+
+  background: linear-gradient(135deg, var(--primary), #ffd700);
+
+  -webkit-background-clip: text;
+
+  background-clip: text; /* ✅ ADD THIS */
+
+  -webkit-text-fill-color: transparent;
+
+  color: transparent; /* ✅ fallback */
+}
+
+/* LABEL */
+
+.stat p {
+  margin-top: 0.6rem;
+
+  opacity: 0.6;
+
+  font-size: 0.95rem;
+}
+
+/* =========================================
+   MOBILE
+========================================= */
 
 @media (max-width: 768px) {
-  .home-stats {
-    flex-direction: column;
-    gap: 2rem;
-  }
-
   .home-carousel {
-    height: 300px;
+    height: 260px;
   }
 }

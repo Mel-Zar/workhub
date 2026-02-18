@@ -6,7 +6,14 @@
 ========================= */
 
 .task-page {
-  padding-top: 2rem;
+  width: 100%;
+
+  padding: clamp(2rem, 4vw, 4rem);
+}
+.task-container {
+  width: 100%;
+
+  max-width: 1200px;
 }
 
 /* =========================

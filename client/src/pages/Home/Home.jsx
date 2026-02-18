@@ -74,52 +74,107 @@ function Home() {
   }, []);
 
   return (
-    <main className="home-page">
-      {/* CAROUSEL */}
-      <section className="home-carousel">
-        {slides.map((slide, index) => (
-          <div
-            key={index}
-            className={`slide ${index === current ? "active" : ""}`}
-          >
-            <img src={slide.image} alt={slide.text} />
-            <div className="overlay">
-              {/* <h2>{slide.title}</h2> */}
-              <p>{slide.text}</p>
-            </div>
-          </div>
-        ))}
-      </section>
-      {/* HERO */}
-      <section className="home-hero">
-        <h1>Organize smarter. Work cleaner.</h1>
-        <p>All your tasks in one professional space.</p>
-        <button
-          className="cta"
-          onClick={() => navigate("/dashboard")}
-        >
-          Create Task
-        </button>
-      </section>
 
-      {/* STATS */}
-      <section className="home-stats">
-        <div className="stat">
-          <h3>{stats.completed}</h3>
-          <p>Tasks Completed</p>
-        </div>
-        <div className="stat">
-          <h3>{stats.productivity}%</h3>
-          <p>Productivity Rate</p>
-        </div>
-        <div className="stat">
-          <h3>{stats.total}</h3>
-          <p>Focus Mode</p>
-        </div>
-      </section>
+    <main className="home-page">
+
+      <div className="home-container">
+
+
+        {/* ================= CAROUSEL ================= */}
+
+        <section className="home-carousel">
+
+          {slides.map((slide, index) => (
+
+            <div
+              key={index}
+              className={`slide ${index === current ? "active" : ""}`}
+            >
+
+              <img src={slide.image} alt={slide.text} />
+
+              <div className="overlay">
+
+                <p>{slide.text}</p>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </section>
+
+
+
+        {/* ================= HERO ================= */}
+
+        <section className="home-hero">
+
+          <div className="hero-content">
+
+            <h1>Organize smarter. Work cleaner.</h1>
+
+            <p>All your tasks in one professional space.</p>
+
+            <button
+              className="cta"
+              onClick={() => navigate("/dashboard")}
+            >
+              Create Task
+            </button>
+
+          </div>
+
+        </section>
+
+
+
+        {/* ================= STATS ================= */}
+
+        <section className="home-stats">
+
+          <div className="stats-container">
+
+            <div className="stat">
+
+              <h3>{stats.completed}</h3>
+
+              <p>Tasks Completed</p>
+
+            </div>
+
+
+            <div className="stat">
+
+              <h3>{stats.productivity}%</h3>
+
+              <p>Productivity Rate</p>
+
+            </div>
+
+
+            <div className="stat">
+
+              <h3>{stats.total}</h3>
+
+              <p>Focus Mode</p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+      </div>
+
 
     </main>
+
   );
+
 }
 
 export default Home;

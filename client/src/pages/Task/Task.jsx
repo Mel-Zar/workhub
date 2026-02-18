@@ -49,9 +49,9 @@ function Task() {
 
     return (
 
-        <div className="page task-page">
+        <main className="task-page">
 
-            <div className="container">
+            <div className="task-container">
 
                 <div className="task-card">
 
@@ -142,8 +142,7 @@ function Task() {
 
             </div>
 
-        </div>
-
+        </main>
     );
 
 }
