@@ -82,9 +82,9 @@ function Home() {
             key={index}
             className={`slide ${index === current ? "active" : ""}`}
           >
-            <img src={slide.image} alt={slide.title} />
+            <img src={slide.image} alt={slide.text} />
             <div className="overlay">
-              <h2>{slide.title}</h2>
+              {/* <h2>{slide.title}</h2> */}
               <p>{slide.text}</p>
             </div>
           </div>

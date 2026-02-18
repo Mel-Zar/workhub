@@ -1,15 +1,15 @@
 @use "../../styles/mixins" as *;
 @use "../../styles/variables" as *;
 
-// =====================
-// TASK ITEM
-// =====================
+/* =====================
+   TASK ITEM
+===================== */
 
 .task-item {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 1.5rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
@@ -30,7 +30,7 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 0.6rem 0.9rem;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text);
     outline: none;
     transition:
@@ -47,28 +47,16 @@
     }
   }
 
-  /* =====================
-     FILE INPUT / UPLOAD
-  ===================== */
   input[type="file"] {
     display: block;
     width: 100%;
     padding: 0.6rem 0.9rem;
     font-size: 0.75rem;
     color: var(--text);
-    border: 1px solid var(--border);
     border-radius: 14px;
-    background: var(--surface);
     cursor: pointer;
-    transition:
-      border 0.2s ease,
-      box-shadow 0.2s ease;
-
-    &:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
-      outline: none;
-    }
+    border: 1px solid var(--border);
+    background: var(--surface);
 
     &::file-selector-button {
       cursor: pointer;
@@ -77,7 +65,6 @@
       color: var(--primary);
       padding: 0.4rem 0.8rem;
       border-radius: 12px;
-      font-size: 0.75rem;
       font-weight: 600;
       transition: all 0.2s ease;
 
@@ -88,6 +75,9 @@
     }
   }
 
+  /* =====================
+     HEADER
+  ===================== */
   .task-header {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -101,6 +91,9 @@
     }
   }
 
+  /* =====================
+     META
+  ===================== */
   .task-meta {
     display: flex;
     flex-direction: column;
@@ -108,16 +101,13 @@
 
     input,
     select {
-      width: 100%; /* Fyll hela bredden */
-      min-width: 0; /* ta bort tidigare min-width */
-    }
-
-    /* EDIT MODE SPECIFIKT */
-    &.editing {
-      gap: 0.75rem; /* lite mer luft mellan fälten */
+      width: 100%;
     }
   }
 
+  /* =====================
+     BADGES
+  ===================== */
   .badge {
     font-size: 0.7rem;
     padding: 0.35rem 0.75rem;
@@ -139,6 +129,9 @@
     color: #f44336;
   }
 
+  /* =====================
+     ACTIONS
+  ===================== */
   .task-actions {
     display: flex;
     gap: 0.5rem;
@@ -158,10 +151,12 @@
       border: 1px solid var(--primary);
       background: transparent;
       color: var(--primary);
+
       &:hover:not(:disabled) {
         background: var(--primary);
         color: var(--on-primary);
       }
+
       &:disabled {
         opacity: 0.45;
         cursor: not-allowed;
@@ -172,6 +167,7 @@
       border: 1px solid crimson;
       color: crimson;
       background: transparent;
+
       &:hover {
         background: crimson;
         color: #fff;
@@ -180,7 +176,10 @@
   }
 }
 
-/* IMAGE MODAL */
+/* =====================
+   IMAGE MODAL
+===================== */
+
 .image-modal {
   position: fixed;
   inset: 0;
@@ -197,34 +196,15 @@
   }
 }
 
-/* RESPONSIVE */
-@include mobile {
-  .task-item {
-    padding: 1rem;
-  }
+/* =====================
+   EDIT MODE
+===================== */
+
+.task-item.editing {
+  cursor: default;
+
   .task-header {
     grid-template-columns: 1fr;
-  }
-  .task-meta {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .task-actions {
-    justify-content: stretch;
-    button {
-      flex: 1;
-    }
-  }
-}
-
-/* =====================
-   EDIT MODE STYLING
-===================== */
-.task-item.editing {
-  cursor: default; /* ingen hover-effekt */
-
-  .task-header {
-    grid-template-columns: 1fr; /* title input full-width */
     gap: 0.75rem;
 
     input[type="text"] {
@@ -236,13 +216,12 @@
   }
 
   .task-meta {
-    flex-direction: column; /* alla fält under varandra */
+    flex-direction: column;
     gap: 0.75rem;
 
     input,
     select,
     input[type="file"] {
-      /* filinput också full-width */
       width: 100%;
       min-width: 0;
       font-size: 0.85rem;
@@ -251,7 +230,7 @@
   }
 
   .task-actions {
-    flex-direction: column; /* knappar under varandra */
+    flex-direction: column;
     gap: 0.5rem;
 
     button {
@@ -261,11 +240,62 @@
 }
 
 /* =====================
-   EDIT MODE RESPONSIVE
+   COMPLETED TASKS
 ===================== */
+
+.task-item.completed {
+  background: rgba(76, 175, 80, 0.05);
+  border-color: #4caf50;
+  color: var(--text-muted);
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    opacity 0.3s ease;
+
+  &:hover {
+    transform: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  h4,
+  .badge {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  input[type="checkbox"] {
+    accent-color: #4caf50;
+  }
+
+  .task-actions button.edit,
+  .task-actions button.danger {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  position: relative;
+
+  &::after {
+    content: "✔";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    color: #4caf50;
+    opacity: 0.8;
+  }
+}
+
+/* =====================
+   RESPONSIVE MOBILE
+===================== */
+
 @include mobile {
-  .task-item.editing {
+  .task-item {
+    padding: 1rem;
+
     .task-header {
+      grid-template-columns: 1fr;
       gap: 0.5rem;
     }
 
@@ -274,16 +304,28 @@
     }
 
     .task-actions {
+      flex-direction: column;
       gap: 0.5rem;
+
       button {
-        flex: 1;
         width: 100%;
       }
     }
   }
+
+  .task-item.editing {
+    .task-header,
+    .task-meta,
+    .task-actions {
+      gap: 0.5rem;
+    }
+  }
 }
 
-/* Optional: större skärmar (desktop) kan ha fält bredvid varandra om du vill */
+/* =====================
+   TABLET / DESKTOP
+===================== */
+
 @media (min-width: 768px) {
   .task-item.editing {
     .task-meta {
@@ -308,51 +350,5 @@
         width: auto;
       }
     }
-  }
-}
-
-/* =====================
-   COMPLETED TASKS
-===================== */
-.task-item.completed {
-  background: rgba(76, 175, 80, 0.05); /* ljusgrön bakgrund */
-  border-color: #4caf50;
-  color: var(--text-muted); /* nedtonad text */
-  transition:
-    background 0.3s ease,
-    color 0.3s ease,
-    opacity 0.3s ease;
-
-  &:hover {
-    transform: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  h4,
-  .badge {
-    text-decoration: line-through; /* genomstruken text */
-    opacity: 0.7;
-  }
-
-  input[type="checkbox"] {
-    accent-color: #4caf50; /* grön checkbox */
-  }
-
-  .task-actions button.edit,
-  .task-actions button.danger {
-    opacity: 0.6;
-    pointer-events: none; /* gör knappar inaktiva */
-  }
-
-  /* Valfritt: ikon overlay */
-  position: relative; /* för ::after */
-  &::after {
-    content: "✔";
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 1.5rem;
-    color: #4caf50;
-    opacity: 0.8;
   }
 }

@@ -1,360 +1,229 @@
 @use "../../styles/mixins" as *;
-@use "../../styles/variables" as *;
 
 /* =========================
-   🔝 Navbar Base
+   NAVBAR PREMIUM
    ========================= */
 
 .navbar {
   position: sticky;
   top: 0;
   z-index: 1000;
-  @include flex-between;
-  padding: 1rem 2rem;
 
-  background: #ffffff; /* 👈 tvingar vit i light mode */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06); /* mjukare */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* mycket lättare */
+  padding: 12px 28px;
 
-  transition: background 0.3s ease;
-  isolation: isolate;
+  background: rgba(255, 255, 255, 0.65);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Dark mode finjustering */
 [data-theme="dark"] .navbar {
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-}
-
-/* Subtle inner glow */
-.navbar::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(18, 18, 18, 0.65);
 }
 
 /* =========================
-   🏷 Brand
+   LOGO
    ========================= */
 
-.brand {
-  font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-
-  a {
-    color: var(--primary);
-    text-decoration: none;
-  }
-
-  &:hover {
-    transform: scale(1.05);
-  }
+.logo {
+  height: 42px;
 }
 
 /* =========================
-   📂 Menu
+   MENU
    ========================= */
 
 .menu {
   display: flex;
   align-items: center;
-  gap: 1.4rem;
-  transition: all 0.25s ease;
-
-  a,
-  .icon-btn,
-  .logout {
-    white-space: nowrap;
-  }
+  gap: 22px;
 }
 
 /* =========================
-   👤 User
-   ========================= */
-
-.user {
-  font-size: 0.9rem;
-  opacity: 0.75;
-  margin-right: 0.4rem;
-}
-
-/* =========================
-   🔗 Links
+   LINKS
    ========================= */
 
 .menu a {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text);
   text-decoration: none;
-  position: relative;
-  padding: 0.2rem 0;
-  transition: color 0.25s ease;
-
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -3px;
-    width: 0;
-    height: 2px;
-    background: var(--primary);
-    transition: width 0.25s ease;
-  }
-
-  &:hover {
-    color: var(--primary);
-  }
-
-  &:hover::after {
-    width: 100%;
-  }
-}
-
-/* =========================
-   🌗 Theme Button
-   ========================= */
-
-.icon-btn {
-  @include button-reset;
-  font-size: 1rem;
-  padding: 0.45rem;
-  border-radius: 50%;
   color: var(--text);
-  transition: all 0.25s ease;
 
-  &:hover {
-    background: rgba(212, 175, 55, 0.12);
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
-  }
+  font-weight: 500;
+
+  position: relative;
+}
+
+.menu a::after {
+  content: "";
+
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+
+  width: 0;
+  height: 2px;
+
+  background: #d4af37;
+
+  transition: 0.3s;
+}
+
+.menu a:hover::after {
+  width: 100%;
 }
 
 /* =========================
-   🚪 Logout
+   LOGOUT BUTTON
    ========================= */
 
 .logout {
-  @include button-reset;
-  font-size: 0.9rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 20px;
-  border: 1px solid var(--primary);
-  color: var(--primary);
-  transition: all 0.25s ease;
+  border: none;
+  padding: 8px 18px;
 
-  &:hover {
-    background: var(--primary);
-    color: #000;
-  }
+  border-radius: 30px;
+
+  background: linear-gradient(135deg, #d4af37, #f5e6a8);
+
+  cursor: pointer;
 }
 
 /* =========================
-   🍔 Burger
+   PREMIUM TOGGLE
+   ========================= */
+
+/* =========================
+   PREMIUM TOGGLE RESPONSIVE
+   ========================= */
+
+.theme-toggle {
+  width: clamp(52px, 6vw, 64px);
+  height: clamp(26px, 3vw, 32px);
+
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* TRACK */
+
+.toggle-track {
+  width: 100%;
+  height: 100%;
+
+  background: linear-gradient(135deg, #d4af37, #f5e6a8);
+
+  border-radius: 999px;
+
+  position: relative;
+
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25);
+
+  padding: 4%;
+}
+
+/* THUMB RESPONSIVE */
+
+.toggle-thumb {
+  position: absolute;
+
+  width: 42%;
+  height: 84%;
+
+  top: 8%;
+  left: 4%;
+
+  border-radius: 50%;
+
+  background: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+
+  transition: transform 0.35s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+/* PERFECT DARK POSITION */
+
+.theme-toggle.dark .toggle-thumb {
+  transform: translateX(120%);
+}
+
+/* ICON */
+
+.icon {
+  position: absolute;
+  font-size: clamp(10px, 1vw, 13px);
+}
+
+/* ICON */
+
+.icon {
+  position: absolute;
+  font-size: 12px;
+}
+
+.sun {
+  opacity: 1;
+}
+
+.moon {
+  opacity: 0;
+}
+
+.theme-toggle.dark .sun {
+  opacity: 0;
+}
+
+.theme-toggle.dark .moon {
+  opacity: 1;
+}
+
+/* =========================
+   BURGER
    ========================= */
 
 .burger {
   display: none;
-  @include button-reset;
-
-  width: 28px;
-  height: 22px;
-  position: relative;
-  cursor: pointer;
-  z-index: 1100;
-
-  span {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: var(--text);
-    border-radius: 4px;
-    transition: all 0.3s ease;
-  }
-
-  span:nth-child(1) {
-    top: 0;
-  }
-  span:nth-child(2) {
-    top: 9px;
-  }
-  span:nth-child(3) {
-    bottom: 0;
-  }
-
-  &:hover span {
-    background: var(--primary);
-    box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
-  }
-
-  &.active span:nth-child(1) {
-    transform: rotate(45deg);
-    top: 9px;
-  }
-
-  &.active span:nth-child(2) {
-    opacity: 0;
-  }
-
-  &.active span:nth-child(3) {
-    transform: rotate(-45deg);
-    bottom: 10px;
-  }
 }
 
 /* =========================
-   📱 MOBILE / TABLET
+   MOBILE
    ========================= */
 
 @include mobile {
-  .burger {
-    display: block;
-  }
-
   .menu {
     position: fixed;
-    top: 0;
+
     right: 0;
-    height: 100vh;
+    top: 0;
+
     width: 260px;
-    padding: 2rem 1.5rem;
+    height: 100vh;
+
+    background: rgba(18, 18, 18, 0.95);
+
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
 
-    background: color-mix(in srgb, var(--surface) 95%, transparent);
-
-    box-shadow:
-      -8px 0 35px rgba(0, 0, 0, 0.12),
-      0 0 25px rgba(212, 175, 55, 0.15);
+    padding: 80px 30px;
 
     transform: translateX(100%);
-    opacity: 0;
-    pointer-events: none;
-    transition:
-      transform 0.3s ease,
-      opacity 0.3s ease;
-    overflow-y: auto;
-    border-left: 1px solid var(--border);
-    z-index: 1050;
+
+    transition: 0.3s;
   }
 
   .menu.open {
     transform: translateX(0);
-    opacity: 1;
-    pointer-events: auto;
   }
 
-  /* 🌫 Premium overlay */
-  .menu::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  .menu.open::before {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
-/* =========================
-   👤 Username Premium
-   ========================= */
-
-.username {
-  font-weight: 700;
-  position: relative;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-/* 🌞 Light mode */
-[data-theme="light"] .username {
-  color: #a67c1f;
-}
-
-[data-theme="light"] .username:hover {
-  text-shadow: 0 0 6px rgba(166, 124, 31, 0.4);
-}
-
-/* 🌙 Dark mode */
-[data-theme="dark"] .username {
-  color: var(--primary);
-}
-
-[data-theme="dark"] .username:hover {
-  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
-}
-
-/* ✨ Shine */
-.username::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -75%;
-  width: 50%;
-  height: 100%;
-  transform: skewX(-20deg);
-  opacity: 0;
-}
-
-[data-theme="light"] .username::after {
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 215, 120, 0.85),
-    transparent
-  );
-}
-
-[data-theme="dark"] .username::after {
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.6),
-    transparent
-  );
-}
-
-.username:hover::after {
-  animation: shine 0.8s ease forwards;
-}
-
-@keyframes shine {
-  0% {
-    left: -75%;
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    left: 125%;
-    opacity: 0;
-  }
-}
-.brand {
-  display: flex;
-  align-items: center;
-
-  .logo {
-    height: 50px; // rimlig grundstorlek på desktop
-    width: auto; // behåll proportioner
-    object-fit: contain;
-    transition: height 0.2s ease;
+  .burger {
+    display: block;
   }
 }

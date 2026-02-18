@@ -48,6 +48,16 @@ export const taskService = {
         );
     },
 
+    reorderImages(id, images) {
+        return apiFetch(`/api/tasks/${id}/reorder-images`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ images })
+        });
+    },
+
     toggleComplete(id) {
         return apiFetch(`/api/tasks/${id}/toggle`, {
             method: "PATCH"

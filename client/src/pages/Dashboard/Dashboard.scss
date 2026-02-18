@@ -9,10 +9,16 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  padding: 4rem 15rem 4rem;
+  gap: 5rem;
+
+  // Dynamic padding based on viewport
+  padding: clamp(2rem, 4vw, 5rem) clamp(1rem, 6vw, 15rem);
+
   background: var(--bg);
+  max-width: 1600px;
+  margin-inline: auto;
 }
+
 /* =====================
    PAGE HEADER
 ===================== */
@@ -24,9 +30,10 @@
 
   .page-header-text {
     h1 {
-      font-size: 2.2rem;
+      font-size: clamp(1.8rem, 2.2vw, 2.4rem);
       font-weight: 700;
       letter-spacing: -0.03em;
+      color: var(--text);
     }
 
     p {
@@ -98,19 +105,23 @@
 }
 
 /* =====================
-   GRID (TASKS)
+   GRID (TASKS & IMAGES)
 ===================== */
 .tasks-layout.grid {
   display: grid;
   gap: 1.4rem;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   align-items: stretch;
 
-  /* Större bilder i TaskItem */
   .task-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
     .task-images {
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      display: grid;
       gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
 
     @include mobile {
@@ -121,13 +132,13 @@
 
     @include breakpoint(768px, 1199px) {
       .task-images {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       }
     }
 
     @include breakpoint(1200px) {
       .task-images {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       }
     }
   }
@@ -171,9 +182,6 @@
   font-weight: 600;
 }
 
-/* =====================
-   PAGINATION
-===================== */
 /* =====================
    PAGINATION
 ===================== */

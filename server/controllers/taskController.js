@@ -206,6 +206,57 @@ export const deleteTask = async (req, res) => {
     }
 };
 
+/* ================= REORDER IMAGES ================= */
+
+export const reorderImages = async (req, res) => {
+
+    try {
+
+        const { images } = req.body;
+
+        if (!images || !Array.isArray(images)) {
+
+            return res.status(400).json({
+                error: "Images array required"
+            });
+
+        }
+
+        const task = await Task.findOne({
+
+            _id: req.params.id,
+            user: req.user.id
+
+        });
+
+        if (!task) {
+
+            return res.status(404).json({
+                error: "Task not found"
+            });
+
+        }
+
+        task.images = images;
+
+        await task.save();
+
+        res.json(task);
+
+    }
+
+    catch (err) {
+
+        console.error("REORDER ERROR:", err);
+
+        res.status(500).json({
+            error: "Server error"
+        });
+
+    }
+
+};
+
 export const toggleComplete = async (req, res) => {
     try {
         const task = await Task.findOne({

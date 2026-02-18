@@ -1,0 +1,230 @@
+@use "../../styles/mixins" as *;
+@use "../../styles/variables" as *;
+
+/* =========================
+   PAGE
+========================= */
+
+.task-page {
+  padding-top: 2rem;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.task-card {
+  @include card;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2rem;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.task-header {
+  @include flex-between;
+
+  gap: 1rem;
+
+  border-bottom: 1px solid var(--border);
+
+  padding-bottom: 1rem;
+}
+
+.task-header h1 {
+  font-size: 1.8rem;
+
+  font-weight: 700;
+}
+
+/* =========================
+   BACK BUTTON
+========================= */
+
+.back-btn {
+  background: transparent;
+
+  border: 1px solid var(--primary);
+
+  color: var(--primary);
+
+  border-radius: $radius;
+
+  padding: 0.5rem 1rem;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+}
+
+.back-btn:hover {
+  background: var(--primary);
+
+  color: var(--on-primary);
+}
+
+/* =========================
+   DETAILS GRID
+========================= */
+
+.task-details {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+
+  gap: 1rem;
+}
+
+/* DETAIL ROW */
+
+.detail-row {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 0.4rem;
+}
+
+.label {
+  font-size: 0.7rem;
+
+  text-transform: uppercase;
+
+  color: var(--text-muted);
+
+  letter-spacing: 0.08em;
+}
+
+/* =========================
+   BADGES
+========================= */
+
+.badge {
+  width: fit-content;
+
+  padding: 0.4rem 0.7rem;
+
+  border-radius: 999px;
+
+  font-size: 0.75rem;
+
+  font-weight: 600;
+
+  border: 1px solid var(--border);
+
+  background: var(--surface);
+}
+
+/* priority */
+
+.priority.high {
+  color: #ff5252;
+
+  border-color: #ff5252;
+
+  background: rgba(255, 82, 82, 0.08);
+}
+
+.priority.medium {
+  color: #ffc107;
+
+  border-color: #ffc107;
+
+  background: rgba(255, 193, 7, 0.08);
+}
+
+.priority.low {
+  color: #4caf50;
+
+  border-color: #4caf50;
+
+  background: rgba(76, 175, 80, 0.08);
+}
+
+/* status */
+
+.badge.done {
+  color: #4caf50;
+
+  border-color: #4caf50;
+
+  background: rgba(76, 175, 80, 0.08);
+}
+
+/* =========================
+   IMAGES GRID
+========================= */
+
+.task-images {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+
+  gap: 1.5rem;
+}
+
+/* IMAGE */
+
+.task-images img {
+  width: 100%;
+
+  height: 260px;
+
+  object-fit: cover;
+
+  border-radius: $radius-lg;
+
+  border: 1px solid var(--border);
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.task-images img:hover {
+  transform: scale(1.04);
+
+  box-shadow: var(--shadow);
+}
+
+/* =========================
+   HERO IMAGE
+========================= */
+
+.task-images img:first-child {
+  grid-column: 1 / -1;
+
+  height: 420px;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@include mobile {
+  .task-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .task-images {
+    grid-template-columns: 1fr;
+  }
+
+  .task-images img {
+    height: 220px;
+  }
+
+  .task-images img:first-child {
+    height: 280px;
+  }
+}

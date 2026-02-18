@@ -10,8 +10,10 @@ import {
     deleteTask,
     toggleComplete,
     addImages,
-    removeImage
+    removeImage,
+    reorderImages
 } from "../controllers/taskController.js";
+
 
 const router = express.Router();
 
@@ -26,5 +28,7 @@ router.patch("/:id/toggle", auth, toggleComplete);
 // IMAGE ROUTES
 router.post("/:id/images", auth, upload.array("images", 5), addImages);
 router.delete("/:id/images", auth, removeImage);
+router.put("/:id/reorder-images", auth, reorderImages);
+
 
 export default router;

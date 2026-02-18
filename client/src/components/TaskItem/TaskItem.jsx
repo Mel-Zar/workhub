@@ -14,6 +14,7 @@ function TaskItem({
     onDelete,
     showActions = true,
     editable = false,
+    onClick,
 }) {
     const [activeImage, setActiveImage] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -264,8 +265,10 @@ function TaskItem({
     return (
         <>
             <article
+                onClick={onClick}
                 className={`task-item ${isEditing ? "editing" : ""} ${task.completed ? "completed" : ""}`}
             >
+
                 <header className="task-header">
                     {showActions && (
                         <input
@@ -375,7 +378,7 @@ function TaskItem({
             </article>
 
             {activeImage && (
-                <div className="image-modal" onClick={() => setActiveImage(null)}>
+                <div className="image-modxal" onClick={() => setActiveImage(null)}>
                     <img src={activeImage} alt="preview" />
                 </div>
             )}

@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { useTheme } from "../../hooks/useTheme";
-import logo from "../../../public/workhub-logo.png"
+import logo from "../../assets/workhub-logo.png";
 import "./Navbar.scss";
 
 function Navbar() {
@@ -38,10 +38,11 @@ function Navbar() {
     }, [open]);
 
     return (
+
         <header className="navbar" ref={menuRef}>
             <div className="brand">
                 <Link to="/">
-                    <img src={logo} alt="WorkHub Logo" className="logo" />
+                    <img src={logo} alt="Workhub logo" />
                 </Link>
             </div>
             <button
@@ -76,12 +77,23 @@ function Navbar() {
                         <Link to="/profile" onClick={() => setOpen(false)}>Account</Link>
 
                         <button
-                            className="icon-btn"
+                            className={`theme-toggle ${theme === "dark" ? "dark" : ""}`}
                             onClick={toggleTheme}
                             title="Toggle theme"
                         >
-                            {theme === "light" ? "🌙" : "☀️"}
+                            <div className="toggle-track">
+
+                                <div className="toggle-thumb">
+
+                                    <span className="icon sun">☀</span>
+
+                                    <span className="icon moon">🌙</span>
+
+                                </div>
+
+                            </div>
                         </button>
+
 
                         <button className="logout" onClick={handleLogout}>
                             Sign out

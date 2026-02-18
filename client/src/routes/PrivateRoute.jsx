@@ -3,9 +3,12 @@ import { Navigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext/AuthContext";
 
 export default function PrivateRoute({ children }) {
-    const { isLoggedIn, loading } = useContext(AuthContext);
 
-    if (loading) return <p>Laddar...</p>; // Show loading while checking auth
+    const { user, loading } = useContext(AuthContext);
 
-    return isLoggedIn ? children : <Navigate to="/login" replace />;
+    if (loading) return <p>Laddar...</p>;
+
+    if (!user) return <Navigate to="/login" replace />;
+
+    return children;
 }
