@@ -1,0 +1,17 @@
+.app {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* ⭐ detta är FIXEN */
+.app main {
+  flex: 1;
+
+  width: 100%;
+
+  display: flex;
+
+  justify-content: center;
+}
