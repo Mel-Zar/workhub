@@ -6,11 +6,17 @@
 ========================= */
 
 .tasks-page {
+  width: 100%;
+
+  max-width: 1200px;
+
+  margin-inline: auto;
+
   padding: clamp(2rem, 4vw, 4rem);
 
   display: flex;
+
   flex-direction: column;
-  align-items: center;
 }
 
 /* remove margin bottom from last element */
@@ -92,13 +98,24 @@
 /* =========================
    TASK GRID
 ========================= */
+/* =========================
+   TASK GRID FIX PRO
+========================= */
 
 .tasks-layout.grid {
   display: grid;
 
-  gap: 1.6rem;
+  gap: clamp(1rem, 2vw, 1.6rem);
 
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+  align-items: start;
+}
+
+.tasks-layout.grid > * {
+  height: fit-content;
+
+  align-self: start;
 }
 
 .tasks-layout.list {
@@ -114,7 +131,7 @@
 ========================= */
 
 .pagination {
-  margin-top: 2rem;
+  margin-top: auto;
 
   padding-top: 1.5rem;
 
@@ -137,4 +154,60 @@
   .tasks-page {
     padding: 1.5rem 1rem;
   }
+}
+
+/* =========================
+   VIEW TOGGLE PRO
+========================= */
+
+.view-toggle {
+  display: flex;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+
+  border-radius: 999px;
+
+  padding: 4px;
+
+  gap: 4px;
+
+  box-shadow: var(--shadow);
+}
+
+.view-toggle button {
+  border: none;
+
+  background: transparent;
+
+  padding: 0.45rem 1.2rem;
+
+  border-radius: 999px;
+
+  font-size: 0.85rem;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  color: var(--text);
+
+  opacity: 0.6;
+
+  transition: all 0.25s ease;
+}
+
+.view-toggle button:hover {
+  opacity: 1;
+}
+
+.view-toggle button.active {
+  background: var(--primary);
+
+  color: var(--on-primary);
+
+  opacity: 1;
+
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 }
