@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import "./Dropdown.scss";
 
-function Dropdown({ value, options = [], onChange, placeholder }) {
+function Dropdown({
+    value,
+    options = [],
+    onChange,
+    placeholder,
+    className = ""
+}) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
 
@@ -21,7 +27,7 @@ function Dropdown({ value, options = [], onChange, placeholder }) {
     return (
         <div
             ref={ref}
-            className={`dropdown ${open ? "open" : ""} ${isActive ? "active" : ""}`}
+            className={`dropdown ${className} ${open ? "open" : ""} ${isActive ? "active" : ""}`}
         >
             <button
                 type="button"

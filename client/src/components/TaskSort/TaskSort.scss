@@ -8,25 +8,118 @@
   width: 100%;
 }
 
-/* reset button */
+/* =====================
+   SORT BUTTON
+===================== */
+
+.sort-btn {
+  height: 42px;
+
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding: 0 0.9rem;
+
+  border-radius: 10px;
+
+  border: 1px solid var(--border);
+
+  background: var(--surface);
+
+  font-size: 0.75rem;
+
+  font-weight: 500;
+
+  color: var(--text);
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+/* HOVER */
+
+.sort-btn:hover {
+  border-color: var(--primary);
+}
+
+/* ACTIVE (EXAKT SOM DROPDOWN) */
+
+.sort-btn.active {
+  background: var(--primary);
+
+  border-color: var(--primary);
+
+  color: #000;
+}
+
+/* DARK MODE FIX */
+
+[data-theme="dark"] .sort-btn {
+  color: var(--text);
+}
+
+[data-theme="dark"] .sort-btn.active {
+  color: #000;
+}
+
+/* =====================
+   RESET BUTTON
+===================== */
+
 .reset-btn {
   @include button-reset;
 
-  width: 100%;
   padding: 0.65rem;
+
   border-radius: 999px;
 
   border: 1px solid var(--border);
+
   color: var(--primary);
 
   font-size: 0.75rem;
+
   font-weight: 600;
 
   transition: $transition;
+}
 
-  &:hover {
-    background: var(--primary);
-    color: var(--on-primary);
-    box-shadow: $shadow-gold;
-  }
+.reset-btn:hover {
+  background: var(--primary);
+
+  color: var(--on-primary);
+
+  box-shadow: var(--shadow);
+}
+.task-sort {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 0.6rem;
+}
+
+/* dropdown list */
+
+.task-sort .dropdown-menu {
+  position: static;
+
+  box-shadow: none;
+
+  padding: 0;
+}
+
+/* RESET BUTTON */
+
+.reset-btn {
+  width: 100%;
 }

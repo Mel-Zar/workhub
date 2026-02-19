@@ -154,3 +154,26 @@
     min-width: unset;
   }
 }
+/* =========================
+   DESKTOP → SORT pil vänster
+   ========================= */
+
+@media (min-width: $tablet) {
+  .control.right .control-btn {
+    flex-direction: row-reverse;
+
+    justify-content: flex-end;
+  }
+}
+
+/* =========================
+   TABLET + MOBILE → SORT pil höger igen
+   ========================= */
+
+@media (max-width: $tablet) {
+  .control.right .control-btn {
+    flex-direction: row;
+
+    justify-content: flex-start;
+  }
+}
