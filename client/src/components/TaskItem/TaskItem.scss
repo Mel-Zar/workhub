@@ -96,29 +96,33 @@
       text-transform: capitalize;
 
       &.priority.low {
-        background: #e0f2f1;
-        border-color: #80cbc4;
-        color: #00796b;
+        background: var(--info-bg);
+        border-color: var(--info);
+        color: var(--info);
       }
+
       &.priority.medium {
-        background: #fff3e0;
-        border-color: #ffb74d;
-        color: #ef6c00;
+        background: var(--warning-bg);
+        border-color: var(--warning);
+        color: var(--warning);
       }
+
       &.priority.high {
-        background: #ffebee;
-        border-color: #e57373;
-        color: #c62828;
+        background: var(--danger-bg);
+        border-color: var(--danger);
+        color: var(--danger);
       }
+
       &.category {
-        background: #e8eaf6;
-        border-color: #7986cb;
-        color: #303f9f;
+        background: var(--info-bg);
+        border-color: var(--primary);
+        color: var(--primary);
       }
+
       &.deadline {
-        background: #f3e5f5;
-        border-color: #ba68c8;
-        color: #6a1b9a;
+        background: var(--info-bg);
+        border-color: var(--primary);
+        color: var(--primary);
       }
     }
   }
