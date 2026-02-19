@@ -15,6 +15,7 @@ function TaskItem({
     showActions = true,
     editable = false,
     onClick,
+    view
 }) {
     const [activeImage, setActiveImage] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -337,6 +338,7 @@ function TaskItem({
                 </div>
 
                 <TaskImages
+                    view={view}
                     oldImages={oldImages}
                     newImages={newImages}
                     isEditing={isEditing}

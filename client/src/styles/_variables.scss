@@ -12,9 +12,14 @@ $white: #ffffff;
    🧱 UI TOKENS
 ========================= */
 
-$radius: 12px;
+/* Border radius */
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius: 12px; // optional alias
 $radius-lg: 18px;
+$radius-xl: 24px; // bonus (valfri)
 
+/* Animation */
 $transition: 0.25s ease;
 
 /* =========================
@@ -23,9 +28,14 @@ $transition: 0.25s ease;
 
 $shadow-gold: 0 0 15px rgba(212, 175, 55, 0.35);
 
+$shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.08);
+$shadow-md: 0 8px 20px rgba(0, 0, 0, 0.12);
+$shadow-lg: 0 16px 30px rgba(0, 0, 0, 0.18);
+
 /* =========================
    📱 BREAKPOINTS
 ========================= */
 
 $mobile: 768px;
 $tablet: 1024px;
+$desktop: 1280px;

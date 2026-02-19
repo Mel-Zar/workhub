@@ -13,7 +13,7 @@
   align-items: center;
   justify-content: space-between;
 
-  padding: 12px 28px;
+  padding: 20px 28px;
 
   background: var(--surface);
 
@@ -31,6 +31,11 @@
 
 .logo {
   height: 42px;
+}
+
+.brand img {
+  height: 50px;
+  width: auto;
 }
 
 /* =========================

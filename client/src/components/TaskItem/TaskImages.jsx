@@ -1,8 +1,10 @@
+import { useState } from "react";
 import "./TaskImages.scss";
 
 function TaskImages({
-    oldImages,
-    newImages,
+    view = "grid",
+    oldImages = [],
+    newImages = [],
     isEditing,
     onRemoveOld,
     onRemoveNew,
@@ -11,79 +13,138 @@ function TaskImages({
     onDragOver,
     onNewImages,
 }) {
+
+    const [index, setIndex] = useState(0);
+
+    const allImages = [
+        ...oldImages.map(img =>
+            img.startsWith("blob:")
+                ? img
+                : `${import.meta.env.VITE_API_URL}${img}`
+        ),
+        ...newImages.map(img => img.preview)
+    ];
+
+    if (!allImages.length && !isEditing) return null;
+
+    const next = (e) => {
+        e.stopPropagation();
+        setIndex(i => (i + 1) % allImages.length);
+    };
+
+    const prev = (e) => {
+        e.stopPropagation();
+        setIndex(i =>
+            i === 0 ? allImages.length - 1 : i - 1
+        );
+    };
+
+    /* =====================
+       LIST VIEW = CAROUSEL
+    ===================== */
+
+    if (view === "list" && !isEditing) {
+
+        return (
+
+            <section className="task-images carousel">
+
+                <button className="nav prev" onClick={prev}>
+                    ‹
+                </button>
+
+                <img
+                    src={allImages[index]}
+                    onClick={() => onPreview(allImages[index])}
+                />
+
+                <button className="nav next" onClick={next}>
+                    ›
+                </button>
+
+            </section>
+
+        );
+
+    }
+
+    /* =====================
+       GRID VIEW = THUMBNAILS
+    ===================== */
+
     return (
+
         <section className="task-images">
-            {oldImages.map((img, i) => (
-                <div
-                    key={img + i}
-                    className="image-wrapper"
-                    draggable={isEditing}
-                    onDragStart={() => onDragStart("old", i)}
-                    onDragOver={(e) => onDragOver("old", i, e)}
-                >
-                    <div className="img-inner">
+
+            {oldImages.map((img, i) => {
+
+                const src = img.startsWith("blob:")
+                    ? img
+                    : `${import.meta.env.VITE_API_URL}${img}`;
+
+                return (
+                    <div
+                        key={`old-${i}`}
+                        className="image-wrapper"
+                        draggable={isEditing}
+                        onDragStart={() => onDragStart("old", i)}
+                        onDragOver={(e) => onDragOver("old", i, e)}
+                    >
+
                         <img
-                            src={
-                                img.startsWith("blob:")
-                                    ? img
-                                    : `${import.meta.env.VITE_API_URL}${img}`
-                            }
-                            alt="Task image"
-                            onClick={() =>
-                                !isEditing &&
-                                onPreview(
-                                    img.startsWith("blob:")
-                                        ? img
-                                        : `${import.meta.env.VITE_API_URL}${img}`
-                                )
-                            }
+                            src={src}
+                            onClick={() => !isEditing && onPreview(src)}
                         />
-                        {isEditing && (
+
+                        {isEditing &&
                             <button
-                                type="button"
                                 className="remove-btn"
                                 onClick={() => onRemoveOld(img)}
-                                aria-label="Remove image"
                             >
                                 ✕
                             </button>
-                        )}
+                        }
+
                     </div>
-                </div>
-            ))}
+                );
+
+            })}
+
 
             {newImages.map((img, i) => (
-                <div
-                    key={img.preview}
-                    className="image-wrapper"
-                    draggable={isEditing}
-                    onDragStart={() => onDragStart("new", i)}
-                    onDragOver={(e) => onDragOver("new", i, e)}
-                >
-                    <div className="img-inner">
-                        <img src={img.preview} alt="New task image preview" />
+
+                <div key={`new-${i}`} className="image-wrapper">
+
+                    <img src={img.preview} />
+
+                    {isEditing &&
                         <button
-                            type="button"
                             className="remove-btn"
                             onClick={() => onRemoveNew(i)}
-                            aria-label="Remove image"
                         >
                             ✕
                         </button>
-                    </div>
+                    }
+
                 </div>
+
             ))}
 
-            {isEditing && (
+
+            {isEditing &&
+
                 <input
                     type="file"
                     multiple
                     onChange={onNewImages}
-                    aria-label="Upload images"
                 />
-            )}
+
+            }
+
         </section>
+
     );
+
 }
 
 export default TaskImages;

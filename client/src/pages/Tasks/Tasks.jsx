@@ -105,6 +105,7 @@ function Tasks() {
                                 task={task}
                                 showActions={false}
                                 editable={false}
+                                view={view}
                                 onClick={() => navigate(`/task/${task._id}`)}
                             />
                         ))}

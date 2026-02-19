@@ -1,20 +1,16 @@
+@use "../styles//mixins" as *;
+@use "../styles/variables" as *;
+
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* MAIN FIX */
 .app main {
   flex: 1;
-
-  width: 100%;
-
   display: flex;
-
-  justify-content: center;
-
-  align-items: center; /* ⭐ DETTA ÄR FIXEN */
-
+  justify-content: center; // centrerar tasks-page horisontellt
+  width: 100%;
   padding: clamp(1rem, 3vw, 3rem);
 }

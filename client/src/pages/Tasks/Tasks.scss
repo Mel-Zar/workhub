@@ -1,213 +1,181 @@
-@use "../../styles/mixins" as *;
 @use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 
 /* =========================
-   PAGE WRAPPER (FIXED)
+   TASKS PAGE
 ========================= */
-
 .tasks-page {
   width: 100%;
-
-  max-width: 1200px;
-
-  margin-inline: auto;
-
+  max-width: 1400px;
+  margin: 0 auto;
   padding: clamp(2rem, 4vw, 4rem);
-
   display: flex;
-
   flex-direction: column;
-}
-
-/* remove margin bottom from last element */
-.tasks-page > *:last-child {
-  margin-bottom: 0;
-}
-
-/* =========================
-   CENTER CONTENT
-========================= */
-
-.tasks-page > * {
-  width: 100%;
-  max-width: 1200px;
-  margin-inline: auto;
-}
-
-/* =========================
-   HEADER
-========================= */
-
-.page-header {
-  @include flex-between;
-
-  align-items: flex-end;
-
   gap: 2rem;
 
-  margin-bottom: 2rem;
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 
-  padding-bottom: 1rem;
-
-  border-bottom: 1px solid var(--border);
-
-  .page-header-text {
-    h1 {
-      font-size: 2.4rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
+    h2 {
+      font-size: clamp(1.5rem, 2vw, 1.75rem);
+      font-weight: 700;
+      margin: 0;
     }
 
     p {
-      margin-top: 0.4rem;
-      font-size: 0.95rem;
-      opacity: 0.6;
+      font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+      color: var(--text-muted);
     }
   }
 }
 
 /* =========================
-   SECTION
+   VIEW TOGGLE
 ========================= */
-
-.tasks-section {
-  margin-bottom: 2rem;
-}
-
-.section-header {
-  margin-bottom: 1rem;
-}
-
-/* =========================
-   CARDS
-========================= */
-
-.tasks-controls,
-.tasks-content {
+.view-toggle {
+  display: flex;
   background: var(--surface);
-
   border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
 
-  border-radius: $radius-lg;
+  button {
+    border: none;
+    background: transparent;
+    padding: 0.45rem 1.2rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text);
+    opacity: 0.6;
+    transition: all 0.25s ease;
 
-  padding: 1.8rem;
+    &:hover {
+      opacity: 1;
+    }
 
-  box-shadow: var(--shadow);
+    &.active {
+      background: var(--primary);
+      color: var(--on-primary);
+      opacity: 1;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  @include mobile {
+    flex-wrap: wrap;
+    gap: 2px;
+
+    button {
+      flex: 1 1 auto;
+      font-size: 0.8rem;
+      padding: 0.4rem 1rem;
+    }
+  }
 }
 
 /* =========================
-   TASK GRID
+   TASK GRID & LIST
 ========================= */
-/* =========================
-   TASK GRID FIX PRO
-========================= */
-
 .tasks-layout.grid {
   display: grid;
-
   gap: clamp(1rem, 2vw, 1.6rem);
+  grid-template-columns: repeat(3, 1fr);
 
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-  align-items: start;
-}
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 
-.tasks-layout.grid > * {
-  height: fit-content;
-
-  align-self: start;
+  > * {
+    height: fit-content;
+  }
 }
 
 .tasks-layout.list {
   display: flex;
-
   flex-direction: column;
-
   gap: 1.2rem;
+}
+
+/* =========================
+   STATUS & EMPTY STATES
+========================= */
+.status-text,
+.error-text {
+  font-size: 1rem;
+  color: var(--text-muted);
+  text-align: center;
+  width: 100%;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
 }
 
 /* =========================
    PAGINATION
 ========================= */
-
 .pagination {
-  margin-top: auto;
-
-  padding-top: 1.5rem;
-
-  border-top: 1px solid var(--border);
-
   display: flex;
-
   justify-content: center;
-
   align-items: center;
-
   gap: 1rem;
-}
+  margin-top: 2rem;
 
-/* =========================
-   MOBILE
-========================= */
+  button {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
 
-@include mobile {
-  .tasks-page {
-    padding: 1.5rem 1rem;
+    &:hover:not(:disabled) {
+      background: var(--primary-light);
+      color: var(--on-primary);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    font-weight: 600;
   }
 }
 
 /* =========================
-   VIEW TOGGLE PRO
+   RESPONSIVE FIXES
 ========================= */
+@include mobile {
+  .tasks-page {
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
+  }
 
-.view-toggle {
-  display: flex;
+  .tasks-layout.grid {
+    grid-template-columns: 1fr;
+  }
 
-  background: var(--surface);
-
-  border: 1px solid var(--border);
-
-  border-radius: 999px;
-
-  padding: 4px;
-
-  gap: 4px;
-
-  box-shadow: var(--shadow);
-}
-
-.view-toggle button {
-  border: none;
-
-  background: transparent;
-
-  padding: 0.45rem 1.2rem;
-
-  border-radius: 999px;
-
-  font-size: 0.85rem;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  color: var(--text);
-
-  opacity: 0.6;
-
-  transition: all 0.25s ease;
-}
-
-.view-toggle button:hover {
-  opacity: 1;
-}
-
-.view-toggle button.active {
-  background: var(--primary);
-
-  color: var(--on-primary);
-
-  opacity: 1;
-
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  .view-toggle {
+    flex-direction: column;
+    gap: 4px;
+  }
 }
