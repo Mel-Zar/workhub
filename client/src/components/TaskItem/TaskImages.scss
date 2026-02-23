@@ -1,121 +1,227 @@
 @use "../../styles/mixins" as *;
 @use "../../styles/variables" as *;
 
+/* =========================
+   PREMIUM BLOCK
+========================= */
+
+.task-images-block {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+
+  width: 100%;
+}
+
+/* =========================
+   CONTAINER (NO FIXED HEIGHT)
+========================= */
+
+.task-images-container {
+  width: 100%;
+
+  min-height: 220px; /* ✅ håller samma storlek när tom */
+
+  padding: 12px;
+
+  border-radius: $radius;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+}
+
+/* =========================
+   GRID
+========================= */
+
 .task-images {
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+
+  gap: 12px;
+  min-height: 196px;
+
   width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
+}
 
-  .image-wrapper {
-    width: 100%;
-    height: clamp(160px, 25vw, 260px);
+/* =========================
+   IMAGE CARD
+========================= */
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.image-wrapper {
+  position: relative;
 
-    background: var(--surface);
-    border-radius: $radius-lg;
-    border: 1px solid var(--border);
+  width: 100%;
 
-    overflow: hidden;
-    padding: 0.5rem;
+  aspect-ratio: 1;
+
+  border-radius: $radius-lg;
+
+  overflow: hidden;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+
+  cursor: grab;
+
+  animation: imageFade 0.25s ease;
+}
+
+.image-wrapper:hover {
+  transform: translateY(-4px) scale(1.02);
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.15),
+    0 4px 12px rgba(212, 175, 55, 0.15);
+}
+
+.image-wrapper:active {
+  cursor: grabbing;
+}
+
+/* =========================
+   IMAGE
+========================= */
+
+.image-wrapper img {
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* =========================
+   REMOVE BUTTON
+========================= */
+
+.remove-btn {
+  @include button-reset;
+
+  position: absolute;
+
+  top: 6px;
+
+  right: 6px;
+
+  width: 26px;
+
+  height: 26px;
+
+  border-radius: 50%;
+
+  background: rgba(0, 0, 0, 0.6);
+
+  color: white;
+
+  font-size: 12px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+.remove-btn:hover {
+  background: #d4af37;
+}
+
+/* =========================
+   UPLOAD BUTTON
+========================= */
+
+.file-upload-row {
+  width: 100%;
+
+  height: 48px;
+
+  border-radius: $radius;
+
+  border: 1px dashed var(--border);
+
+  background: var(--surface);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.file-upload-row:hover {
+  border-color: $gold;
+
+  box-shadow: $shadow-gold;
+}
+
+.file-upload-row input {
+  display: none;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes imageFade {
+  from {
+    opacity: 0;
+
+    transform: scale(0.95);
   }
 
-  .image-wrapper img {
-    width: 100%;
-    height: 100%;
+  to {
+    opacity: 1;
 
-    object-fit: contain;
+    transform: scale(1);
   }
+}
 
-  input[type="file"] {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    border: 2px dashed var(--border);
-    border-radius: $radius-lg;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    background: var(--surface);
-    transition: all 0.2s ease;
+/* =========================
+   CAROUSEL
+========================= */
 
-    &:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: rgba(0, 0, 0, 0.02);
-    }
-  }
+.task-images.carousel {
+  display: flex;
 
-  /* =====================
-     CAROUSEL VIEW
-  ===================== */
+  align-items: center;
 
-  &.carousel {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    max-width: 700px;
-    margin: 0 auto;
+  justify-content: center;
 
-    img {
-      width: 100%;
-      max-width: 100%;
-      max-height: clamp(240px, 55vh, 500px);
+  gap: 20px;
+}
 
-      object-fit: contain;
+.task-images.carousel img {
+  width: 100%;
 
-      border-radius: $radius-lg;
-      cursor: pointer;
+  max-height: 500px;
 
-      background: var(--surface);
+  object-fit: contain;
+}
 
-      margin: 0 auto;
-    }
+.nav {
+  width: 42px;
 
-    .nav {
-      background: var(--primary);
-      color: var(--on-primary);
-      border: none;
-      font-size: 1.5rem;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition:
-        transform 0.2s ease,
-        filter 0.2s ease;
+  height: 42px;
 
-      &:hover {
-        transform: scale(1.1);
-        filter: brightness(0.9);
-      }
-    }
-  }
+  border-radius: 50%;
 
-  @include mobile {
-    grid-template-columns: 1fr;
-    max-width: 100%;
+  border: none;
 
-    &.carousel {
-      img {
-        max-height: 60vh;
-      }
+  background: var(--primary);
 
-      .nav {
-        width: 38px;
-        height: 38px;
-      }
-    }
-  }
+  color: var(--on-primary);
+
+  cursor: pointer;
+}
+
+.nav:hover {
+  transform: scale(1.1);
 }

@@ -72,7 +72,7 @@ function Navbar() {
                 {isLoggedIn ? (
                     <>
                         <Link to="/" onClick={() => setOpen(false)}>Overview</Link>
-                        <Link to="/tasks" onClick={() => setOpen(false)}>My Tasks</Link>
+                        <Link to="/tasks" onClick={() => setOpen(false)}>Tasks</Link>
                         <Link to="/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
                         <Link to="/profile" onClick={() => setOpen(false)}>Account</Link>
 

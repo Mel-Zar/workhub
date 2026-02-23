@@ -1,197 +1,124 @@
 @use "../../styles/mixins" as *;
 @use "../../styles/variables" as *;
 
+/* =========================
+   FORM CONTAINER
+========================= */
+
 .task-form {
-  width: 100%;
-  max-width: 540px;
-  margin: 2rem auto;
+  @include card;
 
   display: flex;
+
   flex-direction: column;
+
   gap: 1.2rem;
 
-  padding: 2rem;
-  border-radius: $radius-lg;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(6px);
-
-  h3 {
-    text-align: center;
-    font-size: 1.2rem;
-    letter-spacing: 0.5px;
-    color: var(--text);
-  }
-
-  input,
-  select {
-    width: 100%;
-    height: 46px;
-    padding: 0 1rem;
-    border-radius: $radius;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-
-    &:hover {
-      border-color: var(--primary);
-    }
-
-    &:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
-    }
-  }
-
-  input[type="file"] {
-    height: auto;
-    padding: 0.5rem 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-
-    &::file-selector-button {
-      padding: 0.4rem 0.8rem;
-      border-radius: $radius;
-      border: 1px solid var(--primary);
-      background: transparent;
-      color: var(--primary);
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: var(--primary);
-        color: var(--on-primary);
-      }
-    }
-  }
-
-  button[type="submit"] {
-    height: 46px;
-    border-radius: $radius;
-    border: none;
-    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-    color: var(--on-primary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25);
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(212, 175, 55, 0.4);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
-  }
+  backdrop-filter: blur(8px);
 }
 
-.dropdown-trigger {
-  width: 100%;
-  height: 46px;
-  padding: 0 1rem;
+/* =========================
+   TITLE
+========================= */
+
+.task-form h3 {
+  text-align: center;
+
+  font-size: 1.25rem;
+
+  font-weight: 600;
+
+  letter-spacing: 0.4px;
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+.task-form input,
+.task-form select {
+  height: 48px;
+
   border-radius: $radius;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 0 0.9rem;
-  border-radius: 10px;
   border: 1px solid var(--border);
+
   background: var(--surface);
 
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text);
+  padding: 0 14px;
+
+  transition: $transition;
+
+  width: 100%;
+}
+
+.task-form input:hover {
+  box-shadow: $shadow-gold;
+}
+
+.task-form input:focus {
+  box-shadow:
+    0 0 0 2px rgba(212, 175, 55, 0.25),
+    0 6px 18px rgba(212, 175, 55, 0.15);
+}
+
+/* =========================
+   SUBMIT BUTTON
+========================= */
+
+.task-form > button {
+  height: 48px;
+
+  border-radius: $radius;
+
+  background: #d4af37;
+
+  border: none;
+
+  font-weight: 600;
+
+  letter-spacing: 0.4px;
+
   cursor: pointer;
 
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  color: var(--on-primary);
+
+  transition: $transition;
+
+  box-shadow: 0 8px 22px rgba(212, 175, 55, 0.25);
 }
 
-.dropdown-trigger:hover {
-  border-color: var(--primary);
+.task-form > button:hover {
+  transform: translateY(-2px);
 }
 
-.dropdown.open .dropdown-trigger {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
-}
+.task-form > button:disabled {
+  opacity: 0.4;
 
-/* =========================
-   IMAGE PREVIEW
-========================= */
+  cursor: not-allowed;
 
-.task-images {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 0.75rem;
-}
+  transform: none;
 
-.image-wrapper {
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-
-  img {
-    width: 100%;
-    height: 120px;
-    object-fit: cover;
-    border: 1px solid var(--border);
-    border-radius: $radius;
-    transition: transform 0.2s ease;
-
-    &:hover {
-      transform: scale(1.05);
-    }
-  }
-
-  .remove-btn {
-    @include button-reset;
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 24px;
-    height: 24px;
-    font-size: 0.7rem;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.65);
-    color: white;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    transition:
-      transform 0.2s ease,
-      background 0.2s ease;
-
-    &:hover {
-      transform: scale(1.1);
-      background: crimson;
-    }
-  }
+  box-shadow: none;
 }
 
 /* =========================
-   DASHBOARD CONTEXT FIX
-   (Gör form 100% responsiv i dashboard)
+   IMAGE BLOCK FIX (CRITICAL)
 ========================= */
 
-.dashboard-page .task-form {
-  max-width: 100%;
+.task-form .task-images-block {
+  margin: 0;
+
+  padding: 0;
+}
+
+.task-form .task-images-container {
+  margin: 0;
+}
+
+/* REMOVE ANY GAP FROM GRID */
+
+.task-form .task-images {
   margin: 0;
 }
 
@@ -202,10 +129,113 @@
 @include mobile {
   .task-form {
     padding: 1.2rem;
-    margin: 0;
   }
+}
 
-  .task-images {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  }
+/* =====================================================
+   DROPDOWN
+===================================================== */
+
+.dropdown {
+  width: 100%;
+}
+
+/* =========================
+   DROPDOWN BUTTON
+========================= */
+
+.dropdown-trigger {
+  height: 48px;
+
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding: 0 14px;
+
+  border-radius: $radius;
+
+  border: 1px solid var(--border);
+
+  background: var(--surface);
+
+  font-size: 0.9rem;
+
+  font-weight: 500;
+
+  color: var(--text);
+
+  cursor: pointer;
+
+  transition: $transition;
+}
+
+/* hover EXACT like input */
+
+.dropdown-trigger:hover {
+  box-shadow: $shadow-gold;
+}
+
+/* focus EXACT like input */
+
+.dropdown.open .dropdown-trigger {
+  box-shadow:
+    0 0 0 2px rgba(212, 175, 55, 0.25),
+    0 6px 18px rgba(212, 175, 55, 0.15);
+}
+
+/* REMOVE YELLOW BACKGROUND */
+
+.dropdown.active .dropdown-trigger {
+  background: var(--surface);
+
+  border-color: var(--border);
+
+  color: var(--text);
+}
+
+/* =========================
+   MENU
+========================= */
+
+.dropdown-menu {
+  margin-top: 6px;
+
+  border-radius: $radius;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+
+  overflow: hidden;
+}
+
+/* =========================
+   ITEMS
+========================= */
+
+.dropdown-item {
+  width: 100%;
+
+  padding: 12px 14px;
+
+  background: none;
+
+  border: none;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.dropdown-item.active {
+  background: rgba(212, 175, 55, 0.08);
 }

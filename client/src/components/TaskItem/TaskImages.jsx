@@ -27,21 +27,8 @@ function TaskImages({
 
     if (!allImages.length && !isEditing) return null;
 
-    const next = (e) => {
-        e.stopPropagation();
-        setIndex(i => (i + 1) % allImages.length);
-    };
 
-    const prev = (e) => {
-        e.stopPropagation();
-        setIndex(i =>
-            i === 0 ? allImages.length - 1 : i - 1
-        );
-    };
-
-    /* =====================
-       LIST VIEW = CAROUSEL
-    ===================== */
+    /* LIST VIEW */
 
     if (view === "list" && !isEditing) {
 
@@ -49,7 +36,13 @@ function TaskImages({
 
             <section className="task-images carousel">
 
-                <button className="nav prev" onClick={prev}>
+                <button className="nav prev"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIndex(i =>
+                            i === 0 ? allImages.length - 1 : i - 1
+                        );
+                    }}>
                     ‹
                 </button>
 
@@ -58,7 +51,13 @@ function TaskImages({
                     onClick={() => onPreview(allImages[index])}
                 />
 
-                <button className="nav next" onClick={next}>
+                <button className="nav next"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIndex(i =>
+                            (i + 1) % allImages.length
+                        );
+                    }}>
                     ›
                 </button>
 
@@ -68,80 +67,105 @@ function TaskImages({
 
     }
 
-    /* =====================
-       GRID VIEW = THUMBNAILS
-    ===================== */
+
+    /* PREMIUM GRID VIEW */
+
 
     return (
 
-        <section className="task-images">
+        <div className="task-images-block">
 
-            {oldImages.map((img, i) => {
+            <div className="task-images-container">
 
-                const src = img.startsWith("blob:")
-                    ? img
-                    : `${import.meta.env.VITE_API_URL}${img}`;
+                <section className="task-images">
 
-                return (
-                    <div
-                        key={`old-${i}`}
-                        className="image-wrapper"
-                        draggable={isEditing}
-                        onDragStart={() => onDragStart("old", i)}
-                        onDragOver={(e) => onDragOver("old", i, e)}
-                    >
+                    {oldImages.map((img, i) => {
 
-                        <img
-                            src={src}
-                            onClick={() => !isEditing && onPreview(src)}
-                        />
+                        const src =
+                            img.startsWith("blob:")
+                                ? img
+                                : `${import.meta.env.VITE_API_URL}${img}`;
 
-                        {isEditing &&
+                        return (
+
+                            <div
+                                key={`old-${i}`}
+                                className="image-wrapper"
+                                draggable={isEditing}
+                                onDragStart={() => onDragStart("old", i)}
+                                onDragOver={(e) => onDragOver("old", i, e)}
+                            >
+
+                                <img
+                                    src={src}
+                                    onClick={() => !isEditing && onPreview(src)}
+                                />
+
+                                {isEditing && (
+
+                                    <button
+                                        className="remove-btn"
+                                        onClick={() => onRemoveOld(img)}
+                                    >
+                                        ✕
+                                    </button>
+
+                                )}
+
+                            </div>
+
+                        );
+
+                    })}
+
+
+                    {newImages.map((img, i) => (
+
+                        <div
+                            key={`new-${i}`}
+                            className="image-wrapper"
+                            draggable={isEditing}
+                            onDragStart={() => onDragStart("new", i)}
+                            onDragOver={(e) => onDragOver("new", i, e)}
+                        >
+
+                            <img src={img.preview} />
+
                             <button
                                 className="remove-btn"
-                                onClick={() => onRemoveOld(img)}
+                                onClick={() => onRemoveNew(i)}
                             >
                                 ✕
                             </button>
-                        }
 
-                    </div>
-                );
+                        </div>
 
-            })}
+                    ))}
+                </section>
 
+            </div>
 
-            {newImages.map((img, i) => (
+            {isEditing && (
 
-                <div key={`new-${i}`} className="image-wrapper">
+                <label className="file-upload-row">
 
-                    <img src={img.preview} />
+                    <input
 
-                    {isEditing &&
-                        <button
-                            className="remove-btn"
-                            onClick={() => onRemoveNew(i)}
-                        >
-                            ✕
-                        </button>
-                    }
+                        type="file"
 
-                </div>
+                        multiple
 
-            ))}
+                        onChange={onNewImages}
 
+                    />
 
-            {isEditing &&
+                    <span>+ Add images</span>
 
-                <input
-                    type="file"
-                    multiple
-                    onChange={onNewImages}
-                />
+                </label>
 
-            }
+            )}
 
-        </section>
+        </div>
 
     );
 

@@ -8,6 +8,14 @@ function TaskFilters({
     priorities = [],
     completionOptions = []
 }) {
+
+    // ✅ ADD THIS
+    const hasActiveFilters =
+        filters.search ||
+        filters.category ||
+        filters.priority ||
+        filters.completed !== undefined;
+
     return (
         <div className="task-filters">
             {/* CATEGORY */}
@@ -18,7 +26,7 @@ function TaskFilters({
                     onChange({
                         ...filters,
                         category: val,
-                        priority: "" // reset child
+                        priority: ""
                     })
                 }
                 options={[
@@ -72,19 +80,23 @@ function TaskFilters({
                 ].filter(Boolean)}
             />
 
-            <button
-                className="reset-btn"
-                onClick={() =>
-                    onChange({
-                        search: "",
-                        category: "",
-                        priority: "",
-                        completed: undefined
-                    })
-                }
-            >
-                Reset filters
-            </button>
+            {/* ✅ CHANGE ONLY THIS PART */}
+            {hasActiveFilters && (
+                <button
+                    className="reset-btn"
+                    onClick={() =>
+                        onChange({
+                            search: "",
+                            category: "",
+                            priority: "",
+                            completed: undefined
+                        })
+                    }
+                >
+                    Reset filters
+                </button>
+            )}
+
         </div>
     );
 }
