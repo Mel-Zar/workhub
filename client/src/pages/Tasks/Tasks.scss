@@ -25,6 +25,7 @@
       h2 {
         margin: 0;
         text-align: left;
+        color: var(--primary);
       }
 
       p {
@@ -184,10 +185,10 @@
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s ease;
-
+    color: var(--text);
     &:hover:not(:disabled) {
       background: var(--primary-light);
-      color: var(--on-primary);
+      color: var(--primary);
     }
 
     &:disabled {

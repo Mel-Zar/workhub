@@ -1,6 +1,9 @@
-@use "./variables";
+@use "./variables" as variables;
 
-/* RESET */
+/* =========================
+   RESET
+========================= */
+
 *,
 *::before,
 *::after {
@@ -13,6 +16,7 @@ html {
 
 body {
   margin: 0;
+
   font-family:
     system-ui,
     -apple-system,
@@ -20,7 +24,9 @@ body {
     sans-serif;
 
   background: var(--bg);
+
   color: var(--text);
+
   transition:
     background 0.3s ease,
     color 0.3s ease;
@@ -32,8 +38,8 @@ a {
 }
 
 img {
-  max-width: 100%;
   display: block;
+  max-width: 100%;
 }
 
 /* =========================
@@ -44,11 +50,17 @@ input,
 textarea,
 select {
   background: var(--surface);
+
   border: 1px solid var(--border);
+
   border-radius: variables.$radius;
+
   padding: 0.6rem 0.9rem;
+
   font-size: 0.85rem;
+
   color: var(--text);
+
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
@@ -64,6 +76,45 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
+
   border-color: var(--primary);
+
   box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
+}
+
+/* =========================
+   DATE INPUT
+========================= */
+
+input[type="date"] {
+  color: var(--text);
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+
+  transition: border-color 0.2s ease;
+}
+
+input[type="date"]:hover {
+  border-color: var(--primary);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+
+  transition: filter 0.2s ease;
+}
+
+/* dark */
+
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* gold hover */
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator {
+  filter: invert(73%) sepia(38%) saturate(750%) hue-rotate(3deg) brightness(95%)
+    contrast(92%);
 }

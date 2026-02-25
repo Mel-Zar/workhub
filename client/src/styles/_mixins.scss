@@ -1,5 +1,9 @@
 @use "./variables" as *;
 
+/* =========================
+   FLEX
+========================= */
+
 @mixin flex-center {
   display: flex;
   align-items: center;
@@ -12,14 +16,18 @@
   justify-content: space-between;
 }
 
+/* =========================
+   BREAKPOINTS
+========================= */
+
 @mixin mobile {
-  @media (max-width: 768px) {
+  @media (max-width: $mobile) {
     @content;
   }
 }
 
 @mixin breakpoint($min, $max: null) {
-  @if $max != null {
+  @if $max {
     @media (min-width: #{$min}px) and (max-width: #{$max}px) {
       @content;
     }
@@ -30,11 +38,19 @@
   }
 }
 
+/* =========================
+   BUTTON RESET
+========================= */
+
 @mixin button-reset {
-  background: none;
   border: none;
+  background: none;
   cursor: pointer;
 }
+
+/* =========================
+   CARD
+========================= */
 
 @mixin card {
   background: var(--surface);

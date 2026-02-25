@@ -1,5 +1,5 @@
-@use "../../styles/mixins" as *;
 @use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 
 /* =========================
    BLOCK
@@ -10,7 +10,7 @@
 
   flex-direction: column;
 
-  gap: 12px;
+  gap: 0.75rem;
 
   width: 100%;
 }
@@ -22,9 +22,7 @@
 .task-images-container {
   width: 100%;
 
-  min-height: 220px;
-
-  padding: 12px;
+  padding: 0.75rem;
 
   border-radius: $radius;
 
@@ -42,11 +40,11 @@
 
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
 
-  gap: 12px;
+  gap: 0.75rem;
 
   width: 100%;
 
-  min-height: 196px;
+  min-height: 180px;
 }
 
 /* =========================
@@ -70,22 +68,24 @@
 
   cursor: grab;
 
-  animation: imageFade 0.25s ease;
+  animation: imageFade $transition ease;
 
-  transition: all 0.25s ease;
+  transition: all $transition;
+
+  &:hover {
+    transform: translateY(-4px) scale(1.02);
+
+    box-shadow: $shadow-md;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
 }
 
-.image-wrapper:hover {
-  transform: translateY(-4px) scale(1.02);
-
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.15),
-    0 4px 12px rgba(212, 175, 55, 0.15);
-}
-
-.image-wrapper:active {
-  cursor: grabbing;
-}
+/* =========================
+   IMAGE
+========================= */
 
 /* =========================
    IMAGE
@@ -93,14 +93,26 @@
 
 .image-wrapper img {
   width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
 
+/* =========================
+   FIRST IMAGE LARGE ✅ FIX
+========================= */
+
+.task-images .image-wrapper:first-child {
+  aspect-ratio: auto; // 🔥 KRITISK FIX
+
+  height: 420px;
+}
+
+.task-images .image-wrapper:first-child img {
+  width: 100%;
   height: 100%;
 
   object-fit: contain;
-
-  background: var(--surface);
-
-  padding: 4px;
 }
 
 /* =========================
@@ -109,6 +121,8 @@
 
 .remove-btn {
   @include button-reset;
+
+  @include flex-center;
 
   position: absolute;
 
@@ -128,28 +142,24 @@
 
   font-size: 12px;
 
-  display: flex;
+  transition: $transition;
 
-  align-items: center;
+  &:hover {
+    background: var(--primary);
 
-  justify-content: center;
+    color: var(--on-primary);
 
-  cursor: pointer;
-
-  transition: all 0.2s ease;
-}
-
-.remove-btn:hover {
-  background: #d4af37;
-
-  transform: scale(1.1);
+    transform: scale(1.1);
+  }
 }
 
 /* =========================
-   FILE UPLOAD ROW
+   FILE UPLOAD
 ========================= */
 
 .file-upload-row {
+  @include flex-center;
+
   width: 100%;
 
   height: 48px;
@@ -160,52 +170,28 @@
 
   background: var(--surface);
 
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
   cursor: pointer;
 
-  transition: all 0.25s ease;
-}
+  transition: $transition;
 
-.file-upload-row:hover {
-  border-color: $gold;
+  &:hover {
+    border-color: var(--primary);
 
-  box-shadow: $shadow-gold;
+    box-shadow: $shadow-gold;
 
-  background: rgba(212, 175, 55, 0.05);
-}
-
-.file-upload-row span {
-  font-size: 0.85rem;
-
-  font-weight: 600;
-
-  color: var(--primary);
-}
-
-.file-upload-row input {
-  display: none;
-}
-
-/* =========================
-   IMAGE ANIMATION
-========================= */
-
-@keyframes imageFade {
-  from {
-    opacity: 0;
-
-    transform: scale(0.95);
+    background: rgba(212, 175, 55, 0.06);
   }
 
-  to {
-    opacity: 1;
+  span {
+    font-size: 0.85rem;
 
-    transform: scale(1);
+    font-weight: 600;
+
+    color: var(--primary);
+  }
+
+  input {
+    display: none;
   }
 }
 
@@ -216,17 +202,13 @@
 .task-images.carousel {
   position: relative;
 
-  width: 100%;
-
-  height: 260px;
-
   display: flex;
 
   align-items: center;
 
   justify-content: center;
 
-  gap: 20px;
+  height: 260px;
 }
 
 .task-images.carousel img {
@@ -234,16 +216,16 @@
 
   height: 100%;
 
-  max-height: 500px;
-
   object-fit: contain;
 }
 
 /* =========================
-   CAROUSEL BUTTONS
+   CAROUSEL NAV
 ========================= */
 
 .task-images.carousel .nav {
+  @include flex-center;
+
   position: absolute;
 
   top: 50%;
@@ -262,52 +244,64 @@
 
   color: white;
 
-  font-size: 26px;
+  font-size: 22px;
 
   cursor: pointer;
 
-  z-index: 10;
+  transition: $transition;
 
-  display: flex;
+  &:hover {
+    background: var(--primary);
 
-  align-items: center;
+    color: var(--on-primary);
 
-  justify-content: center;
-
-  transition: all 0.2s ease;
+    transform: translateY(-50%) scale(1.1);
+  }
 }
 
-.task-images.carousel .nav:hover {
-  background: #d4af37;
-
-  transform: translateY(-50%) scale(1.15);
-}
-
-.task-images.carousel .prev {
+.prev {
   left: 10px;
 }
 
-.task-images.carousel .next {
+.next {
   right: 10px;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes imageFade {
+  from {
+    opacity: 0;
+
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: scale(1);
+  }
 }
 
 /* =========================
    RESPONSIVE
 ========================= */
 
-@include breakpoint(0, 1200) {
+@include breakpoint(0, $desktop) {
   .task-images {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@include breakpoint(0, 768) {
+@include breakpoint(0, $tablet) {
   .task-images {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@include breakpoint(0, 480) {
+@include mobile {
   .task-images {
     grid-template-columns: repeat(1, 1fr);
   }

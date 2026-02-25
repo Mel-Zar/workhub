@@ -10,20 +10,13 @@ $white: #ffffff;
 
 /* =========================
    🧱 UI TOKENS
-   (SCSS fallback + theme support)
 ========================= */
 
-/* Border radius */
-
 $radius-sm: 8px;
-
 $radius: 12px;
-$radius-md: 12px; // ✅ FIX added (används i TaskItem)
+$radius-md: 12px;
 $radius-lg: 18px;
-
 $radius-xl: 24px;
-
-/* Transition */
 
 $transition: 0.25s ease;
 
@@ -46,11 +39,8 @@ $tablet: 1024px;
 $desktop: 1280px;
 
 /* =========================
-   🎯 THEME-LINKED VARIABLES
-   Dessa speglar CSS theme
+   🎯 Theme bindings
 ========================= */
-
-/* används när du behöver SCSS färger */
 
 $primary: var(--primary);
 $surface: var(--surface);

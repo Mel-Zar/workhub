@@ -106,8 +106,19 @@ function TaskItem({
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+
+        let newValue = value;
+
+        if (name === "title" || name === "category") {
+            newValue = capitalize(value);
+        }
+
+        setFormData((prev) => ({
+            ...prev,
+            [name]: newValue,
+        }));
     };
+
 
     /* =========================
          IMAGES
