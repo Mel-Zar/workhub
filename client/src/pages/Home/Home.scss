@@ -3,18 +3,21 @@
 ========================================= */
 .home-page {
   width: 100%;
+  min-height: 100vh;
 
-  max-width: 1500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 
-  margin: 0 auto;
+  gap: 3rem;
 
-  padding-top: clamp(2rem, 6vh, 6rem);
+  padding: clamp(3rem, 6vh, 6rem) clamp(1rem, 6vw, 15rem);
 
-  padding-bottom: clamp(4rem, 10vh, 10rem);
+  background: var(--bg);
 
-  padding-left: clamp(1.5rem, 4vw, 4rem);
-
-  padding-right: clamp(1.5rem, 4vw, 4rem);
+  max-width: 1400px;
+  margin-inline: auto;
 }
 
 /* MAIN WIDTH CONTAINER */
