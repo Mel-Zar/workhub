@@ -46,13 +46,21 @@ function TaskItem({
 
     const hasAtLeastOneImage = oldImages.length + newImages.length > 0;
 
+    const imagesOrderChanged = () => {
+        if (!task.images) return false;
+        if (oldImages.length !== task.images.length) return true;
+        return oldImages.some((img, index) => img !== task.images[index]);
+    };
+
     const hasChanges =
         formData.title !== task.title ||
         formData.category !== task.category ||
         formData.priority !== task.priority ||
         formData.deadline !== task.deadline ||
         imagesToRemove.length > 0 ||
-        newImages.length > 0;
+        newImages.length > 0 ||
+        imagesOrderChanged(); // <-- ny rad
+
 
     const canSave = allInputsFilled && hasAtLeastOneImage && hasChanges;
 
@@ -352,13 +360,9 @@ function TaskItem({
 
                 {showActions && editable && (
                     <footer className="task-actions">
-                        {isEditing ? (
+                        {isEditing && !task.completed ? (
                             <>
-                                <button
-                                    className="edit"
-                                    onClick={confirmSave}
-                                    disabled={!canSave}
-                                >
+                                <button className="edit" onClick={confirmSave} disabled={!canSave}>
                                     Save
                                 </button>
                                 <button className="danger" onClick={handleEditToggle}>
@@ -367,9 +371,11 @@ function TaskItem({
                             </>
                         ) : (
                             <>
-                                <button className="edit" onClick={handleEditToggle}>
-                                    Edit
-                                </button>
+                                {!task.completed && (
+                                    <button className="edit" onClick={handleEditToggle}>
+                                        Edit
+                                    </button>
+                                )}
                                 <button className="danger" onClick={confirmDelete}>
                                     Delete
                                 </button>
@@ -377,6 +383,8 @@ function TaskItem({
                         )}
                     </footer>
                 )}
+
+
             </article>
 
             {activeImage && (
