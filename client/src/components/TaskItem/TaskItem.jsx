@@ -32,6 +32,9 @@ function TaskItem({
     const [imagesToRemove, setImagesToRemove] = useState([]);
     const [dragged, setDragged] = useState({ type: null, index: null });
 
+    // Lägg till kopia av originalbilder för att kunna jämföra ordning
+    const [originalImages, setOriginalImages] = useState(task?.images || []);
+
     if (!task) return null;
 
     /* =========================
@@ -44,12 +47,12 @@ function TaskItem({
         formData.priority &&
         formData.deadline;
 
-    const hasAtLeastOneImage = oldImages.length + newImages.length > 0;
+    const hasAtLeastTwoImages = oldImages.length + newImages.length >= 2;
 
     const imagesOrderChanged = () => {
-        if (!task.images) return false;
-        if (oldImages.length !== task.images.length) return true;
-        return oldImages.some((img, index) => img !== task.images[index]);
+        if (!originalImages) return false;
+        if (oldImages.length !== originalImages.length) return true;
+        return oldImages.some((img, index) => img !== originalImages[index]);
     };
 
     const hasChanges =
@@ -59,10 +62,9 @@ function TaskItem({
         formData.deadline !== task.deadline ||
         imagesToRemove.length > 0 ||
         newImages.length > 0 ||
-        imagesOrderChanged(); // <-- ny rad
+        imagesOrderChanged();
 
-
-    const canSave = allInputsFilled && hasAtLeastOneImage && hasChanges;
+    const canSave = allInputsFilled && hasAtLeastTwoImages && hasChanges;
 
     /* =========================
          HANDLERS
@@ -89,10 +91,12 @@ function TaskItem({
                 deadline: task.deadline || "",
             });
             setOldImages(task.images || []);
+            setOriginalImages(task.images || []); // Spara originalordning
             setNewImages([]);
             setImagesToRemove([]);
         } else {
             setOldImages(task.images || []);
+            setOriginalImages(task.images || []); // Återställ originalordning
             setNewImages([]);
             setImagesToRemove([]);
         }
@@ -128,7 +132,7 @@ function TaskItem({
                         toastId: `duplicate-${file.name}`,
                         autoClose: 2000,
                     });
-                    continue; // ⬅️ DETTA VAR DET SOM SAKNADES
+                    continue;
                 }
 
                 next.push({
@@ -214,6 +218,11 @@ function TaskItem({
                 ...prev.filter((img) => !imagesToRemove.includes(img)),
                 ...uploadedPreviews,
             ]);
+
+            setOriginalImages([
+                ...oldImages.filter((img) => !imagesToRemove.includes(img)),
+                ...uploadedPreviews,
+            ]); // uppdatera originalImages efter save
 
             toast.success("Task updated");
 
