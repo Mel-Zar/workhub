@@ -2,7 +2,7 @@
 @use "../../styles/variables" as *;
 
 /* =========================
-   PREMIUM BLOCK
+   BLOCK
 ========================= */
 
 .task-images-block {
@@ -16,13 +16,13 @@
 }
 
 /* =========================
-   CONTAINER (NO FIXED HEIGHT)
+   CONTAINER
 ========================= */
 
 .task-images-container {
   width: 100%;
 
-  min-height: 220px; /* ✅ håller samma storlek när tom */
+  min-height: 220px;
 
   padding: 12px;
 
@@ -43,13 +43,14 @@
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
 
   gap: 12px;
-  min-height: 196px;
 
   width: 100%;
+
+  min-height: 196px;
 }
 
 /* =========================
-   IMAGE CARD
+   IMAGE WRAPPER
 ========================= */
 
 .image-wrapper {
@@ -70,6 +71,8 @@
   cursor: grab;
 
   animation: imageFade 0.25s ease;
+
+  transition: all 0.25s ease;
 }
 
 .image-wrapper:hover {
@@ -87,22 +90,17 @@
 /* =========================
    IMAGE
 ========================= */
+
 .image-wrapper img {
   width: 100%;
 
   height: 100%;
 
-  object-fit: contain; /* ✅ visar hela bilden */
+  object-fit: contain;
 
-  background: var(--surface); /* fyller tomrum snyggt */
+  background: var(--surface);
 
-  padding: 4px; /* premium spacing */
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
+  padding: 4px;
 }
 
 /* =========================
@@ -124,7 +122,7 @@
 
   border-radius: 50%;
 
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.65);
 
   color: white;
 
@@ -135,14 +133,20 @@
   align-items: center;
 
   justify-content: center;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
 }
 
 .remove-btn:hover {
   background: #d4af37;
+
+  transform: scale(1.1);
 }
 
 /* =========================
-   UPLOAD BUTTON
+   FILE UPLOAD ROW
 ========================= */
 
 .file-upload-row {
@@ -163,12 +167,24 @@
   justify-content: center;
 
   cursor: pointer;
+
+  transition: all 0.25s ease;
 }
 
 .file-upload-row:hover {
   border-color: $gold;
 
   box-shadow: $shadow-gold;
+
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.file-upload-row span {
+  font-size: 0.85rem;
+
+  font-weight: 600;
+
+  color: var(--primary);
 }
 
 .file-upload-row input {
@@ -176,7 +192,7 @@
 }
 
 /* =========================
-   ANIMATION
+   IMAGE ANIMATION
 ========================= */
 
 @keyframes imageFade {
@@ -194,10 +210,16 @@
 }
 
 /* =========================
-   CAROUSEL
+   CAROUSEL MODE
 ========================= */
 
 .task-images.carousel {
+  position: relative;
+
+  width: 100%;
+
+  height: 260px;
+
   display: flex;
 
   align-items: center;
@@ -210,12 +232,24 @@
 .task-images.carousel img {
   width: 100%;
 
+  height: 100%;
+
   max-height: 500px;
 
   object-fit: contain;
 }
 
-.nav {
+/* =========================
+   CAROUSEL BUTTONS
+========================= */
+
+.task-images.carousel .nav {
+  position: absolute;
+
+  top: 50%;
+
+  transform: translateY(-50%);
+
   width: 42px;
 
   height: 42px;
@@ -224,13 +258,57 @@
 
   border: none;
 
-  background: var(--primary);
+  background: rgba(0, 0, 0, 0.6);
 
-  color: var(--on-primary);
+  color: white;
+
+  font-size: 26px;
 
   cursor: pointer;
+
+  z-index: 10;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  transition: all 0.2s ease;
 }
 
-.nav:hover {
-  transform: scale(1.1);
+.task-images.carousel .nav:hover {
+  background: #d4af37;
+
+  transform: translateY(-50%) scale(1.15);
+}
+
+.task-images.carousel .prev {
+  left: 10px;
+}
+
+.task-images.carousel .next {
+  right: 10px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@include breakpoint(0, 1200) {
+  .task-images {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@include breakpoint(0, 768) {
+  .task-images {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@include breakpoint(0, 480) {
+  .task-images {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }

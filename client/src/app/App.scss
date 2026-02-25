@@ -10,7 +10,6 @@
 .app main {
   flex: 1;
   display: flex;
-  justify-content: center; // centrerar tasks-page horisontellt
-  width: 100%;
+  justify-content: center;
   padding: clamp(1rem, 3vw, 3rem);
 }
