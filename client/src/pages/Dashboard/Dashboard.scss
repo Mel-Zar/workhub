@@ -4,14 +4,15 @@
 /* =====================
    PAGE
 ===================== */
+
 .dashboard-page {
   width: 100%;
   min-height: 100vh;
 
   display: flex;
   flex-direction: column;
-  justify-content: center; // ⭐ VIKTIG – vertical center
-  align-items: center; // ⭐ horizontal center
+  justify-content: flex-start;
+  align-items: center;
 
   gap: 3rem;
 
@@ -22,89 +23,204 @@
   max-width: 1400px;
   margin-inline: auto;
 }
+
 .dashboard-page > * {
   width: 100%;
   max-width: 1100px;
 }
+
 /* =====================
    PAGE HEADER
 ===================== */
+
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  display: grid;
+
+  grid-template-columns: 1fr;
+
+  gap: 1.5rem;
+
+  width: 100%;
+}
+
+/* =====================
+   STATS FIX PERFECT
+===================== */
+
+/* DESKTOP → 3 bredvid varandra */
+
+.stats-row {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
   gap: 1rem;
 
-  .page-header-text {
-    h1 {
-      font-size: clamp(1.8rem, 2.2vw, 2.4rem);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      color: var(--text);
-    }
+  width: 100%;
+}
 
-    p {
-      margin-top: 0.35rem;
-      font-size: 0.9rem;
-      opacity: 0.6;
-    }
+/* TABLET → 1 under varandra */
+
+@media (max-width: 1024px) {
+  .stats-row {
+    grid-template-columns: 1fr;
   }
+}
+
+/* MOBILE → 1 under varandra */
+
+@media (max-width: 600px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================
+   CARD FIX
+===================== */
+
+.stat-card {
+  width: 100%;
+
+  background: var(--surface);
+
+  padding: 1.2rem;
+
+  border-radius: 12px;
+
+  box-shadow: var(--shadow);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  justify-content: center;
+
+  text-align: left;
+
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.page-header-text h1 {
+  font-size: clamp(1.8rem, 2.2vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+
+  color: var(--text);
+}
+
+.page-header-text p {
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  opacity: 0.6;
+}
+
+/* =====================
+   STATS TEXT
+===================== */
+
+.stat-number {
+  font-size: clamp(22px, 3vw, 28px);
+
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: clamp(12px, 2vw, 14px);
+
+  color: var(--text-muted);
 }
 
 /* =====================
    SECTIONS
 ===================== */
+
 .tasks-section {
   display: flex;
+
   flex-direction: column;
+
   gap: 1rem;
+
+  align-items: center;
+
+  width: 100%;
 }
 
 /* =====================
-   CONTROLS CARD
+   CONTROLS
 ===================== */
+
 .tasks-controls {
-  background: var(--surface);
-  padding: 1rem 1.25rem;
-  border-radius: 18px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  transition: box-shadow 0.25s ease;
+  width: 100%;
 
-  &:hover {
-    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
-  }
+  max-width: 1100px;
+
+  margin-inline: auto;
+
+  background: var(--surface);
+
+  padding: 1rem 1.25rem;
+
+  border-radius: 18px;
+
+  border: 1px solid var(--border);
+
+  box-shadow: var(--shadow);
 }
 
 /* =====================
-   TASK CONTENT
+   CONTENT
 ===================== */
+
 .tasks-content {
   min-height: 260px;
-  position: relative;
+
+  width: 100%;
+
+  display: flex;
+
+  justify-content: center;
 }
 
 /* =====================
-   TASK GROUPS (WRAPPER)
+   GROUPS
 ===================== */
+
 .tasks-layout {
   display: flex;
+
   flex-direction: column;
+
   gap: 2rem;
+
+  width: 100%;
 }
 
 .task-group {
   display: flex;
+
   flex-direction: column;
+
   gap: 1rem;
+
+  width: 100%;
 }
 
 .task-group-title {
   font-size: 1.1rem;
+
   font-weight: 700;
+
   padding-bottom: 0.4rem;
+
   border-bottom: 1px solid var(--border);
-  color: var(--text);
 }
 
 .completed-group {
@@ -112,148 +228,93 @@
 }
 
 /* =====================
-   GRID (TASKS & IMAGES)
+   GRID
 ===================== */
+
 .tasks-layout.grid {
   display: grid;
-  gap: 1.4rem;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  align-items: stretch;
 
-  .task-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 
-    .task-images {
-      display: grid;
-      gap: 0.75rem;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    }
+  gap: 1.6rem;
 
-    @include mobile {
-      .task-images {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @include breakpoint(768px, 1199px) {
-      .task-images {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      }
-    }
-
-    @include breakpoint(1200px) {
-      .task-images {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      }
-    }
-  }
+  width: 100%;
 }
 
 /* =====================
-   EMPTY STATE
+   TASK CARD
 ===================== */
+
+.tasks-layout.grid .task-item {
+  width: 100%;
+
+  max-width: 520px;
+
+  margin-inline: auto;
+}
+
+/* =====================
+   IMAGE GRID DESKTOP
+===================== */
+
+.tasks-layout.grid .task-item .task-images {
+  display: grid;
+
+  grid-template-columns: repeat(2, 120px);
+
+  justify-content: center;
+
+  gap: 12px;
+
+  width: 100%;
+
+  max-width: 252px;
+
+  margin-inline: auto;
+}
+
+.tasks-layout.grid .task-item .image-wrapper {
+  width: 120px;
+
+  height: 120px;
+}
+
+.tasks-layout.grid .task-item img {
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* =====================
+   EMPTY
+===================== */
+
 .empty-state {
   text-align: center;
+
   padding: 3.5rem 1rem;
+
   opacity: 0.7;
-
-  p {
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-
-  span {
-    display: block;
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
-  }
-}
-
-/* =====================
-   STATUS / ERROR TEXT
-===================== */
-.status-text,
-.error-text {
-  text-align: center;
-  font-size: 0.85rem;
-}
-
-.status-text {
-  opacity: 0.6;
-}
-
-.error-text {
-  color: #ff6b6b;
-  font-weight: 600;
 }
 
 /* =====================
    PAGINATION
 ===================== */
+
 .pagination {
   display: flex;
+
   justify-content: center;
+
   align-items: center;
-  gap: 0.9rem;
-  margin-top: 1.5rem;
-  padding: 0.75rem 1rem;
-
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  box-shadow: var(--shadow);
-
-  button {
-    min-width: 90px;
-    height: 38px;
-    padding: 0 1rem;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    background: transparent;
-    cursor: pointer;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text);
-    transition: all 0.25s ease;
-
-    &:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    &:not(:disabled):hover {
-      background: var(--primary);
-      color: var(--on-primary);
-      box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
-      transform: translateY(-2px);
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-  }
-
-  span {
-    min-width: 70px;
-    text-align: center;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    padding: 0.4rem 0.9rem;
-    border-radius: 999px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-    color: var(--on-primary);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
-  }
 }
 
 /* =====================
-   MICRO ANIMATION
+   ANIMATION
 ===================== */
+
 .tasks-layout.grid > * {
   animation: fadeUp 0.35s ease both;
 }
@@ -261,34 +322,45 @@
 @keyframes fadeUp {
   from {
     opacity: 0;
+
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
+
     transform: translateY(0);
   }
 }
 
 /* =====================
-   RESPONSIVE / MOBILE
+   MOBILE
 ===================== */
+
 @include mobile {
   .dashboard-page {
     padding: 1.5rem 0.75rem;
   }
 
-  .tasks-layout.grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .tasks-controls {
-    padding: 0.75rem;
-  }
-
   .page-header {
     flex-direction: column;
+
     align-items: flex-start;
-    gap: 0.5rem;
+  }
+
+  .tasks-layout.grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tasks-layout.grid .task-item .task-images {
+    grid-template-columns: repeat(2, 1fr);
+
+    max-width: 100%;
+  }
+
+  .tasks-layout.grid .task-item .image-wrapper {
+    width: 100%;
+
+    aspect-ratio: 1 / 1;
   }
 }

@@ -2,7 +2,7 @@
 @use "../../styles/variables" as *;
 
 /* =========================
-   FORM CONTAINER
+   FORM CONTAINER (FIXED WIDTH)
 ========================= */
 
 .task-form {
@@ -15,6 +15,22 @@
   gap: 1.2rem;
 
   backdrop-filter: blur(8px);
+
+  width: 100%;
+
+  max-width: 650px; /* ✅ PREMIUM WIDTH */
+
+  margin-inline: auto;
+
+  padding: 1.25rem;
+
+  background: var(--surface);
+
+  border-radius: 18px;
+
+  border: 1px solid var(--border);
+
+  box-shadow: var(--shadow);
 }
 
 /* =========================
@@ -103,7 +119,7 @@
 }
 
 /* =========================
-   IMAGE BLOCK FIX (CRITICAL)
+   IMAGE BLOCK
 ========================= */
 
 .task-form .task-images-block {
@@ -114,12 +130,66 @@
 
 .task-form .task-images-container {
   margin: 0;
+
+  width: 100%;
 }
 
-/* REMOVE ANY GAP FROM GRID */
+/* =========================
+   IMAGE GRID (4 CENTERED)
+========================= */
 
 .task-form .task-images {
-  margin: 0;
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, 120px);
+
+  gap: 12px;
+
+  justify-content: center; /* ⭐ CENTRERAR ALLA BILDER */
+
+  justify-items: center;
+
+  align-items: center;
+
+  width: 100%;
+}
+
+/* =========================
+   IMAGE WRAPPER
+========================= */
+
+.task-form .task-images .image-wrapper {
+  width: 100%;
+
+  max-width: 120px;
+
+  aspect-ratio: 1 / 1;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: grab;
+}
+
+.task-form .task-images .image-wrapper:active {
+  cursor: grabbing;
+}
+
+/* =========================
+   IMAGE
+========================= */
+
+.task-form .task-images img {
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: contain;
+
+  pointer-events: none;
 }
 
 /* =========================
@@ -128,21 +198,23 @@
 
 @include mobile {
   .task-form {
-    padding: 1.2rem;
+    max-width: 100%;
+
+    padding: 1rem;
+  }
+
+  .task-form .task-images {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* =====================================================
+/* =========================
    DROPDOWN
-===================================================== */
+========================= */
 
 .dropdown {
   width: 100%;
 }
-
-/* =========================
-   DROPDOWN BUTTON
-========================= */
 
 .dropdown-trigger {
   height: 48px;
@@ -174,21 +246,15 @@
   transition: $transition;
 }
 
-/* hover EXACT like input */
-
 .dropdown-trigger:hover {
   box-shadow: $shadow-gold;
 }
-
-/* focus EXACT like input */
 
 .dropdown.open .dropdown-trigger {
   box-shadow:
     0 0 0 2px rgba(212, 175, 55, 0.25),
     0 6px 18px rgba(212, 175, 55, 0.15);
 }
-
-/* REMOVE YELLOW BACKGROUND */
 
 .dropdown.active .dropdown-trigger {
   background: var(--surface);
@@ -197,10 +263,6 @@
 
   color: var(--text);
 }
-
-/* =========================
-   MENU
-========================= */
 
 .dropdown-menu {
   margin-top: 6px;
@@ -213,10 +275,6 @@
 
   overflow: hidden;
 }
-
-/* =========================
-   ITEMS
-========================= */
 
 .dropdown-item {
   width: 100%;

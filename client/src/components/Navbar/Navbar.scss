@@ -2,7 +2,7 @@
 
 /* =========================
    NAVBAR PREMIUM
-   ========================= */
+========================= */
 
 .navbar {
   position: sticky;
@@ -16,22 +16,16 @@
   padding: 20px 28px;
 
   background: var(--surface);
-
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 
   border-bottom: 1px solid var(--border);
-
   transition: all 0.25s ease;
 }
 
 /* =========================
    LOGO
-   ========================= */
-
-.logo {
-  height: 42px;
-}
+========================= */
 
 .brand img {
   height: 50px;
@@ -40,41 +34,35 @@
 
 /* =========================
    MENU DESKTOP
-   ========================= */
+========================= */
 
 .menu {
   display: flex;
   align-items: center;
   gap: 22px;
+  z-index: 1010; /* ovanför overlay */
 }
 
 /* =========================
    LINKS
-   ========================= */
+========================= */
 
 .menu a {
   text-decoration: none;
   color: var(--text);
-
   font-weight: 500;
-
   position: relative;
-
   transition: color 0.25s ease;
 }
 
 .menu a::after {
   content: "";
-
   position: absolute;
   bottom: -6px;
   left: 0;
-
   width: 0;
   height: 2px;
-
   background: #d4af37;
-
   transition: width 0.3s ease;
 }
 
@@ -84,21 +72,15 @@
 
 /* =========================
    LOGOUT BUTTON
-   ========================= */
+========================= */
 
 .logout {
   border: none;
-
   padding: 8px 18px;
-
   color: var(--text);
-
   border-radius: 30px;
-
   background: linear-gradient(135deg, #d4af37, #f5e6a8);
-
   cursor: pointer;
-
   transition: transform 0.2s ease;
 }
 
@@ -108,66 +90,44 @@
 
 /* =========================
    THEME TOGGLE
-   ========================= */
+========================= */
 
 .theme-toggle {
   width: clamp(52px, 6vw, 64px);
   height: clamp(26px, 3vw, 32px);
-
   border: none;
   background: none;
-
   cursor: pointer;
 }
-
-/* TRACK */
 
 .toggle-track {
   width: 100%;
   height: 100%;
-
   background: linear-gradient(135deg, #d4af37, #f5e6a8);
-
   border-radius: 999px;
-
   position: relative;
-
   padding: 4%;
-
   border: 2px solid var(--border);
 }
 
-/* THUMB */
-
 .toggle-thumb {
   position: absolute;
-
   width: 42%;
   height: 84%;
-
   top: 8%;
   left: 4%;
-
   border-radius: 50%;
-
   background: white;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-
   transition: transform 0.35s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
-
-/* DARK MODE POSITION */
 
 .theme-toggle.dark .toggle-thumb {
   transform: translateX(120%);
 }
-
-/* ICONS */
 
 .icon {
   position: absolute;
@@ -177,6 +137,7 @@
 .sun {
   opacity: 1;
 }
+
 .moon {
   opacity: 0;
 }
@@ -190,62 +151,68 @@
 
 /* =========================
    BURGER ICON
-   ========================= */
+========================= */
 
 .burger {
   display: none;
-
   flex-direction: column;
   gap: 5px;
-
   cursor: pointer;
-
   background: none;
   border: none;
+  z-index: 1020; /* ovanför overlay */
 }
 
 .burger span {
   width: 25px;
   height: 3px;
-
   background: var(--text);
-
   border-radius: 2px;
-
   transition: 0.3s;
 }
 
 /* =========================
-   MOBILE MENU
-   ========================= */
+   MOBILE MENU + OVERLAY
+========================= */
 
 @include mobile {
   .burger {
     display: flex;
   }
 
+  /* Overlay bakom menyn */
+  .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease;
+    z-index: 1005;
+  }
+
+  .menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
   .menu {
     position: fixed;
-
     right: 0;
     top: 0;
-
     width: 260px;
     height: 100vh;
-
     background: var(--surface);
-
     backdrop-filter: blur(20px);
-
     border-left: 1px solid var(--border);
-
     flex-direction: column;
-
     padding: 80px 30px;
-
     transform: translateX(100%);
-
     transition: transform 0.35s cubic-bezier(0.77, 0, 0.18, 1);
+    z-index: 1010;
   }
 
   .menu.open {
@@ -254,5 +221,6 @@
 
   .menu a {
     font-size: 18px;
+    margin-bottom: 16px;
   }
 }

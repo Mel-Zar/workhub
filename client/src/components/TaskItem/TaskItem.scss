@@ -127,6 +127,20 @@
     }
   }
 
+  /* =========================
+     TASK IMAGES CENTERED
+  ========================== */
+
+  .task-images {
+    display: flex;
+    justify-content: center; /* horisontell centering */
+    align-items: center; /* vertikal centering */
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+    padding: 0; /* tar bort extra padding under */
+  }
+
   .task-actions {
     display: flex;
     gap: 0.5rem;

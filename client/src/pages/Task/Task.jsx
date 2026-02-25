@@ -12,6 +12,8 @@ function Task() {
     const [task, setTask] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const [index, setIndex] = useState(0);
+
 
     useEffect(() => {
 
@@ -45,6 +47,9 @@ function Task() {
     if (loading) return <p className="container">Laddar...</p>;
 
     if (!task) return <p className="container">Task hittades inte</p>;
+
+
+    const images = task.images || [];
 
 
     return (
@@ -120,18 +125,40 @@ function Task() {
 
 
 
-                    {task.images?.length > 0 && (
+                    {images.length > 0 && (
 
-                        <div className="task-images">
+                        <div className="task-carousel">
 
-                            {task.images.map((img, i) => (
+                            <button
+                                className="nav prev"
+                                onClick={() =>
+                                    setIndex(
+                                        index === 0
+                                            ? images.length - 1
+                                            : index - 1
+                                    )
+                                }
+                            >
+                                ‹
+                            </button>
 
-                                <img
-                                    key={i}
-                                    src={`${import.meta.env.VITE_API_URL}${img}`}
-                                />
 
-                            ))}
+                            <img
+                                src={`${import.meta.env.VITE_API_URL}${images[index]}`}
+                            />
+
+
+                            <button
+                                className="nav next"
+                                onClick={() =>
+                                    setIndex(
+                                        (index + 1) % images.length
+                                    )
+                                }
+                            >
+                                ›
+                            </button>
+
 
                         </div>
 
@@ -143,6 +170,7 @@ function Task() {
             </div>
 
         </main>
+
     );
 
 }

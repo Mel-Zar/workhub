@@ -36,7 +36,8 @@ function TaskImages({
 
             <section className="task-images carousel">
 
-                <button className="nav prev"
+                <button
+                    className="nav prev"
                     onClick={(e) => {
                         e.stopPropagation();
                         setIndex(i =>
@@ -51,7 +52,8 @@ function TaskImages({
                     onClick={() => onPreview(allImages[index])}
                 />
 
-                <button className="nav next"
+                <button
+                    className="nav next"
                     onClick={(e) => {
                         e.stopPropagation();
                         setIndex(i =>
@@ -68,8 +70,7 @@ function TaskImages({
     }
 
 
-    /* PREMIUM GRID VIEW */
-
+    /* GRID VIEW */
 
     return (
 
@@ -78,6 +79,9 @@ function TaskImages({
             <div className="task-images-container">
 
                 <section className="task-images">
+
+
+                    {/* OLD IMAGES */}
 
                     {oldImages.map((img, i) => {
 
@@ -89,7 +93,7 @@ function TaskImages({
                         return (
 
                             <div
-                                key={`old-${i}`}
+                                key={src}   // ✅ FIXED
                                 className="image-wrapper"
                                 draggable={isEditing}
                                 onDragStart={() => onDragStart("old", i)}
@@ -119,10 +123,12 @@ function TaskImages({
                     })}
 
 
+                    {/* NEW IMAGES */}
+
                     {newImages.map((img, i) => (
 
                         <div
-                            key={`new-${i}`}
+                            key={img.preview}   // ✅ CRITICAL FIX
                             className="image-wrapper"
                             draggable={isEditing}
                             onDragStart={() => onDragStart("new", i)}
@@ -141,22 +147,21 @@ function TaskImages({
                         </div>
 
                     ))}
+
+
                 </section>
 
             </div>
+
 
             {isEditing && (
 
                 <label className="file-upload-row">
 
                     <input
-
                         type="file"
-
                         multiple
-
                         onChange={onNewImages}
-
                     />
 
                     <span>+ Add images</span>

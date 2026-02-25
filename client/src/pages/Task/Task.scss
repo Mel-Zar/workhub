@@ -235,3 +235,76 @@
     height: 280px;
   }
 }
+/* =========================
+   CAROUSEL
+========================= */
+
+.task-carousel {
+  position: relative;
+
+  width: 100%;
+}
+
+.task-carousel img {
+  width: 100%;
+
+  height: 420px;
+
+  object-fit: cover;
+
+  border-radius: $radius-lg;
+
+  border: 1px solid var(--border);
+}
+
+/* arrows */
+
+.nav {
+  position: absolute;
+
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  background: rgba(0, 0, 0, 0.5);
+
+  color: white;
+
+  border: none;
+
+  font-size: 2rem;
+
+  width: 50px;
+
+  height: 50px;
+
+  cursor: pointer;
+
+  border-radius: 50%;
+}
+
+.prev {
+  left: 15px;
+}
+
+.next {
+  right: 15px;
+}
+
+.nav:hover {
+  background: var(--primary);
+}
+
+.task-carousel img {
+  width: 100%;
+
+  height: 420px;
+
+  object-fit: contain; /* visar hela bilden */
+
+  border-radius: $radius-lg;
+
+  border: 1px solid var(--border);
+
+  background: var(--surface); /* fyller tomrum snyggt */
+}

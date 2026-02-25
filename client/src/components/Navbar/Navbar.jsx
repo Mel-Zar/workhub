@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useContext, useState, useRef, useEffect } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { useTheme } from "../../hooks/useTheme";
 import logo from "../../assets/workhub-logo.png";
@@ -10,7 +10,6 @@ function Navbar() {
     const { isLoggedIn, user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
-    const menuRef = useRef(null);
 
     const handleLogout = () => {
         logout();
@@ -18,33 +17,14 @@ function Navbar() {
         setOpen(false);
     };
 
-    // Klick utanför stänger menyn
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (menuRef.current && !menuRef.current.contains(e.target)) {
-                setOpen(false);
-            }
-        };
-
-        if (open) {
-            document.addEventListener("mousedown", handleClickOutside);
-        } else {
-            document.removeEventListener("mousedown", handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [open]);
-
     return (
-
-        <header className="navbar" ref={menuRef}>
+        <header className="navbar">
             <div className="brand">
                 <Link to="/">
                     <img src={logo} alt="Workhub logo" />
                 </Link>
             </div>
+
             <button
                 className={`burger ${open ? "active" : ""}`}
                 onClick={() => setOpen(!open)}
@@ -54,6 +34,12 @@ function Navbar() {
                 <span></span>
                 <span></span>
             </button>
+
+            {/* Overlay bakom menyn */}
+            <div
+                className={`menu-overlay ${open ? "active" : ""}`}
+                onClick={() => setOpen(false)}
+            />
 
             <nav className={`menu ${open ? "open" : ""}`}>
                 {isLoggedIn && (
@@ -82,18 +68,12 @@ function Navbar() {
                             title="Toggle theme"
                         >
                             <div className="toggle-track">
-
                                 <div className="toggle-thumb">
-
                                     <span className="icon sun">☀</span>
-
                                     <span className="icon moon">🌙</span>
-
                                 </div>
-
                             </div>
                         </button>
-
 
                         <button className="logout" onClick={handleLogout}>
                             Sign out
@@ -101,22 +81,16 @@ function Navbar() {
                     </>
                 ) : (
                     <>
-
                         <button
                             className={`theme-toggle ${theme === "dark" ? "dark" : ""}`}
                             onClick={toggleTheme}
                             title="Toggle theme"
                         >
                             <div className="toggle-track">
-
                                 <div className="toggle-thumb">
-
                                     <span className="icon sun">☀</span>
-
                                     <span className="icon moon">🌙</span>
-
                                 </div>
-
                             </div>
                         </button>
 
