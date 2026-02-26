@@ -1,156 +1,177 @@
 @use "../../styles/mixins" as *;
 @use "../../styles/variables" as *;
 
-/* =========================
-   FORM CONTAINER (FIXED WIDTH)
-========================= */
+/* =====================================================
+   TASK FORM — PRO VERSION
+   Premium UI / Production Ready
+===================================================== */
 
+/* =========================
+   FORM CONTAINER
+========================= */
 .task-form {
   @include card;
-
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
-
-  backdrop-filter: blur(8px);
-
+  gap: 1.25rem;
   width: 100%;
-  max-width: 650px;
-
+  max-width: 720px; /* PRO bredd */
   margin-inline: auto;
+  padding: 1.1rem 1.3rem;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.02),
+      rgba(255, 255, 255, 0.01)
+    ),
+    var(--surface);
+  border-radius: $radius-lg;
+  border: 1px solid var(--border);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  transition: $transition;
+  isolation: isolate;
 
-  padding: 1.25rem;
+  &:hover {
+    box-shadow:
+      0 16px 40px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(212, 175, 55, 0.12);
+  }
+
+  @include mobile {
+    padding: 1rem;
+  }
 }
 
 /* =========================
    TITLE
 ========================= */
-
 .task-form h3 {
   text-align: center;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 600;
-  letter-spacing: 0.4px;
-  color: #d4af37;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+  text-shadow: 0 2px 8px rgba(212, 175, 55, 0.25);
 }
 
 /* =========================
    INPUTS
 ========================= */
-
 .task-form input,
 .task-form select {
   height: 48px;
-
   border-radius: $radius;
-
   border: 1px solid var(--border);
-
-  background: var(--surface);
-
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.02),
+      rgba(255, 255, 255, 0.01)
+    ),
+    var(--surface);
   padding: 0 14px;
-
-  transition: $transition;
-
   width: 100%;
-}
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: $transition;
+  outline: none;
 
-.task-form input:hover {
-  box-shadow: $shadow-gold;
-}
+  &:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.18);
+  }
 
-.task-form input:focus {
-  box-shadow:
-    0 0 0 2px rgba(212, 175, 55, 0.25),
-    0 6px 18px rgba(212, 175, 55, 0.15);
+  &:focus {
+    border-color: var(--primary);
+    box-shadow:
+      0 0 0 2px rgba(212, 175, 55, 0.25),
+      0 10px 25px rgba(212, 175, 55, 0.18);
+  }
+
+  &:active {
+    transform: scale(0.995);
+  }
 }
 
 /* =========================
-   SUBMIT BUTTON
+   BUTTON
 ========================= */
-
 .task-form > button {
+  position: relative;
   height: 48px;
-
   border-radius: $radius;
-
-  background: #d4af37;
-
   border: none;
-
   font-weight: 600;
-
-  letter-spacing: 0.4px;
-
+  letter-spacing: 0.5px;
   cursor: pointer;
-
   color: var(--on-primary);
-
+  background: linear-gradient(180deg, var(--primary), var(--primary-hover));
+  box-shadow:
+    0 10px 26px rgba(212, 175, 55, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition: $transition;
+  overflow: hidden;
 
-  box-shadow: 0 8px 22px rgba(212, 175, 55, 0.25);
-}
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px rgba(212, 175, 55, 0.45);
+  }
 
-.task-form > button:hover {
-  transform: translateY(-2px);
-}
+  &:active {
+    transform: translateY(-1px) scale(0.98);
+  }
 
-.task-form > button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* =========================
-   IMAGE BLOCK
-========================= */
-
-.task-form .task-images-block {
-  margin: 0;
-  padding: 0;
-}
-
-.task-form .task-images-container {
-  margin: 0;
-  width: 100%;
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 /* =========================
    IMAGE GRID
 ========================= */
-
 .task-form .task-images {
   display: grid;
-  grid-template-columns: repeat(auto-fit, 120px);
-  gap: 12px;
+  grid-template-columns: repeat(4, 120px);
   justify-content: center;
   justify-items: center;
   align-items: center;
+  gap: 14px;
   width: 100%;
+  margin-inline: auto;
+  padding-block: 8px;
 }
 
-/* =========================
-   IMAGE WRAPPER
-========================= */
-
+/* IMAGE WRAPPER */
 .task-form .task-images .image-wrapper {
-  width: 100%;
-  max-width: 120px;
-  aspect-ratio: 1 / 1;
+  width: 120px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: grab;
-}
+  border-radius: $radius;
+  transition: $transition;
+  position: relative;
 
-.task-form .task-images .image-wrapper:active {
-  cursor: grabbing;
-}
+  &:hover {
+    transform: translateY(-6px) scale(1.05);
+    box-shadow:
+      0 18px 40px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(212, 175, 55, 0.25);
+  }
 
-/* =========================
-   IMAGE
-========================= */
+  &:active {
+    cursor: grabbing;
+    transform: scale(0.97);
+  }
+}
 
 .task-form .task-images img {
   width: 100%;
@@ -160,73 +181,31 @@
 }
 
 /* =========================
-   RESPONSIVE
-========================= */
-
-@include mobile {
-  .task-form {
-    max-width: 100%;
-
-    padding: 1rem;
-  }
-
-  .task-form .task-images {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* =========================
    DROPDOWN
 ========================= */
-
 .dropdown {
   width: 100%;
+  position: relative;
 }
 
 .dropdown-trigger {
   height: 48px;
-
   width: 100%;
-
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
   padding: 0 14px;
-
   border-radius: $radius;
-
   border: 1px solid var(--border);
-
   background: var(--surface);
-
-  font-size: 0.9rem;
-
-  font-weight: 500;
-
   color: var(--text);
-
   cursor: pointer;
-
   transition: $transition;
-}
 
-.dropdown-trigger:hover {
-  box-shadow: $shadow-gold;
-}
-
-.dropdown.open .dropdown-trigger {
-  box-shadow:
-    0 0 0 2px rgba(212, 175, 55, 0.25),
-    0 6px 18px rgba(212, 175, 55, 0.15);
-}
-
-.dropdown.active .dropdown-trigger {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text);
+  &:hover {
+    border-color: var(--primary);
+    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.2);
+  }
 }
 
 .dropdown-menu {
@@ -234,22 +213,62 @@
   border-radius: $radius;
   background: var(--surface);
   border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
 
 .dropdown-item {
-  width: 100%;
   padding: 12px 14px;
-  background: none;
-  border: none;
-  text-align: left;
   cursor: pointer;
+  transition: $transition;
+
+  &:hover {
+    background: rgba(212, 175, 55, 0.12);
+  }
 }
 
-.dropdown-item:hover {
-  background: rgba(212, 175, 55, 0.08);
+/* =========================
+   RESPONSIVE
+========================= */
+
+/* TABLET */
+@include breakpoint(769, 1024) {
+  .task-form {
+    max-width: 900px;
+  }
+  .task-form .task-images {
+    grid-template-columns: repeat(2, 110px);
+    padding-block: 14px;
+  }
+  .task-form .task-images .image-wrapper {
+    width: 110px;
+    height: 110px;
+  }
 }
 
-.dropdown-item.active {
-  background: rgba(212, 175, 55, 0.08);
+/* MOBILE */
+@include breakpoint(481, 768) {
+  .task-form {
+    max-width: 100%;
+  }
+  .task-form .task-images {
+    grid-template-columns: repeat(2, 100px);
+    padding-block: 16px;
+  }
+  .task-form .task-images .image-wrapper {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* SMALL MOBILE */
+@include breakpoint(0, 480) {
+  .task-form .task-images {
+    grid-template-columns: repeat(2, 90px);
+    padding-block: 18px;
+  }
+  .task-form .task-images .image-wrapper {
+    width: 90px;
+    height: 90px;
+  }
 }

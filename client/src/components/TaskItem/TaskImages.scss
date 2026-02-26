@@ -7,11 +7,8 @@
 
 .task-images-block {
   display: flex;
-
   flex-direction: column;
-
   gap: 0.75rem;
-
   width: 100%;
 }
 
@@ -20,15 +17,9 @@
 ========================= */
 
 .task-images-container {
-  width: 100%;
+  @include card;
 
   padding: 0.75rem;
-
-  border-radius: $radius;
-
-  background: var(--surface);
-
-  border: 1px solid var(--border);
 }
 
 /* =========================
@@ -38,13 +29,15 @@
 .task-images {
   display: grid;
 
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
 
   gap: 0.75rem;
 
   width: 100%;
 
   min-height: 180px;
+
+  transition: $transition;
 }
 
 /* =========================
@@ -87,32 +80,30 @@
    IMAGE
 ========================= */
 
-/* =========================
-   IMAGE
-========================= */
-
 .image-wrapper img {
   width: 100%;
   height: 100%;
+
   object-fit: contain;
+
   padding: 4px;
+
+  user-select: none;
+  pointer-events: none;
 }
 
 /* =========================
-   FIRST IMAGE LARGE ✅ FIX
+   FIRST IMAGE LARGE
 ========================= */
 
 .task-images .image-wrapper:first-child {
-  aspect-ratio: auto; // 🔥 KRITISK FIX
+  aspect-ratio: auto;
 
   height: 420px;
 }
 
 .task-images .image-wrapper:first-child img {
-  width: 100%;
   height: 100%;
-
-  object-fit: contain;
 }
 
 /* =========================
@@ -121,17 +112,14 @@
 
 .remove-btn {
   @include button-reset;
-
   @include flex-center;
 
   position: absolute;
 
   top: 6px;
-
   right: 6px;
 
   width: 26px;
-
   height: 26px;
 
   border-radius: 50%;
@@ -143,6 +131,8 @@
   font-size: 12px;
 
   transition: $transition;
+
+  backdrop-filter: blur(4px);
 
   &:hover {
     background: var(--primary);
@@ -172,7 +162,7 @@
 
   cursor: pointer;
 
-  transition: $transition;
+  transition: all $transition;
 
   &:hover {
     border-color: var(--primary);
@@ -205,7 +195,6 @@
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   height: 260px;
@@ -213,7 +202,6 @@
 
 .task-images.carousel img {
   width: 100%;
-
   height: 100%;
 
   object-fit: contain;
@@ -224,6 +212,7 @@
 ========================= */
 
 .task-images.carousel .nav {
+  @include button-reset;
   @include flex-center;
 
   position: absolute;
@@ -233,12 +222,9 @@
   transform: translateY(-50%);
 
   width: 42px;
-
   height: 42px;
 
   border-radius: 50%;
-
-  border: none;
 
   background: rgba(0, 0, 0, 0.6);
 
@@ -246,9 +232,9 @@
 
   font-size: 22px;
 
-  cursor: pointer;
+  transition: all $transition;
 
-  transition: $transition;
+  backdrop-filter: blur(6px);
 
   &:hover {
     background: var(--primary);
@@ -274,13 +260,11 @@
 @keyframes imageFade {
   from {
     opacity: 0;
-
     transform: scale(0.95);
   }
 
   to {
     opacity: 1;
-
     transform: scale(1);
   }
 }
@@ -289,13 +273,13 @@
    RESPONSIVE
 ========================= */
 
-@include breakpoint(0, $desktop) {
+@include breakpoint(1024, 1280) {
   .task-images {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@include breakpoint(0, $tablet) {
+@include breakpoint(768, 1024) {
   .task-images {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -303,6 +287,6 @@
 
 @include mobile {
   .task-images {
-    grid-template-columns: repeat(1, 1fr);
+    grid-template-columns: 1fr;
   }
 }

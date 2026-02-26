@@ -1,5 +1,5 @@
 /* =========================
-   LIGHT
+   LIGHT THEME
 ========================= */
 
 [data-theme="light"] {
@@ -8,6 +8,8 @@
   --surface: #fafafa;
 
   --text: #1a1a1a;
+
+  --text-muted: #777777;
 
   --primary: #d4af37;
 
@@ -21,7 +23,7 @@
 }
 
 /* =========================
-   DARK
+   DARK THEME
 ========================= */
 
 [data-theme="dark"] {
@@ -30,6 +32,8 @@
   --surface: #161616;
 
   --text: #f5f1e8;
+
+  --text-muted: #aaaaaa;
 
   --primary: #d4af37;
 
