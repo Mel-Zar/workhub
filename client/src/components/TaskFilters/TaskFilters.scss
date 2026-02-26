@@ -1,26 +1,27 @@
 @use "../../styles/variables" as *;
 @use "../../styles/mixins" as *;
 
+/* =========================
+   TASK FILTERS
+========================= */
 .task-filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.75rem;
 }
 
-/* Reset button */
+/* =========================
+   RESET BUTTON
+========================= */
 .reset-btn {
   @include button-reset;
-
   padding: 0.65rem 1rem;
   border-radius: 999px;
-
   border: 1px solid var(--border);
   background: transparent;
   color: var(--primary);
-
   font-size: 0.75rem;
   font-weight: 600;
-
   transition: $transition;
 
   &:hover {
@@ -30,6 +31,9 @@
   }
 }
 
+/* =========================
+   RESPONSIVE
+========================= */
 @include mobile {
   .task-filters {
     grid-template-columns: 1fr;

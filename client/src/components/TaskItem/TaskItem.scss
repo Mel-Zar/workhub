@@ -1,53 +1,284 @@
 @use "../../styles/variables" as *;
 @use "../../styles/mixins" as *;
 
+/* =========================
+   TASK IMAGES
+========================= */
+
+/* =========================
+   BLOCK
+========================= */
+
+.task-images-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+
+.task-images-container {
+  @include card;
+  padding: 0.75rem;
+}
+
+/* =========================
+   GRID
+========================= */
+
+.task-images {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 180px;
+  transition: $transition;
+}
+
+/* =========================
+   IMAGE WRAPPER
+========================= */
+
+.image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: grab;
+  animation: imageFade $transition ease;
+  transition: all $transition;
+
+  &:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: $shadow-md;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* =========================
+   IMAGE
+========================= */
+
+.image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* =========================
+   FIRST IMAGE LARGE
+========================= */
+
+.task-images .image-wrapper:first-child {
+  aspect-ratio: auto;
+  height: 420px;
+
+  @include breakpoint(0, 480) {
+    height: auto; /* Mobil: skalar med bredden */
+  }
+
+  @include breakpoint(481, 768) {
+    height: 300px; /* Tablet: valfri höjd */
+  }
+}
+
+.task-images .image-wrapper:first-child img {
+  height: 100%;
+}
+
+/* =========================
+   REMOVE BUTTON
+========================= */
+
+.remove-btn {
+  @include button-reset;
+  @include flex-center;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: white;
+  font-size: 12px;
+  transition: $transition;
+  backdrop-filter: blur(4px);
+
+  &:hover {
+    background: var(--primary);
+    color: var(--on-primary);
+    transform: scale(1.1);
+  }
+}
+
+/* =========================
+   FILE UPLOAD
+========================= */
+
+.file-upload-row {
+  @include flex-center;
+  width: 100%;
+  height: 48px;
+  border-radius: $radius;
+  border: 1px dashed var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all $transition;
+
+  &:hover {
+    border-color: var(--primary);
+    box-shadow: $shadow-gold;
+    background: rgba(212, 175, 55, 0.06);
+  }
+
+  span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  input {
+    display: none;
+  }
+}
+
+/* =========================
+   CAROUSEL MODE
+========================= */
+
+.task-images.carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 260px;
+}
+
+.task-images.carousel img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* =========================
+   CAROUSEL NAV
+========================= */
+
+.task-images.carousel .nav {
+  @include button-reset;
+  @include flex-center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 22px;
+  transition: all $transition;
+  backdrop-filter: blur(6px);
+
+  &:hover {
+    background: var(--primary);
+    color: var(--on-primary);
+    transform: translateY(-50%) scale(1.1);
+  }
+}
+
+.prev {
+  left: 10px;
+}
+
+.next {
+  right: 10px;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes imageFade {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@include breakpoint(1024, 1280) {
+  .task-images {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@include breakpoint(768, 1024) {
+  .task-images {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@include mobile {
+  .task-images {
+    grid-template-columns: 1fr;
+  }
+
+  .task-images .image-wrapper:first-child {
+    height: auto; /* För mobil: skala med bredden */
+  }
+}
+
+/* =========================
+   TASK ITEM
+========================= */
+
 .task-item {
   @include card;
-
   padding: clamp(1rem, 2vw, 1.5rem);
-
   display: flex;
   flex-direction: column;
   gap: 1rem;
-
   cursor: pointer;
-
   transition:
     transform $transition,
     box-shadow $transition,
     border-color $transition;
 
-  /* =========================
-     HOVER
-  ========================== */
-
   &:hover {
     transform: translateY(-4px);
-
     box-shadow: $shadow-lg;
   }
 
-  /* =========================
-     EDITING
-  ========================== */
-
   &.editing {
     border-color: var(--primary);
-
     box-shadow: $shadow-gold;
   }
 
-  /* =========================
-     COMPLETED
-  ========================== */
-
   &.completed {
     background: rgba(76, 175, 80, 0.06);
-
     border-color: #4caf50;
-
     color: var(--text);
-
     opacity: 0.7;
 
     h4,
@@ -56,186 +287,111 @@
     }
   }
 
-  /* =========================
-     HEADER
-  ========================== */
-
   .task-header {
     display: grid;
-
     grid-template-columns: auto 1fr;
-
     gap: 0.75rem;
-
     align-items: center;
 
     h4 {
       font-size: 1rem;
-
       font-weight: 600;
-
       text-transform: capitalize;
     }
 
     input {
       width: 100%;
-
       font-weight: 600;
     }
   }
 
-  /* =========================
-     META
-  ========================== */
-
   .task-meta {
     display: flex;
-
     flex-wrap: wrap;
-
     gap: 0.5rem;
-
     align-items: center;
   }
-
-  /* =========================
-     BADGES
-  ========================== */
 
   .badge {
     font-size: 0.7rem;
-
     padding: 0.35rem 0.65rem;
-
     border-radius: 999px;
-
     font-weight: 600;
-
     border: 1px solid var(--border);
-
     display: inline-flex;
-
     align-items: center;
-
     gap: 4px;
   }
-
-  /* =========================
-     PRIORITIES
-  ========================== */
 
   .priority {
     &.low {
       background: rgba(33, 150, 243, 0.1);
-
       border-color: #2196f3;
-
       color: #2196f3;
     }
-
     &.medium {
       background: rgba(255, 152, 0, 0.1);
-
       border-color: #ff9800;
-
       color: #ff9800;
     }
-
     &.high {
       background: rgba(244, 67, 54, 0.1);
-
       border-color: #f44336;
-
       color: #f44336;
     }
   }
 
-  /* =========================
-     CATEGORY / DEADLINE
-  ========================== */
-
   .category,
   .deadline {
     background: rgba(212, 175, 55, 0.1);
-
     border-color: var(--primary);
-
     color: var(--primary);
   }
 
-  /* =========================
-     IMAGES
-  ========================== */
-
   .task-images {
     display: flex;
-
     align-items: center;
-
     gap: 0.5rem;
-
     margin-top: 4px;
   }
 
-  /* =========================
-     ACTIONS
-  ========================== */
-
   .task-actions {
     display: flex;
-
     justify-content: flex-end;
-
     gap: 0.5rem;
-
     flex-wrap: wrap;
 
     button {
       border-radius: $radius-md;
-
       padding: 0.45rem 0.9rem;
-
       font-size: 0.75rem;
-
       font-weight: 600;
-
       transition: $transition;
 
       &:disabled {
         opacity: 0.4;
-
         cursor: not-allowed;
       }
     }
 
-    /* EDIT */
-
     .edit {
       border: 1px solid var(--primary);
-
       background: transparent;
-
       color: var(--primary);
 
       &:hover:not(:disabled) {
         background: var(--primary);
-
         color: var(--on-primary);
       }
     }
 
-    /* DELETE */
-
     .danger {
       border: 1px solid crimson;
-
       background: transparent;
-
       color: crimson;
 
       &:hover:not(:disabled) {
         background: crimson;
-
         color: white;
       }
     }
@@ -243,7 +399,7 @@
 }
 
 /* =========================
-   RESPONSIVE
+   TASK ITEM RESPONSIVE
 ========================= */
 
 @include breakpoint(0, $tablet) {
@@ -255,5 +411,34 @@
 @include mobile {
   .task-item {
     padding: 0.9rem;
+  }
+}
+
+@include mobile {
+  .task-images {
+    grid-template-columns: 1fr;
+  }
+
+  .task-images .image-wrapper:first-child {
+    height: auto;
+    aspect-ratio: 16/9;
+
+    .task-images .image-wrapper:first-child img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  @include mobile {
+    .task-images {
+      grid-template-columns: 1fr;
+
+      .image-wrapper:first-child img {
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+      }
+    }
   }
 }
