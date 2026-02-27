@@ -7,13 +7,13 @@
 
 .task-page {
   width: 100%;
-
   padding: clamp(2rem, 4vw, 4rem);
 }
+
 .task-container {
   width: 100%;
-
   max-width: 1200px;
+  margin-inline: auto;
 }
 
 /* =========================
@@ -22,11 +22,8 @@
 
 .task-card {
   @include card;
-
   display: flex;
-
   flex-direction: column;
-
   gap: 2rem;
 }
 
@@ -36,17 +33,13 @@
 
 .task-header {
   @include flex-between;
-
   gap: 1rem;
-
   border-bottom: 1px solid var(--border);
-
   padding-bottom: 1rem;
 }
 
 .task-header h1 {
   font-size: 1.8rem;
-
   font-weight: 700;
 }
 
@@ -55,26 +48,18 @@
 ========================= */
 
 .back-btn {
-  background: transparent;
+  @include button-reset;
 
   border: 1px solid var(--primary);
-
   color: var(--primary);
-
   border-radius: $radius;
-
   padding: 0.5rem 1rem;
-
   font-weight: 600;
-
-  cursor: pointer;
-
-  transition: 0.25s;
+  transition: all $transition;
 }
 
 .back-btn:hover {
   background: var(--primary);
-
   color: var(--on-primary);
 }
 
@@ -84,29 +69,20 @@
 
 .task-details {
   display: grid;
-
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-
   gap: 1rem;
 }
 
-/* DETAIL ROW */
-
 .detail-row {
   display: flex;
-
   flex-direction: column;
-
   gap: 0.4rem;
 }
 
 .label {
   font-size: 0.7rem;
-
   text-transform: uppercase;
-
   color: var(--text-muted);
-
   letter-spacing: 0.08em;
 }
 
@@ -116,54 +92,35 @@
 
 .badge {
   width: fit-content;
-
   padding: 0.4rem 0.7rem;
-
   border-radius: 999px;
-
   font-size: 0.75rem;
-
   font-weight: 600;
-
   border: 1px solid var(--border);
-
   background: var(--surface);
+  transition: all $transition;
 }
 
-/* priority */
+/* Priority – använder theme-färger */
 
 .priority.high {
-  color: #ff5252;
-
-  border-color: #ff5252;
-
-  background: rgba(255, 82, 82, 0.08);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .priority.medium {
-  color: #ffc107;
-
-  border-color: #ffc107;
-
-  background: rgba(255, 193, 7, 0.08);
+  border-color: var(--primary-hover);
+  color: var(--primary-hover);
 }
 
 .priority.low {
-  color: #4caf50;
-
-  border-color: #4caf50;
-
-  background: rgba(76, 175, 80, 0.08);
+  opacity: 0.7;
 }
 
-/* status */
-
 .badge.done {
-  color: #4caf50;
-
-  border-color: #4caf50;
-
-  background: rgba(76, 175, 80, 0.08);
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
 }
 
 /* =========================
@@ -172,105 +129,62 @@
 
 .task-images {
   display: grid;
-
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-
   gap: 1.5rem;
 }
 
-/* IMAGE */
-
 .task-images img {
   width: 100%;
-
   height: 260px;
-
   object-fit: cover;
-
   border-radius: $radius-lg;
-
   border: 1px solid var(--border);
-
-  cursor: pointer;
-
-  transition: 0.3s;
+  transition:
+    transform $transition,
+    box-shadow $transition;
 }
 
 .task-images img:hover {
-  transform: scale(1.04);
-
+  transform: scale(1.03);
   box-shadow: var(--shadow);
 }
 
-/* =========================
-   MOBILE
-========================= */
-
-@include mobile {
-  .task-header {
-    flex-direction: column;
-
-    align-items: flex-start;
-  }
-
-  .task-images {
-    grid-template-columns: 1fr;
-  }
-
-  .task-images img {
-    height: 220px;
-  }
-
-  .task-images img:first-child {
-    height: 280px;
-  }
-}
 /* =========================
    CAROUSEL
 ========================= */
 
 .task-carousel {
   position: relative;
-
   width: 100%;
 }
 
 .task-carousel img {
   width: 100%;
-
   height: 420px;
-
-  object-fit: cover;
-
+  object-fit: contain;
   border-radius: $radius-lg;
-
   border: 1px solid var(--border);
+  background: var(--surface);
 }
 
-/* arrows */
+/* NAVIGATION */
 
 .nav {
+  @include button-reset;
+
   position: absolute;
-
   top: 50%;
-
   transform: translateY(-50%);
-
-  background: rgba(0, 0, 0, 0.5);
-
-  color: white;
-
-  border: none;
-
-  font-size: 2rem;
-
   width: 50px;
-
   height: 50px;
 
-  cursor: pointer;
-
   border-radius: 50%;
+  font-size: 2rem;
+
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+
+  transition: all $transition;
 }
 
 .prev {
@@ -283,18 +197,28 @@
 
 .nav:hover {
   background: var(--primary);
+  color: var(--on-primary);
 }
 
-.task-carousel img {
-  width: 100%;
+/* =========================
+   MOBILE
+========================= */
 
-  height: 420px;
+@include mobile {
+  .task-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-  object-fit: contain; /* visar hela bilden */
+  .task-images {
+    grid-template-columns: 1fr;
+  }
 
-  border-radius: $radius-lg;
+  .task-images img {
+    height: 220px;
+  }
 
-  border: 1px solid var(--border);
-
-  background: var(--surface); /* fyller tomrum snyggt */
+  .task-carousel img {
+    height: 280px;
+  }
 }

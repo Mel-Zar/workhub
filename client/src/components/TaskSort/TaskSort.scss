@@ -11,42 +11,34 @@
 }
 
 /* =========================
-   TRIGGER = SORT BUTTON STYLE
+   TRIGGER
 ========================= */
 
 .dropdown-trigger {
+  @include flex-between;
+
   height: 42px;
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 0 0.9rem;
-  border-radius: 10px;
+
+  border-radius: $radius;
   border: 1px solid var(--border);
   background: var(--surface);
+
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--text);
-  cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    background 0.15s ease;
-}
 
-.dropdown-trigger:hover {
-  border-color: var(--primary);
+  cursor: pointer;
+  transition: all $transition;
+
+  &:hover {
+    border-color: var(--primary);
+  }
 }
 
 .dropdown.open .dropdown-trigger {
   box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
-}
-
-/* REMOVE ANY YELLOW / GOLD BACKGROUND */
-.dropdown.active .dropdown-trigger {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text);
 }
 
 /* =========================
@@ -56,10 +48,12 @@
 .dropdown-chevron {
   width: 6px;
   height: 6px;
+
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
+
   transform: rotate(45deg);
-  transition: transform 0.2s ease;
+  transition: transform $transition;
 }
 
 .dropdown.open .dropdown-chevron {
@@ -75,9 +69,13 @@
   top: calc(100% + 0.4rem);
   left: 0;
   width: 100%;
-  border-radius: 10px;
+
+  border-radius: $radius;
   background: var(--surface);
   border: 1px solid var(--border);
+
+  box-shadow: var(--shadow);
+
   overflow: hidden;
   z-index: 100;
 }
@@ -87,89 +85,65 @@
 ========================= */
 
 .dropdown-item {
+  @include button-reset;
+
   width: 100%;
   padding: 10px 12px;
-  background: none;
-  border: none;
+
   text-align: left;
+
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--text);
-  cursor: pointer;
-  transition: background 0.12s ease;
-}
 
-.dropdown-item:hover {
-  background: rgba(212, 175, 55, 0.08);
-}
+  transition: background $transition;
 
-.dropdown-item.active {
-  background: rgba(212, 175, 55, 0.08);
-  color: var(--text);
-}
+  &:hover {
+    background: rgba(212, 175, 55, 0.08);
+  }
 
-/* =========================
-   DARK MODE
-========================= */
-
-[data-theme="dark"] .dropdown-trigger,
-[data-theme="dark"] .dropdown-item {
-  color: var(--text);
-}
-
-[data-theme="dark"] .dropdown-item:hover {
-  background: rgba(212, 175, 55, 0.08);
-}
-
-[data-theme="dark"] .dropdown-menu {
-  background: var(--surface);
-  border-color: var(--border);
+  &.active {
+    background: rgba(212, 175, 55, 0.08);
+  }
 }
 
 /* =========================
-   TASK SORT CONTAINER FIX
+   TASK SORT CONTAINER
 ========================= */
 
 .task-sort {
   display: flex;
-
   flex-direction: column;
-
-  gap: 8px;
-
+  gap: 0.5rem;
   width: 100%;
-
   position: relative;
 }
 
-/* gör dropdown relative istället */
+/* dropdown inside task-sort becomes static */
 
 .task-sort .dropdown-menu {
   position: relative;
-
   top: auto;
 }
 
 /* =========================
-   RESET BUTTON — ALWAYS BOTTOM
+   RESET BUTTON
 ========================= */
 
 .reset-btn {
-  height: 36px;
+  @include button-reset;
 
-  border-radius: 8px;
+  height: 36px;
+  border-radius: $radius-sm;
 
   border: 1px solid var(--border);
-
   background: var(--surface);
-
-  cursor: pointer;
 
   font-size: 0.75rem;
 
-  transition: all 0.15s ease;
-}
+  transition: all $transition;
 
-.reset-btn:hover {
-  border-color: var(--primary);
+  &:hover {
+    border-color: var(--primary);
+  }
 }

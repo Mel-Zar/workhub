@@ -4,61 +4,61 @@
 /* =========================
    DROPDOWN
 ========================= */
+
 .dropdown {
   width: 100%;
   position: relative;
 }
 
 /* =========================
-   TRIGGER = exakt som input
+   TRIGGER (matchar input)
 ========================= */
+
 .dropdown-trigger {
+  @include flex-between;
+
   height: 48px;
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 14px;
+  padding: 0 0.9rem;
+
   border-radius: $radius;
-  border: 1px solid var(--border); /* alltid border */
-  background: var(--surface); /* alltid bakgrund */
+  border: 1px solid var(--border);
+  background: var(--surface);
+
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--text);
+
   cursor: pointer;
-  transition: $transition;
+  transition:
+    border-color $transition,
+    box-shadow $transition;
+
+  &:hover {
+    border-color: var(--primary);
+  }
 }
 
-/* hover = exakt som input */
-.dropdown-trigger:hover {
-  box-shadow: $shadow-gold;
-  border-color: var(--border);
-}
+/* Focus / open = exakt som input */
 
-/* focus/open = exakt som input */
 .dropdown.open .dropdown-trigger {
-  box-shadow:
-    0 0 0 2px rgba(212, 175, 55, 0.25),
-    0 6px 18px rgba(212, 175, 55, 0.15);
-}
-
-/* active = när ett värde är valt */
-.dropdown.active .dropdown-trigger {
-  background: var(--surface); /* behåll samma som input */
-  border-color: var(--border);
-  color: var(--text);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
 }
 
 /* =========================
    CHEVRON
 ========================= */
+
 .dropdown-chevron {
   width: 6px;
   height: 6px;
+
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
+
   transform: rotate(45deg);
-  transition: transform 0.2s ease;
+  transition: transform $transition;
 }
 
 .dropdown.open .dropdown-chevron {
@@ -68,67 +68,59 @@
 /* =========================
    MENU
 ========================= */
+
 .dropdown-menu {
   position: absolute;
   top: calc(100% + 0.4rem);
   left: 0;
   width: 100%;
+
   border-radius: $radius;
   background: var(--surface);
   border: 1px solid var(--border);
+
+  box-shadow: var(--shadow);
+
   overflow: hidden;
   z-index: 100;
-  box-shadow: var(--shadow);
 }
 
 /* =========================
    ITEMS
 ========================= */
+
 .dropdown-item {
+  @include button-reset;
+
   width: 100%;
   padding: 12px 14px;
-  background: none;
-  border: none;
+
   text-align: left;
+
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--text);
-  cursor: pointer;
-  transition: background 0.12s ease;
-}
 
-.dropdown-item:hover {
-  background: rgba(212, 175, 55, 0.08);
-}
+  transition: background $transition;
 
-.dropdown-item.active {
-  background: rgba(212, 175, 55, 0.08);
-  color: var(--text);
+  &:hover {
+    background: rgba(212, 175, 55, 0.08);
+  }
+
+  &.active {
+    background: rgba(212, 175, 55, 0.08);
+  }
 }
 
 .check {
   font-size: 0.65rem;
 }
 
-/* =====================
-   DARK MODE FIXES
-===================== */
-[data-theme="dark"] .dropdown-trigger,
-[data-theme="dark"] .dropdown-item {
-  color: var(--text);
-}
+/* =========================
+   MOBILE
+========================= */
 
-[data-theme="dark"] .dropdown-item:hover {
-  background: rgba(212, 175, 55, 0.08);
-}
-
-[data-theme="dark"] .dropdown-menu {
-  background: var(--surface);
-  border-color: var(--border);
-}
-
-/* MOBILE */
-@media (max-width: 600px) {
+@include mobile {
   .dropdown-menu {
     position: static;
     margin-top: 0.4rem;

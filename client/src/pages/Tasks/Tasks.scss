@@ -6,7 +6,7 @@
 ========================= */
 
 .tasks-page {
-  width: 70%;
+  width: 100%;
   max-width: 1400px;
   margin-inline: auto;
 
@@ -17,40 +17,41 @@
   gap: 2rem;
 
   @include mobile {
-    width: 100%;
     padding: 1.5rem 1rem;
     gap: 1.5rem;
   }
+}
 
-  .section-header {
-    display: flex;
-    flex-direction: column;
+/* =========================
+   SECTION HEADER
+========================= */
 
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.section-header-text {
+  width: 100%;
+
+  h2 {
+    margin: 0;
+    color: var(--primary);
+  }
+
+  p {
+    margin-top: 0.25rem;
+    color: var(--text-muted);
+  }
+}
+
+.section-header .view-toggle {
+  margin-left: auto;
+
+  @include mobile {
     width: 100%;
-
-    gap: 0.75rem;
-
-    .section-header-text {
-      width: 100%;
-
-      h2 {
-        margin: 0;
-        color: var(--primary);
-      }
-
-      p {
-        margin-top: 0.25rem;
-        color: var(--text-muted);
-      }
-    }
-
-    .view-toggle {
-      margin-left: auto;
-
-      @include mobile {
-        width: 100%;
-      }
-    }
   }
 }
 
@@ -66,9 +67,7 @@
   justify-content: center;
 
   border-radius: 999px;
-
   padding: 4px;
-
   gap: 4px;
 
   width: fit-content;
@@ -77,14 +76,12 @@
     @include button-reset;
 
     padding: 0.5rem 1.4rem;
-
     border-radius: 999px;
 
     font-size: 0.85rem;
     font-weight: 600;
 
     color: var(--text);
-
     opacity: 0.6;
 
     transition: all $transition;
@@ -96,15 +93,9 @@
 
     &.active {
       background: var(--primary);
-
       color: var(--on-primary);
-
       opacity: 1;
-
-      box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.25),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-
+      box-shadow: var(--shadow);
       transform: translateY(-1px);
     }
   }
@@ -125,9 +116,7 @@
 
 .tasks-layout.grid {
   display: grid;
-
   gap: clamp(1rem, 2vw, 1.6rem);
-
   grid-template-columns: repeat(3, 1fr);
 
   @include breakpoint(768, 1024) {
@@ -154,7 +143,7 @@
 }
 
 /* =========================
-   STATUS & EMPTY STATES
+   STATES
 ========================= */
 
 .status-text,
@@ -166,15 +155,10 @@
 
 .empty-state {
   @include flex-center;
-
   flex-direction: column;
-
   gap: 0.5rem;
-
   padding: 2rem;
-
   font-size: 0.95rem;
-
   color: var(--text-muted);
 }
 
@@ -184,25 +168,20 @@
 
 .pagination {
   @include flex-center;
-
   gap: 1rem;
-
   margin-top: 2rem;
 
   button {
-    padding: 0.5rem 1rem;
+    @include button-reset;
 
+    padding: 0.5rem 1rem;
     border-radius: $radius-sm;
 
     border: 1px solid var(--border);
-
     background: var(--surface);
 
     font-weight: 600;
-
     color: var(--text);
-
-    cursor: pointer;
 
     transition: all $transition;
 
