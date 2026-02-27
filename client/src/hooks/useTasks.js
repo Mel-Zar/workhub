@@ -23,8 +23,13 @@ export function useTasks({ limit } = {}) {
 
     useEffect(() => {
         const timeout = setTimeout(() => {
+
+            if (filters.search.length > 0 && filters.search.length < 2) return;
+
+
             setDebouncedSearch(filters.search);
             setPage(1);
+
         }, 400);
 
         return () => clearTimeout(timeout);
@@ -98,7 +103,7 @@ export function useTasks({ limit } = {}) {
 
     const categories = useMemo(() => [...new Set(allTasks.map(t => t.category).filter(Boolean))], [allTasks]);
     const priorities = useMemo(() => [...new Set(allTasks.map(t => t.priority).filter(Boolean))], [allTasks]);
-    const completionOptions = ["true", "false"];
+    const completionOptions = [true, false];
 
     return {
         tasks: allTasks,

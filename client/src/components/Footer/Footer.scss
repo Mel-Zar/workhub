@@ -2,15 +2,12 @@
 
 /* =========================
    FOOTER
-   ========================= */
+========================= */
 
 .footer {
   width: 100%;
-
   background: var(--surface);
-
   border-top: 1px solid var(--border);
-
   backdrop-filter: blur(20px);
 }
 
@@ -18,23 +15,17 @@
 
 .footer-inner {
   width: 100%;
-
   padding: clamp(16px, 2vw, 28px);
 
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
+  @include flex-between; // ✅ kopplad till bas
 
   gap: 20px;
 }
 
-/* LOGO — SAMMA RESPONSIVE SOM NAVBAR */
+/* LOGO */
 
 .footer-brand img {
   height: clamp(38px, 3vw, 50px);
-
   width: auto;
 }
 
@@ -42,9 +33,7 @@
 
 .tagline {
   color: var(--text);
-
   font-size: clamp(13px, 1.2vw, 15px);
-
   opacity: 0.7;
 }
 
@@ -53,7 +42,6 @@
 @include mobile {
   .footer-inner {
     flex-direction: column;
-
     text-align: center;
   }
 }

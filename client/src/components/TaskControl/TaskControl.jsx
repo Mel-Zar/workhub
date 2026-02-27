@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import TaskFilters from "../TaskFilters/TaskFilters";
 import TaskSort from "../TaskSort/TaskSort";
 import TaskSearch from "../TaskSearch/TaskSearch";
@@ -10,7 +10,6 @@ function TaskControls({
     categories,
     priorities,
     completionOptions,
-    onSearch
 }) {
     const [open, setOpen] = useState(null); // "filter" | "sort" | null
     const ref = useRef(null);
@@ -29,12 +28,37 @@ function TaskControls({
             document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    const handleSearchChange = useCallback((value) => {
+        setFilters(prev => ({
+            ...prev,
+            search: value
+        }));
+    }, [setFilters]);
+
+    const handleSortChange = useCallback((value) => {
+        setFilters(prev => ({
+            ...prev,
+            sortBy: value
+        }));
+    }, [setFilters]);
+
+    const handleSortReset = useCallback(() => {
+        setFilters(prev => ({
+            ...prev,
+            sortBy: ""
+        }));
+    }, [setFilters]);
+
+
     /* =====================
        COUNTERS
        ===================== */
     const activeFiltersCount = Object.entries(filters)
         .filter(([key, value]) =>
-            key !== "sortBy" && value !== "" && value !== undefined
+            key !== "sortBy" &&
+            key !== "search" &&   // 🔥 lägg till denna
+            value !== "" &&
+            value !== undefined
         ).length;
 
     const hasSort = Boolean(filters.sortBy);
@@ -79,7 +103,10 @@ function TaskControls({
                SEARCH
                ===================== */}
             <div className="search-wrapper">
-                <TaskSearch onSearch={onSearch} />
+                <TaskSearch
+                    value={filters.search}
+                    onChange={handleSearchChange}
+                />
             </div>
 
             {/* =====================
@@ -103,19 +130,10 @@ function TaskControls({
                     <div className="dropdown-panel">
                         <TaskSort
                             value={filters.sortBy}
-                            onChange={(value) =>
-                                setFilters(prev => ({
-                                    ...prev,
-                                    sortBy: value
-                                }))
-                            }
-                            onReset={() =>
-                                setFilters(prev => ({
-                                    ...prev,
-                                    sortBy: ""
-                                }))
-                            }
+                            onChange={handleSortChange}
+                            onReset={handleSortReset}
                         />
+
                     </div>
                 )}
             </div>

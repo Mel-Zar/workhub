@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
+import { authService } from "../../services/authService";
+import { useNavigate } from "react-router-dom";
+
 
 function getUserFromToken(token) {
     try {
@@ -15,6 +18,8 @@ function getUserFromToken(token) {
 }
 
 export default function AuthProvider({ children }) {
+    const navigate = useNavigate();
+
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -28,15 +33,8 @@ export default function AuthProvider({ children }) {
             }
 
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/refresh`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ refreshToken })
-                });
+                const data = await authService.refresh(refreshToken);
 
-                if (!res.ok) throw new Error("Refresh failed");
-
-                const data = await res.json();
                 localStorage.setItem("accessToken", data.accessToken);
                 setUser(getUserFromToken(data.accessToken));
             } catch {
@@ -50,6 +48,7 @@ export default function AuthProvider({ children }) {
         initAuth();
     }, []);
 
+
     function login(accessToken, refreshToken) {
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
@@ -59,7 +58,7 @@ export default function AuthProvider({ children }) {
     function logout() {
         localStorage.clear();
         setUser(null);
-        window.location.href = "/login";
+        navigate("/login", { replace: true });
     }
 
     return (

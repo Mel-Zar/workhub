@@ -49,6 +49,7 @@ function TaskImages({
 
                 <img
                     src={allImages[index]}
+                    alt={`Task image ${index + 1}`}
                     onClick={() => onPreview(allImages[index])}
                 />
 
@@ -102,6 +103,7 @@ function TaskImages({
 
                                 <img
                                     src={src}
+                                    alt={`Task image ${i + 1}`}
                                     onClick={() => !isEditing && onPreview(src)}
                                 />
 
@@ -135,7 +137,10 @@ function TaskImages({
                             onDragOver={(e) => onDragOver("new", i, e)}
                         >
 
-                            <img src={img.preview} />
+                            <img
+                                src={img.preview}
+                                alt={`New task image ${i + 1}`}
+                            />
 
                             <button
                                 className="remove-btn"

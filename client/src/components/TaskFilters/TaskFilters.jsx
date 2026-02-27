@@ -1,3 +1,4 @@
+import React from "react";
 import Dropdown from "../Ui/Dropdown";
 import "./TaskFilters.scss";
 
@@ -9,9 +10,8 @@ function TaskFilters({
     completionOptions = []
 }) {
 
-    // ✅ ADD THIS
+    // Behåller exakt din logik
     const hasActiveFilters =
-        filters.search ||
         filters.category ||
         filters.priority ||
         filters.completed !== undefined;
@@ -23,11 +23,11 @@ function TaskFilters({
                 value={filters.category}
                 placeholder="All categories"
                 onChange={(val) =>
-                    onChange({
-                        ...filters,
+                    onChange(prev => ({
+                        ...prev,
                         category: val,
                         priority: ""
-                    })
+                    }))
                 }
                 options={[
                     { label: "All categories", value: "" },
@@ -43,10 +43,10 @@ function TaskFilters({
                 value={filters.priority}
                 placeholder="All priorities"
                 onChange={(val) =>
-                    onChange({
-                        ...filters,
+                    onChange(prev => ({
+                        ...prev,
                         priority: val
-                    })
+                    }))
                 }
                 options={[
                     { label: "All priorities", value: "" },
@@ -62,43 +62,43 @@ function TaskFilters({
                 value={filters.completed ?? ""}
                 placeholder="Status"
                 onChange={(val) =>
-                    onChange({
-                        ...filters,
+                    onChange(prev => ({
+                        ...prev,
                         completed: val === "" ? undefined : val
-                    })
+                    }))
                 }
                 options={[
                     { label: "All", value: "" },
-                    completionOptions.includes("true") && {
+                    completionOptions.includes(true) && {
                         label: "Completed",
                         value: true
                     },
-                    completionOptions.includes("false") && {
+                    completionOptions.includes(false) && {
                         label: "Not completed",
                         value: false
                     }
                 ].filter(Boolean)}
             />
 
-            {/* ✅ CHANGE ONLY THIS PART */}
+            {/* RESET */}
             {hasActiveFilters && (
                 <button
                     className="reset-btn"
                     onClick={() =>
-                        onChange({
+                        onChange(prev => ({
+                            ...prev,
                             search: "",
                             category: "",
                             priority: "",
                             completed: undefined
-                        })
+                        }))
                     }
                 >
                     Reset filters
                 </button>
             )}
-
         </div>
     );
 }
 
-export default TaskFilters;
+export default React.memo(TaskFilters);

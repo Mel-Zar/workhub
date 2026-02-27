@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { taskService } from "../../services/taskService";
 import { capitalize } from "../../utils/formatters";
@@ -34,6 +34,16 @@ function TaskItem({
 
     // Lägg till kopia av originalbilder för att kunna jämföra ordning
     const [originalImages, setOriginalImages] = useState(task?.images || []);
+
+    // 🧹 Cleanup blob URLs when component unmounts or images change
+    useEffect(() => {
+        return () => {
+            newImages.forEach(img => {
+                URL.revokeObjectURL(img.preview);
+            });
+        };
+    }, [newImages]);
+
 
     if (!task) return null;
 
@@ -164,8 +174,15 @@ function TaskItem({
     };
 
     const removeNewImage = (index) => {
-        setNewImages((prev) => prev.filter((_, i) => i !== index));
+        setNewImages((prev) => {
+            const imgToRemove = prev[index];
+            if (imgToRemove?.preview) {
+                URL.revokeObjectURL(imgToRemove.preview);
+            }
+            return prev.filter((_, i) => i !== index);
+        });
     };
+
 
     /* =========================
          DRAG & DROP (EDIT MODE)
@@ -211,9 +228,11 @@ function TaskItem({
             await taskService.update(task._id, formData);
 
             // 🗑️ remove old images
-            for (const img of imagesToRemove) {
-                await taskService.removeImage(task._id, img);
-            }
+            await Promise.all(
+                imagesToRemove.map(img =>
+                    taskService.removeImage(task._id, img)
+                )
+            );
 
             // 📤 upload new images
             if (newImages.length > 0) {
@@ -408,7 +427,7 @@ function TaskItem({
             </article>
 
             {activeImage && (
-                <div className="image-modxal" onClick={() => setActiveImage(null)}>
+                <div className="image-modal" onClick={() => setActiveImage(null)}>
                     <img src={activeImage} alt="preview" />
                 </div>
             )}

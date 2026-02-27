@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { useTheme } from "../../hooks/useTheme";
@@ -8,12 +8,10 @@ import "./Navbar.scss";
 function Navbar() {
     const { theme, toggleTheme } = useTheme();
     const { isLoggedIn, user, logout } = useContext(AuthContext);
-    const navigate = useNavigate();
     const [open, setOpen] = useState(false);
 
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
+    const handleLogout = async () => {
+        await logout();
         setOpen(false);
     };
 

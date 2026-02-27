@@ -1,13 +1,14 @@
+import React from "react";
 import "./TaskSort.scss";
 
-function TaskSort({ value, onChange, onReset }) {
+const options = [
+    { label: "Created date", value: "createdAt" },
+    { label: "Deadline", value: "deadline" },
+    { label: "Priority", value: "priority" },
+    { label: "Title", value: "title" }
+];
 
-    const options = [
-        { label: "Created date", value: "createdAt" },
-        { label: "Deadline", value: "deadline" },
-        { label: "Priority", value: "priority" },
-        { label: "Title", value: "title" }
-    ];
+function TaskSort({ value, onChange, onReset }) {
 
     return (
 
@@ -62,4 +63,4 @@ function TaskSort({ value, onChange, onReset }) {
 
 }
 
-export default TaskSort;
+export default React.memo(TaskSort);

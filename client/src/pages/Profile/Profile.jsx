@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { authService } from "../../services/authService";
+import { jwtDecode } from "jwt-decode";
 import "./Profile.scss";
 
 function capitalizeFirst(value) {
@@ -14,15 +15,17 @@ function getUserFromToken() {
     if (!token) return { name: "", email: "" };
 
     try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
+        const payload = jwtDecode(token);
         return {
             name: payload.name || "",
             email: payload.email || ""
         };
-    } catch {
+    } catch (err) {
+        console.error("Invalid token:", err);
         return { name: "", email: "" };
     }
 }
+
 
 function Profile() {
     const { setUser } = useContext(AuthContext);
@@ -66,8 +69,8 @@ function Profile() {
                                     payload.newPassword = newPassword;
                                 }
 
-
                                 const data = await authService.updateProfile(payload);
+
 
                                 if (data.accessToken) {
                                     localStorage.setItem("accessToken", data.accessToken);
@@ -154,9 +157,10 @@ function Profile() {
                             <label>Name</label>
                             <input
                                 value={name}
-                                onChange={e => setName(capitalizeFirst(e.target.value))}
+                                onChange={e => setName(e.target.value)}
                                 placeholder="Name"
                             />
+
                         </div>
 
                         <div className="input-group">

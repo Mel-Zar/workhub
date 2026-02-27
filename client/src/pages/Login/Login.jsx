@@ -28,9 +28,12 @@ function Login() {
         password
       });
 
+      // ✅ AuthProvider äger nu token storage
       login(data.accessToken, data.refreshToken);
-      toast.success(`Welcome back ${data.user.name}!`);
+
+      toast.success(`Welcome back ${data.user?.name || ""}!`);
       navigate("/dashboard");
+
     } catch (err) {
       toast.error(err.message || "Invalid email or password");
     } finally {
@@ -43,13 +46,11 @@ function Login() {
       <section className="login-container">
         <article className="login-card">
 
-          {/* HEADER */}
           <header className="login-header">
             <h1>Welcome Back</h1>
             <p>Sign in to continue organizing your tasks</p>
           </header>
 
-          {/* FORM */}
           <form className="login-form" onSubmit={handleSubmit}>
 
             <div className="form-group">
@@ -98,7 +99,6 @@ function Login() {
 
           </form>
 
-          {/* FOOTER */}
           <footer className="login-footer">
             <p>
               Don't have an account?{" "}

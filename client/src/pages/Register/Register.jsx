@@ -26,7 +26,7 @@ function Register() {
     try {
       await authService.register({
         name: capitalizeFirst(name),
-        email,
+        email: email.toLowerCase(),
         password,
       });
 
@@ -38,6 +38,7 @@ function Register() {
       setLoading(false);
     }
   }
+
 
   return (
     <main className="register-page">
@@ -57,7 +58,7 @@ function Register() {
               <input
                 placeholder="Your name"
                 value={name}
-                onChange={(e) => setName(capitalizeFirst(e.target.value))}
+                onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
