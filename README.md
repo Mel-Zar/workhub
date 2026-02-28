@@ -241,11 +241,8 @@ workhub/
 │       │   ├── authRoutes.js
 │       │   └── taskRoutes.js
 │       │
-│       ├── uploads/
-│       │   └── img.jpeg
-│       │
-│       └── utils/
-│           └── generateToken.js
+│       └── uploads/
+│           └── img.jpeg
 │
 ├── .gitignore
 └── README.md
