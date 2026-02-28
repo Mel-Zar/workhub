@@ -2,13 +2,9 @@ import { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { authService } from "../../services/authService";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
+import { capitalize } from "../../utils/formatters";
 import "./Profile.scss";
-
-function capitalizeFirst(value) {
-    if (!value) return "";
-    return value.charAt(0).toUpperCase() + value.slice(1);
-}
 
 function getUserFromToken() {
     const token = localStorage.getItem("accessToken");
@@ -25,7 +21,6 @@ function getUserFromToken() {
         return { name: "", email: "" };
     }
 }
-
 
 function Profile() {
     const { setUser } = useContext(AuthContext);
@@ -60,9 +55,9 @@ function Profile() {
 
                             try {
                                 const payload = {
-                                    name: capitalizeFirst(name),
-                                    email: email.toLowerCase(),
-                                    currentPassword: currentPassword,
+                                    name: capitalize(name),
+                                    email: email.trim().toLowerCase(),
+                                    currentPassword,
                                 };
 
                                 if (newPassword) {
@@ -70,7 +65,6 @@ function Profile() {
                                 }
 
                                 const data = await authService.updateProfile(payload);
-
 
                                 if (data.accessToken) {
                                     localStorage.setItem("accessToken", data.accessToken);
@@ -138,7 +132,6 @@ function Profile() {
     const hasChanges =
         (name !== initialName || email !== initialEmail || newPassword.length > 0) && currentPassword;
 
-
     return (
         <div className="profile-page page">
 
@@ -160,14 +153,13 @@ function Profile() {
                                 onChange={e => setName(e.target.value)}
                                 placeholder="Name"
                             />
-
                         </div>
 
                         <div className="input-group">
                             <label>Email</label>
                             <input
                                 value={email}
-                                onChange={e => setEmail(e.target.value.toLowerCase())}
+                                onChange={e => setEmail(e.target.value)}
                                 placeholder="Email"
                             />
                         </div>
@@ -275,7 +267,7 @@ function Profile() {
                 </div>
             </div>
 
-        </div >
+        </div>
     );
 }
 

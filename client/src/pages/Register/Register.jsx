@@ -2,13 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { authService } from "../../services/authService";
+import { capitalize } from "../../utils/formatters"; // ✅ använder central capitalize
 import "./Register.scss";
-
-function capitalizeFirst(value) {
-  if (!value) return "";
-  const [first, ...rest] = value;
-  return first.toUpperCase() + rest.join("").toLowerCase();
-}
 
 function Register() {
   const [name, setName] = useState("");
@@ -25,7 +20,7 @@ function Register() {
 
     try {
       await authService.register({
-        name: capitalizeFirst(name),
+        name: capitalize(name), // ✅ använder central capitalize
         email: email.toLowerCase(),
         password,
       });
@@ -38,7 +33,6 @@ function Register() {
       setLoading(false);
     }
   }
-
 
   return (
     <main className="register-page">

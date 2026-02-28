@@ -24,7 +24,7 @@ function Login() {
 
     try {
       const data = await authService.login({
-        email: email.trim().toLowerCase(),
+        email: email.trim().toLowerCase(), // gör det här istället
         password
       });
 
@@ -59,8 +59,8 @@ function Login() {
                 id="email"
                 type="email"
                 placeholder="your@email.com"
+                onChange={(e) => setEmail(e.target.value)}
                 value={email}
-                onChange={(e) => setEmail(e.target.value.toLowerCase())}
                 required
               />
             </div>

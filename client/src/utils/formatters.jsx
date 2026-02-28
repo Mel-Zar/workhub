@@ -9,3 +9,4 @@ export const formatCategory = str => {
     const firstWord = str.split(/\s+/)[0];
     return capitalize(firstWord);
 };
+
