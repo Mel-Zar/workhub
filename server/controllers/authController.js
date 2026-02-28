@@ -6,18 +6,20 @@ import jwt from "jsonwebtoken";
 const createAccessToken = (user) => {
     return jwt.sign(
         { id: user._id, name: user.name, email: user.email },
-        process.env.JWT_SECRET || "secret",
+        process.env.JWT_SECRET,
         { expiresIn: "15m" }
     );
 };
 
+
 const createRefreshToken = (user) => {
     return jwt.sign(
         { id: user._id },
-        process.env.JWT_REFRESH_SECRET || "refreshsecret",
+        process.env.JWT_REFRESH_SECRET,
         { expiresIn: "7d" }
     );
 };
+
 
 // ================= REGISTER =================
 const registerUser = async (req, res) => {
@@ -182,7 +184,7 @@ const refreshAccessToken = async (req, res) => {
     try {
         const payload = jwt.verify(
             refreshToken,
-            process.env.JWT_REFRESH_SECRET || "refreshsecret"
+            process.env.JWT_REFRESH_SECRET
         );
 
         const user = await User.findById(payload.id);

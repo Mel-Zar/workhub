@@ -9,6 +9,9 @@ import authRoutes from "./routes/authRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 
 dotenv.config();
+if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+    throw new Error("JWT secrets missing in .env");
+}
 
 const app = express();
 const PORT = process.env.PORT || 5001;
