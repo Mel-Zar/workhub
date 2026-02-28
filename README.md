@@ -6,7 +6,7 @@ WorkHub is a production-style fullstack task management application built using 
 
 It features secure **JWT authentication with refresh tokens**, protected routes, scalable API architecture, image uploads, filtering, pagination, and a modular frontend structure.
 
-## This project demonstrates real-world fullstack development practices including token lifecycle management, API abstraction layers, separation of concerns, and reusable component architecture.
+This project demonstrates real-world fullstack development practices including token lifecycle management, API abstraction layers, separation of concerns, and reusable component architecture.
 
 ## 🌐 Live Demo
 
