@@ -3,7 +3,6 @@
 ## Fullstack MERN Task Management Application
 
 WorkHub is a production-style fullstack task management application built using the **MERN stack**
-
 **(MongoDB, Express, React, Node.js)**.
 
 It features secure **JWT authentication with refresh tokens**, protected routes, scalable API architecture, image uploads, filtering, pagination, and a modular frontend structure.
