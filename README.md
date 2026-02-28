@@ -10,7 +10,7 @@ This project demonstrates real-world fullstack development practices including t
 
 ## 🌐 Live Demo
 
-### Add deployment link here (Render / Railway / Vercel)
+## Add deployment link here (Render / Railway / Vercel)
 
 ## ✨ Core Features
 
