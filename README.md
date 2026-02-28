@@ -360,21 +360,21 @@ http://localhost:5173
 
 ### 🔐 Authentication Flow
 
-1. User logs in
+**1.** User logs in
 
-2. Backend returns:
+**2.** Backend returns:
 
 - `accessToken`
 
 - `refreshToken`
 
-3. Tokens stored in localStorage
+**3.** Tokens stored in localStorage
 
-4. All requests go through apiFetch()
+**4.** All requests go through apiFetch()
 
-5. If access token expires → automatic refresh
+**5.** If access token expires → automatic refresh
 
-6. If refresh fails → forced logout
+**6.** If refresh fails → forced logout
 
 ---
 
