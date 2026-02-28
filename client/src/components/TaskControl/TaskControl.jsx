@@ -56,10 +56,11 @@ function TaskControls({
     const activeFiltersCount = Object.entries(filters)
         .filter(([key, value]) =>
             key !== "sortBy" &&
-            key !== "search" &&   // 🔥 lägg till denna
+            key !== "search" &&
             value !== "" &&
             value !== undefined
         ).length;
+
 
     const hasSort = Boolean(filters.sortBy);
 

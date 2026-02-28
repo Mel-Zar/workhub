@@ -1,35 +1,17 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { authService } from "../../services/authService";
-import { jwtDecode } from "jwt-decode";
 import { capitalize } from "../../utils/formatters";
 import "./Profile.scss";
 
-function getUserFromToken() {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return { name: "", email: "" };
-
-    try {
-        const payload = jwtDecode(token);
-        return {
-            name: payload.name || "",
-            email: payload.email || ""
-        };
-    } catch (err) {
-        console.error("Invalid token:", err);
-        return { name: "", email: "" };
-    }
-}
-
 function Profile() {
-    const { setUser } = useContext(AuthContext);
-    const user = getUserFromToken();
+    const { user, setUser } = useContext(AuthContext);
 
-    const [name, setName] = useState(user.name);
-    const [email, setEmail] = useState(user.email);
-    const [initialName, setInitialName] = useState(user.name);
-    const [initialEmail, setInitialEmail] = useState(user.email);
+    const [name, setName] = useState(user?.name || "");
+    const [email, setEmail] = useState(user?.email || "");
+    const [initialName, setInitialName] = useState(user?.name || "");
+    const [initialEmail, setInitialEmail] = useState(user?.email || "");
 
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -40,6 +22,17 @@ function Profile() {
     const [showDeletePassword, setShowDeletePassword] = useState(false);
 
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!user) return;
+
+        const formattedName = capitalize(user.name);
+
+        setName(formattedName);
+        setEmail(user.email);
+        setInitialName(formattedName);
+        setInitialEmail(user.email);
+    }, [user]);
 
     function handleSubmit(e) {
         e.preventDefault();
@@ -73,8 +66,11 @@ function Profile() {
                                 setUser(data.user);
 
                                 toast.success("Profile updated ✅");
-                                setInitialName(name);
-                                setInitialEmail(email);
+                                const formattedName = capitalize(data.user.name);
+
+                                setInitialName(formattedName);
+                                setName(formattedName);
+                                setInitialEmail(data.user.email);
                                 setCurrentPassword("");
                                 setNewPassword("");
                             } catch (err) {
@@ -112,6 +108,7 @@ function Profile() {
                                 await authService.deleteAccount(deletePassword);
                                 toast.success("Account deleted");
                                 localStorage.clear();
+                                setDeletePassword("");
                                 setTimeout(() => (window.location.href = "/login"), 1000);
                             } catch (err) {
                                 toast.error(err.message || "Server error during deletion");
@@ -130,7 +127,10 @@ function Profile() {
     }
 
     const hasChanges =
-        (name !== initialName || email !== initialEmail || newPassword.length > 0) && currentPassword;
+        (name.trim() !== initialName ||
+            email.trim().toLowerCase() !== initialEmail ||
+            newPassword.length > 0) &&
+        currentPassword.length > 0;
 
     return (
         <div className="profile-page page">
@@ -150,7 +150,7 @@ function Profile() {
                             <label>Name</label>
                             <input
                                 value={name}
-                                onChange={e => setName(e.target.value)}
+                                onChange={e => setName(capitalize(e.target.value))} // ⚡ alltid kapitaliserad första bokstav
                                 placeholder="Name"
                             />
                         </div>

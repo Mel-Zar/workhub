@@ -24,8 +24,15 @@ export function useTasks({ limit } = {}) {
     useEffect(() => {
         const timeout = setTimeout(() => {
 
-            if (filters.search.length > 0 && filters.search.length < 2) return;
+            // Tillåt tom sträng direkt
+            if (filters.search === "") {
+                setDebouncedSearch("");
+                setPage(1);
+                return;
+            }
 
+            // Vänta tills minst 2 tecken
+            if (filters.search.length < 2) return;
 
             setDebouncedSearch(filters.search);
             setPage(1);
@@ -35,11 +42,16 @@ export function useTasks({ limit } = {}) {
         return () => clearTimeout(timeout);
     }, [filters.search]);
 
+    useEffect(() => {
+        setPage(1);
+    }, [filters.category, filters.priority, filters.completed, filters.sortBy]);
+
+
     const abortControllerRef = useRef(null);
 
     const refreshTasks = useCallback(async () => {
 
-        if (!user) return;
+        if (!user || authLoading) return;
 
         // 🛑 Avbryt tidigare request
         if (abortControllerRef.current) {
@@ -79,6 +91,7 @@ export function useTasks({ limit } = {}) {
     }, [
         user,
         page,
+        authLoading,
         limit,
         debouncedSearch,
         filters.category,

@@ -1,5 +1,8 @@
-export const capitalize = str =>
-    str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+export const capitalize = str => {
+    if (!str) return "";
+    const trimmed = str.trim();
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+};
 
 export const cleanCategory = str =>
     str ? str.replace(/[0-9]/g, "").trim() : "";
