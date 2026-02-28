@@ -68,7 +68,7 @@ This project demonstrates real-world fullstack development practices including t
 
 ---
 
-## 🧠 Technical Highlights
+### 🧠 Technical Highlights
 
 - Centralized API layer (apiFetch)
 
@@ -88,9 +88,9 @@ This project demonstrates real-world fullstack development practices including t
 
 ---
 
-## 🖥️ Tech Stack
+### 🖥️ Tech Stack
 
-### Frontend
+#### Frontend
 
 - React (Vite)
 
@@ -104,7 +104,7 @@ This project demonstrates real-world fullstack development practices including t
 
 - jwt-decode
 
-### Backend
+#### Backend
 
 - Node.js
 
@@ -124,7 +124,7 @@ This project demonstrates real-world fullstack development practices including t
 
 ---
 
-## 🧱 System Architecture & Code Structure
+### 🧱 System Architecture & Code Structure
 
 ```bash
 workhub/
@@ -253,7 +253,7 @@ workhub/
 
 ---
 
-## Frontend Architecture
+### Frontend Architecture
 
 - api/ → Centralized fetch wrapper
 
@@ -269,7 +269,7 @@ workhub/
 
 - routes/ → Protected routing
 
-## Backend Architecture
+### Backend Architecture
 
 - controllers/ → Business logic
 
@@ -285,9 +285,9 @@ workhub/
 
 ---
 
-## ⚙️ Installation
+### ⚙️ Installation
 
-### 1️⃣ Clone Repository
+#### 1️⃣ Clone Repository
 
 ```bash
 git clone https://github.com/Mel-Zar/workhub.git
@@ -296,7 +296,7 @@ cd workhub
 
 ---
 
-### 2️⃣ Backend Setup
+#### 2️⃣ Backend Setup
 
 ```bash
 cd server
@@ -326,7 +326,7 @@ http://localhost:5001
 
 ---
 
-### 3️⃣ Frontend Setup
+#### 3️⃣ Frontend Setup
 
 Open new terminal:
 
@@ -361,7 +361,7 @@ http://localhost:5173
 
 ---
 
-## 🔐 Authentication Flow
+### 🔐 Authentication Flow
 
 1. User logs in
 
@@ -381,13 +381,13 @@ http://localhost:5173
 
 ---
 
-## 🌍 API Flow
+### 🌍 API Flow
 
 ```bash
 Component → Service → apiFetch → Backend
 ```
 
-### Why this structure?
+#### Why this structure?
 
 **✔** Centralized error handling
 
@@ -401,7 +401,7 @@ Component → Service → apiFetch → Backend
 
 ---
 
-## 🛡 Protected Routes
+### 🛡 Protected Routes
 
 Protected pages:
 
@@ -421,7 +421,7 @@ Implemented using:
 
 ---
 
-## 🧰 Utilities
+### 🧰 Utilities
 
 `utils/formatters.js`
 
@@ -442,7 +442,7 @@ formatCategory("work123") // "Work"
 
 ---
 
-## 🖼 Screenshots
+### 🖼 Screenshots
 
 Create folder:
 
@@ -461,7 +461,7 @@ Then reference:
 
 ---
 
-## 🚀 Why This Project Matters
+### 🚀 Why This Project Matters
 
 This project demonstrates:
 
@@ -481,7 +481,7 @@ It reflects how a real SaaS-style dashboard would be structured.
 
 ---
 
-## 📈 Future Improvements
+### 📈 Future Improvements
 
 - Drag & Drop tasks
 
@@ -501,7 +501,7 @@ It reflects how a real SaaS-style dashboard would be structured.
 
 ---
 
-## 👩‍💻 Author
+### 👩‍💻 Author
 
 Melissa Zarinnegar
 Web Developer (E-commerce specialization)
@@ -509,7 +509,7 @@ Junior Fullstack Developer
 
 ---
 
-## ⭐ If You Like This Project
+### ⭐ If You Like This Project
 
 Consider giving it a star on GitHub.
 
