@@ -500,8 +500,10 @@ It reflects how a real SaaS-style dashboard would be structured.
 
 ### 👩‍💻 Author
 
-Melissa Zarinnegar
+**Melissa Zarinnegar**
+
 Web Developer (E-commerce specialization)
+
 Junior Fullstack Developer
 
 ---
