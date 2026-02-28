@@ -16,9 +16,9 @@ This project demonstrates real-world fullstack development practices including t
 
 ---
 
-## ✨ Core Features
+### ✨ Core Features
 
-### 🔐 Authentication & Security
+#### 🔐 Authentication & Security
 
 - JWT Authentication (Access + Refresh Tokens)
 
@@ -32,7 +32,7 @@ This project demonstrates real-world fullstack development practices including t
 
 - Account deletion
 
-### 🗂 Task Management
+#### 🗂 Task Management
 
 - Create / Edit / Delete tasks
 
@@ -54,7 +54,7 @@ This project demonstrates real-world fullstack development practices including t
 
 - Pagination
 
-### 👤 User Features
+#### 👤 User Features
 
 - Profile update
 
