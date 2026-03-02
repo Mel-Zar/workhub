@@ -1,21 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-
-import AuthProvider from "./context/AuthContext/AuthProvider";
-import ThemeProvider from "./context/ThemeContext/ThemeProvider";
-
-import "./styles/main.scss";
+import GlobalProvider from "./context/GlobalContext/GlobalProvider";
 import App from "./app/App";
+import "./styles/main.scss";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <ThemeProvider>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </ThemeProvider>
+      <GlobalProvider>
+        <App />
+      </GlobalProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

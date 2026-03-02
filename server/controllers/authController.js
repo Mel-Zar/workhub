@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import asyncHandler from "express-async-handler";
+
 
 // ================= HELPERS =================
 const createAccessToken = (user) => {
@@ -10,7 +12,6 @@ const createAccessToken = (user) => {
         { expiresIn: "15m" }
     );
 };
-
 
 const createRefreshToken = (user) => {
     return jwt.sign(
@@ -22,178 +23,193 @@ const createRefreshToken = (user) => {
 
 
 // ================= REGISTER =================
-const registerUser = async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        const normalizedEmail = email.toLowerCase().trim();
+const registerUser = asyncHandler(async (req, res) => {
 
-        if (!name || !email || !password)
-            return res.status(400).json({ error: "All fields are required" });
+    const { name, email, password } = req.body;
+    const normalizedEmail = email?.toLowerCase().trim();
 
-        const emailRegex = /\S+@\S+\.\S+/;
-        if (!emailRegex.test(normalizedEmail))
-            return res.status(400).json({ error: "Invalid email format" });
+    if (!name || !email || !password)
+        return res.status(400).json({ error: "All fields are required" });
 
-        if (password.length < 6)
-            return res.status(400).json({ error: "Password must be at least 6 characters" });
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(normalizedEmail))
+        return res.status(400).json({ error: "Invalid email format" });
 
-        const existingUser = await User.findOne({ email: normalizedEmail });
-        if (existingUser)
-            return res.status(400).json({ error: "User already exists" });
+    if (password.length < 6)
+        return res.status(400).json({ error: "Password must be at least 6 characters" });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser)
+        return res.status(400).json({ error: "User already exists" });
 
-        const user = new User({
-            name,
-            email: normalizedEmail,
-            password: hashedPassword,
-        }); await user.save();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        res.status(201).json({ message: "User registered successfully" });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
+    const user = new User({
+        name,
+        email: normalizedEmail,
+        password: hashedPassword,
+    });
+
+    await user.save();
+
+    res.status(201).json({ message: "User registered successfully" });
+});
+
 
 // ================= LOGIN =================
-const loginUser = async (req, res) => {
-    try {
-        const { email, password } = req.body;
+const loginUser = asyncHandler(async (req, res) => {
 
-        if (!email || !password)
-            return res.status(400).json({ error: "Email and password required" });
+    const { email, password } = req.body;
 
-        const normalizedEmail = email.toLowerCase().trim();
+    if (!email || !password)
+        return res.status(400).json({ error: "Email and password required" });
 
-        const user = await User.findOne({ email: normalizedEmail });
-        if (!user)
-            return res.status(401).json({ error: "Invalid credentials" });
+    const normalizedEmail = email.toLowerCase().trim();
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch)
-            return res.status(401).json({ error: "Invalid credentials" });
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user)
+        return res.status(401).json({ error: "Invalid credentials" });
 
-        const accessToken = createAccessToken(user);
-        const refreshToken = createRefreshToken(user);
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
+        return res.status(401).json({ error: "Invalid credentials" });
 
-        user.refreshToken = refreshToken;
-        await user.save();
+    const accessToken = createAccessToken(user);
+    const refreshToken = createRefreshToken(user);
 
-        res.json({
-            accessToken,
-            refreshToken,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email
-            }
-        });
+    user.refreshToken = refreshToken;
+    await user.save();
 
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
+    res.json({
+        accessToken,
+        refreshToken,
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email
+        }
+    });
+});
 
 
 // ================= UPDATE PROFILE =================
-const updateUser = async (req, res) => {
-    try {
-        if (!req.user?.id)
-            return res.status(401).json({ error: "Not authenticated" });
+const updateUser = asyncHandler(async (req, res) => {
 
-        const userId = req.user.id;
-        const { name, email, currentPassword, newPassword } = req.body;
+    if (!req.user?.id)
+        return res.status(401).json({ error: "Not authenticated" });
 
-        // ✅ Always require current password for any change
-        if (!currentPassword)
-            return res.status(400).json({ error: "Current password required to update profile" });
+    const userId = req.user.id;
+    const { name, email, currentPassword, newPassword } = req.body;
 
-        const user = await User.findById(userId);
-        if (!user)
-            return res.status(404).json({ error: "User not found" });
+    if (!currentPassword)
+        return res.status(400).json({ error: "Current password required to update profile" });
 
-        const match = await bcrypt.compare(currentPassword, user.password);
-        if (!match)
-            return res.status(401).json({ error: "Wrong password" });
+    const user = await User.findById(userId);
+    if (!user)
+        return res.status(404).json({ error: "User not found" });
 
-        // Uppdatera fält
-        if (name) user.name = name;
-        if (email) {
-            const normalizedEmail = email.toLowerCase().trim();
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match)
+        return res.status(401).json({ error: "Wrong password" });
 
-            const existingUser = await User.findOne({ email: normalizedEmail });
+    if (name) user.name = name;
 
-            if (existingUser && existingUser._id.toString() !== userId)
-                return res.status(400).json({ error: "Email already in use" });
+    if (email) {
+        const normalizedEmail = email.toLowerCase().trim();
 
-            user.email = normalizedEmail;
-        }
+        const existingUser = await User.findOne({ email: normalizedEmail });
 
-        if (newPassword) {
-            if (newPassword.length < 6)
-                return res.status(400).json({ error: "Password must be at least 6 characters" });
-            user.password = await bcrypt.hash(newPassword, 10);
-        }
+        if (existingUser && existingUser._id.toString() !== userId)
+            return res.status(400).json({ error: "Email already in use" });
 
-        // Spara ändringarna
-        await user.save();
-
-        // ✅ Skapa ny access token så frontend uppdaterar name/email
-        const newAccessToken = createAccessToken(user);
-
-        res.json({
-            message: "Profile updated",
-            accessToken: newAccessToken,
-            user: {
-                name: user.name,
-                email: user.email
-            }
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
+        user.email = normalizedEmail;
     }
-};
+
+    if (newPassword) {
+        if (newPassword.length < 6)
+            return res.status(400).json({ error: "Password must be at least 6 characters" });
+
+        user.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    await user.save();
+
+    const newAccessToken = createAccessToken(user);
+
+    res.json({
+        message: "Profile updated",
+        accessToken: newAccessToken,
+        user: {
+            name: user.name,
+            email: user.email
+        }
+    });
+});
 
 
 // ================= DELETE ACCOUNT =================
-const deleteAccount = async (req, res) => {
-    try {
-        if (!req.user?.id)
-            return res.status(401).json({ error: "Not authenticated" });
+const deleteAccount = asyncHandler(async (req, res) => {
 
-        const { currentPassword } = req.body;
+    if (!req.user?.id)
+        return res.status(401).json({ error: "Not authenticated" });
 
-        if (!currentPassword)
-            return res.status(400).json({ error: "Password required" });
+    const { currentPassword } = req.body;
 
-        const user = await User.findById(req.user.id);
-        if (!user)
-            return res.status(404).json({ error: "User not found" });
+    if (!currentPassword)
+        return res.status(400).json({ error: "Password required" });
 
-        const match = await bcrypt.compare(currentPassword, user.password);
-        if (!match)
-            return res.status(401).json({ error: "Wrong password" });
+    const user = await User.findById(req.user.id);
+    if (!user)
+        return res.status(404).json({ error: "User not found" });
 
-        await User.findByIdAndDelete(req.user.id);
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match)
+        return res.status(401).json({ error: "Wrong password" });
 
-        res.json({ message: "Account deleted" });
+    await User.findByIdAndDelete(req.user.id);
 
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
+    res.json({ message: "Account deleted" });
+});
+
 
 // ================= REFRESH =================
-const refreshAccessToken = async (req, res) => {
+const refreshAccessToken = asyncHandler(async (req, res) => {
+
     const { refreshToken } = req.body;
 
     if (!refreshToken)
         return res.status(401).json({ error: "Refresh token required" });
+
+    const payload = jwt.verify(
+        refreshToken,
+        process.env.JWT_REFRESH_SECRET
+    );
+
+    const user = await User.findById(payload.id);
+
+    if (!user || user.refreshToken !== refreshToken)
+        return res.status(403).json({ error: "Invalid refresh token" });
+
+    const newRefreshToken = createRefreshToken(user);
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    const newAccessToken = createAccessToken(user);
+
+    res.json({
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken
+    });
+});
+
+
+// ================= LOGOUT =================
+const logout = asyncHandler(async (req, res) => {
+
+    const { refreshToken } = req.body;
+
+    if (!refreshToken)
+        return res.status(400).json({ error: "Refresh token required" });
 
     try {
         const payload = jwt.verify(
@@ -203,71 +219,25 @@ const refreshAccessToken = async (req, res) => {
 
         const user = await User.findById(payload.id);
 
-        if (!user || user.refreshToken !== refreshToken)
-            return res.status(403).json({ error: "Invalid refresh token" });
-
-        // 🔥 ROTATE refresh token
-        const newRefreshToken = createRefreshToken(user);
-        user.refreshToken = newRefreshToken;
-        await user.save();
-
-        const newAccessToken = createAccessToken(user);
-
-        res.json({
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken
-        });
+        if (user) {
+            user.refreshToken = null;
+            await user.save();
+        }
 
     } catch (err) {
-        return res.status(403).json({ error: "Invalid refresh token" });
-    }
-};
+        const decoded = jwt.decode(refreshToken);
 
-
-// ================= LOGOUT =================
-const logout = async (req, res) => {
-    try {
-        const { refreshToken } = req.body;
-
-        if (!refreshToken)
-            return res.status(400).json({ error: "Refresh token required" });
-
-        try {
-            // Försök verifiera normalt
-            const payload = jwt.verify(
-                refreshToken,
-                process.env.JWT_REFRESH_SECRET
-            );
-
-            const user = await User.findById(payload.id);
-
+        if (decoded?.id) {
+            const user = await User.findById(decoded.id);
             if (user) {
                 user.refreshToken = null;
                 await user.save();
             }
-
-        } catch (err) {
-            // Om expired eller invalid – försök hitta user ändå
-            const decoded = jwt.decode(refreshToken);
-
-            if (decoded?.id) {
-                const user = await User.findById(decoded.id);
-                if (user) {
-                    user.refreshToken = null;
-                    await user.save();
-                }
-            }
         }
-
-        // 🔥 Logout ska alltid vara idempotent
-        res.json({ message: "Logged out" });
-
-    } catch (err) {
-        console.error("LOGOUT ERROR:", err);
-        res.status(500).json({ error: "Server error" });
     }
-};
 
+    res.json({ message: "Logged out" });
+});
 
 
 export {
@@ -278,4 +248,3 @@ export {
     refreshAccessToken,
     logout
 };
-

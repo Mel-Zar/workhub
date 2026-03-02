@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { taskService } from "../../services/taskService";
-import { capitalize } from "../../utils/formatters";
+import { capitalize, formatCategory, cleanCategory } from "../../utils/formatters"; // ✅ added cleanCategory
 import TaskImages from "./TaskImages";
 import "./TaskItem.scss";
 import Dropdown from "../Ui/Dropdown";
@@ -43,7 +43,6 @@ function TaskItem({
             });
         };
     }, [newImages]);
-
 
     if (!task) return null;
 
@@ -119,8 +118,12 @@ function TaskItem({
 
         let newValue = value;
 
-        if (name === "title" || name === "category") {
+        if (name === "title") {
             newValue = capitalize(value);
+        }
+
+        if (name === "category") {
+            newValue = formatCategory(cleanCategory(value)); // ✅ cleanCategory + formatCategory
         }
 
         setFormData((prev) => ({
@@ -128,7 +131,6 @@ function TaskItem({
             [name]: newValue,
         }));
     };
-
 
     /* =========================
          IMAGES
@@ -182,7 +184,6 @@ function TaskItem({
             return prev.filter((_, i) => i !== index);
         });
     };
-
 
     /* =========================
          DRAG & DROP (EDIT MODE)
@@ -422,7 +423,6 @@ function TaskItem({
                         )}
                     </footer>
                 )}
-
 
             </article>
 

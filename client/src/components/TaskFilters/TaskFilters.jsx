@@ -1,5 +1,6 @@
 import React from "react";
 import Dropdown from "../Ui/Dropdown";
+import { capitalize } from "../../utils/formatters";
 import "./TaskFilters.scss";
 
 function TaskFilters({
@@ -32,7 +33,7 @@ function TaskFilters({
                 options={[
                     { label: "All categories", value: "" },
                     ...categories.map(c => ({
-                        label: c,
+                        label: capitalize(c),
                         value: c
                     }))
                 ]}
@@ -51,7 +52,7 @@ function TaskFilters({
                 options={[
                     { label: "All priorities", value: "" },
                     ...priorities.map(p => ({
-                        label: p,
+                        label: capitalize(p), // ✅ capitalize priority
                         value: p
                     }))
                 ]}

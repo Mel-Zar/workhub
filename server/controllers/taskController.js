@@ -1,17 +1,14 @@
 import Task from "../models/Task.js";
 import fs from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
-
+import asyncHandler from "express-async-handler";
+import { validateUploadedFile } from "../middleware/uploadMiddleware.js";
 
 /* ================= HELPERS ================= */
 const buildQuery = (userId, search, priority, completed, category) => {
     const query = { user: userId };
 
-    if (search) {
-        query.$text = { $search: search };
-    }
-
+    if (search) query.$text = { $search: search };
     if (priority) query.priority = priority;
     if (category) query.category = category;
 
@@ -23,302 +20,298 @@ const buildQuery = (userId, search, priority, completed, category) => {
 };
 
 /* ================= TASKS ================= */
-export const getTasks = async (req, res) => {
-    try {
-        const { search, priority, category, completed, sortBy } = req.query;
+export const getTasks = asyncHandler(async (req, res) => {
 
-        const page = Number(req.query.page) || 1;
-        const DEFAULT_LIMIT = 9;
-        const MAX_LIMIT = 50;
+    const { search, priority, category, completed, sortBy } = req.query;
 
-        const limit = Math.min(
-            Number(req.query.limit) || DEFAULT_LIMIT,
-            MAX_LIMIT
-        );
-        const query = buildQuery(req.user.id, search, priority, completed, category);
-        const skip = (page - 1) * limit;
+    const page = Number(req.query.page) || 1;
+    const DEFAULT_LIMIT = 9;
+    const MAX_LIMIT = 50;
 
-        let sortOption = { createdAt: -1 };
+    const limit = Math.min(
+        Number(req.query.limit) || DEFAULT_LIMIT,
+        MAX_LIMIT
+    );
 
-        const allowedSortFields = ["createdAt", "deadline", "priority", "title"];
+    const query = buildQuery(
+        req.user.id,
+        search,
+        priority,
+        completed,
+        category
+    );
 
-        if (sortBy && allowedSortFields.includes(sortBy)) {
-            sortOption = { [sortBy]: 1 };
-        }
-        if (process.env.NODE_ENV === "development") {
-            console.log("REQ QUERY:", req.query);
-        }
-        const total = await Task.countDocuments(query);
+    const skip = (page - 1) * limit;
 
-        const tasks = await Task.find(query)
-            .sort(sortOption)
-            .skip(skip)
-            .limit(limit)
-            .lean();
+    let sortOption = { createdAt: -1 };
+    const allowedSortFields = ["createdAt", "deadline", "priority", "title"];
 
-        res.json({ tasks, page, pages: Math.ceil(total / limit), total });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
+    if (sortBy && allowedSortFields.includes(sortBy)) {
+        sortOption = { [sortBy]: 1 };
     }
-};
 
-export const getTask = async (req, res) => {
-    try {
-        const task = await Task.findOne({
-            _id: req.params.id,
-            user: req.user.id
-        });
+    const total = await Task.countDocuments(query);
 
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
+    const tasks = await Task.find(query)
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limit)
+        .lean();
+
+    res.json({ tasks, page, pages: Math.ceil(total / limit), total });
+});
+
+
+export const getTask = asyncHandler(async (req, res) => {
+
+    const task = await Task.findOne({
+        _id: req.params.id,
+        user: req.user.id
+    });
+
+    if (!task)
+        return res.status(404).json({ error: "Task not found" });
+
+    res.json(task);
+});
+
+
+export const createTask = asyncHandler(async (req, res) => {
+
+    if (!req.body.title)
+        return res.status(400).json({ error: "Title is required" });
+
+    const images =
+        req.files?.map(f => `/uploads/${f.filename}`) || [];
+
+    if (req.files) {
+        for (const file of req.files) {
+            await validateUploadedFile(
+                path.join(process.cwd(), "uploads", file.filename)
+            );
         }
-
-        res.json(task);
-    } catch (err) {
-        console.error("GET TASK ERROR:", err);
-        res.status(500).json({ error: "Server error" });
     }
-};
 
-export const createTask = async (req, res) => {
-    try {
-        if (!req.body.title) {
-            return res.status(400).json({ error: "Title is required" });
+    const task = await Task.create({
+        title: req.body.title,
+        category: req.body.category || "general",
+        priority: req.body.priority || "medium",
+        deadline: req.body.deadline || null,
+        images,
+        user: req.user.id
+    });
+
+    res.status(201).json(task);
+});
+
+
+export const updateTask = asyncHandler(async (req, res) => {
+
+    const task = await Task.findOne({
+        _id: req.params.id,
+        user: req.user.id
+    });
+
+    if (!task)
+        return res.status(404).json({ error: "Task not found" });
+
+    const allowedFields = [
+        "title",
+        "description",
+        "category",
+        "priority",
+        "deadline",
+        "completed"
+    ];
+
+    allowedFields.forEach(field => {
+        if (req.body[field] !== undefined) {
+            task[field] = req.body[field];
         }
+    });
 
-        const images = req.files?.map(f => `/uploads/${f.filename}`) || [];
-
-        const task = await Task.create({
-            title: req.body.title,
-            category: req.body.category || "general",
-            priority: req.body.priority || "medium",
-            deadline: req.body.deadline || null,
-            images,
-            user: req.user.id
-        });
-
-        res.status(201).json(task);
-    } catch (err) {
-        console.error("CREATE ERROR:", err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
-
-export const updateTask = async (req, res) => {
-    try {
-        const task = await Task.findOne({
-            _id: req.params.id,
-            user: req.user.id
-        });
-
-        if (!task)
-            return res.status(404).json({ error: "Task not found" });
-
-        const allowedFields = [
-            "title",
-            "description",
-            "category",
-            "priority",
-            "deadline",
-            "completed"
-        ];
-
-        allowedFields.forEach(field => {
-            if (req.body[field] !== undefined) {
-                task[field] = req.body[field];
-            }
-        });
-
-        await task.save();
-        res.json(task);
-
-    } catch (err) {
-        console.error("UPDATE ERROR:", err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
+    await task.save();
+    res.json(task);
+});
 
 
 /* ================= IMAGES ================= */
-export const addImages = async (req, res) => {
-    try {
-        const task = await Task.findOne({
-            _id: req.params.id,
-            user: req.user.id
-        });
 
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
-        }
+export const addImages = asyncHandler(async (req, res) => {
+    const task = await Task.findOne({
+        _id: req.params.id,
+        user: req.user.id
+    });
 
-        const images = req.files.map(f => `/uploads/${f.filename}`);
-        task.images.push(...images);
+    if (!task)
+        return res.status(404).json({ error: "Task not found" });
 
-        await task.save();
-        res.json(task);
-    } catch (err) {
-        console.error("ADD IMAGE ERROR:", err);
-        res.status(500).json({ error: "Server error" });
+    // Validera alla uppladdade filer
+    for (const file of req.files) {
+        await validateUploadedFile(
+            path.join(process.cwd(), "uploads", file.filename)
+        );
     }
-};
 
-export const removeImage = async (req, res) => {
-    try {
-        const imagePath = req.query.image;
-        if (!imagePath) {
-            return res.status(400).json({ error: "Image query param missing" });
-        }
+    // Lägg till de nya bilderna i task.images
+    const images = req.files.map(f => `/uploads/${f.filename}`);
+    task.images.push(...images);
 
-        const task = await Task.findOne({
-            _id: req.params.id,
-            user: req.user.id
+    await task.save();
+
+    res.json(task);
+});
+
+
+
+export const removeImage = asyncHandler(async (req, res) => {
+
+    const imagePath = req.query.image;
+
+    if (!imagePath)
+        return res.status(400).json({
+            error: "Image query param missing"
         });
 
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
+    const task = await Task.findOne({
+        _id: req.params.id,
+        user: req.user.id
+    });
+
+    if (!task)
+        return res.status(404).json({
+            error: "Task not found"
+        });
+
+    const filename = path.basename(imagePath);
+
+    const exists = task.images.some(
+        img => path.basename(img) === filename
+    );
+
+    if (!exists)
+        return res.status(404).json({
+            error: "Image not found on task"
+        });
+
+    task.images = task.images.filter(
+        img => path.basename(img) !== filename
+    );
+
+    await task.save();
+
+    const filePath = path.join(
+        process.cwd(),
+        "uploads",
+        filename
+    );
+
+    try {
+        await fs.unlink(filePath);
+    } catch (err) {
+        if (process.env.NODE_ENV === "development") {
+            console.error(err);
         }
+    }
 
-        const filename = path.basename(imagePath);
+    res.json(task);
+});
 
-        const exists = task.images.some(
-            img => path.basename(img) === filename
-        );
 
-        if (!exists) {
-            return res.status(404).json({ error: "Image not found on task" });
-        }
+/* ================= DELETE TASK ================= */
 
-        task.images = task.images.filter(
-            img => path.basename(img) !== filename
-        );
+export const deleteTask = asyncHandler(async (req, res) => {
 
-        await task.save();
+    const task = await Task.findOne({
+        _id: req.params.id,
+        user: req.user.id
+    });
 
-        const filePath = path.join(process.cwd(), "uploads", filename);
-        try {
-            await fs.unlink(filePath);
-        } catch (err) {
-            if (process.env.NODE_ENV === "development") {
-                console.error(err);
+    if (!task)
+        return res.status(404).json({
+            error: "Task not found"
+        });
+
+    if (task.images?.length > 0) {
+
+        for (const imagePath of task.images) {
+            try {
+                const fullPath = path.join(
+                    process.cwd(),
+                    imagePath.replace(/^\/+/, "")
+                );
+
+                await fs.unlink(fullPath);
+            } catch (err) {
+                console.warn(
+                    "Could not delete file:",
+                    imagePath
+                );
             }
         }
-
-        res.json(task);
-    } catch (err) {
-        console.error("REMOVE IMAGE ERROR:", err);
-        res.status(500).json({ error: "Server error" });
     }
-};
 
+    await task.deleteOne();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-/* ================= OTHER ================= */
-export const deleteTask = async (req, res) => {
-    try {
-        const task = await Task.findOne({
-            _id: req.params.id,
-            user: req.user.id
-        });
-
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
-        }
-
-        // 🔥 Radera bilder från disk om de finns
-        if (task.images && task.images.length > 0) {
-            for (const imagePath of task.images) {
-                try {
-                    const fullPath = path.join(
-                        process.cwd(),
-                        imagePath.replace(/^\/+/, "")
-                    );
-
-                    await fs.unlink(fullPath);
-                } catch (err) {
-                    console.warn("Could not delete file:", imagePath);
-                }
-            }
-        }
-
-        await task.deleteOne();
-
-        res.json({ message: "Task deleted" });
-
-    } catch (err) {
-        console.error("DELETE TASK ERROR:", err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
+    res.json({ message: "Task deleted" });
+});
 
 
 /* ================= REORDER IMAGES ================= */
-export const reorderImages = async (req, res) => {
-    try {
-        const { images } = req.body;
 
-        if (!Array.isArray(images)) {
-            return res.status(400).json({
-                error: "Images array required"
-            });
-        }
+export const reorderImages = asyncHandler(async (req, res) => {
 
-        const task = await Task.findOne({
-            _id: req.params.id,
-            user: req.user.id
+    const { images } = req.body;
+
+    if (!Array.isArray(images))
+        return res.status(400).json({
+            error: "Images array required"
         });
 
-        if (!task) {
-            return res.status(404).json({
-                error: "Task not found"
-            });
-        }
+    const task = await Task.findOne({
+        _id: req.params.id,
+        user: req.user.id
+    });
 
-        // 🔥 Validera att alla skickade bilder redan finns på tasken
-        const existingImages = task.images.map(img => img.toString());
-
-        const isValid = images.every(img =>
-            existingImages.includes(img)
-        );
-
-        if (!isValid) {
-            return res.status(400).json({
-                error: "Invalid image order data"
-            });
-        }
-
-        task.images = images;
-        await task.save();
-
-        res.json(task);
-
-    } catch (err) {
-        console.error("REORDER ERROR:", err);
-        res.status(500).json({
-            error: "Server error"
-        });
-    }
-};
-
-
-export const toggleComplete = async (req, res) => {
-    try {
-        const task = await Task.findOne({
-            _id: req.params.id,
-            user: req.user.id
+    if (!task)
+        return res.status(404).json({
+            error: "Task not found"
         });
 
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
-        }
+    const existingImages = task.images.map(
+        img => img.toString()
+    );
 
-        task.completed = !task.completed;
-        await task.save();
+    const isValid = images.every(img =>
+        existingImages.includes(img)
+    );
 
-        res.json(task);
-    } catch (err) {
-        res.status(500).json({ error: "Server error" });
-    }
-};
+    if (!isValid)
+        return res.status(400).json({
+            error: "Invalid image order data"
+        });
+
+    task.images = images;
+    await task.save();
+
+    res.json(task);
+});
+
+
+export const toggleComplete = asyncHandler(async (req, res) => {
+
+    const task = await Task.findOne({
+        _id: req.params.id,
+        user: req.user.id
+    });
+
+    if (!task)
+        return res.status(404).json({
+            error: "Task not found"
+        });
+
+    task.completed = !task.completed;
+    await task.save();
+
+    res.json(task);
+});

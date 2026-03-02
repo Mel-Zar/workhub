@@ -278,6 +278,7 @@ workhub/
 │       │
 │       ├── middleware/
 │       │   ├── authMiddleware.js
+│       │   ├── errorMiddleware.js
 │       │   └── uploadMiddleware.js
 │       │
 │       ├── models/
