@@ -2,11 +2,13 @@
 
 ### Fullstack MERN Task Management Application
 
-WorkHub is a production-style fullstack task management application built using the **MERN stack (MongoDB, Express, React, Node.js)**.
+**Production-Style Fullstack MERN Task Management Application**
 
-It features secure **JWT authentication with refresh tokens**, protected routes, scalable API architecture, image uploads, filtering, pagination, and a modular frontend structure.
+WorkHub is a fullstack task management application built with the **MERN stack (MongoDB, Express, React, Node.js).**
 
-This project demonstrates real-world fullstack development practices including token lifecycle management, API abstraction layers, separation of concerns, and reusable component architecture.
+The project demonstrates real-world backend security practices, scalable architecture, token lifecycle management, and clean frontend structure using reusable components and centralized API handling.
+
+This project was built to reflect how a real SaaS-style dashboard application would be structured.
 
 ---
 
@@ -22,37 +24,46 @@ This project demonstrates real-world fullstack development practices including t
 
 - JWT Authentication (Access + Refresh Tokens)
 
-- Automatic token refresh handling
+- Refresh token rotation
 
-- Protected routes (PrivateRoute)
+- Protected routes with middleware
+
+- Login rate limiting
 
 - Password hashing with bcrypt
 
-- Logout & session invalidation
+- Session invalidation (logout)
 
-- Account deletion
+- Account deletion with password confirmation
+
+- Token expiration handling
+
+- Ownership-based authorization (users can only access their own tasks)
 
 #### 🗂 Task Management
 
 - Create / Edit / Delete tasks
 
-- Upload task images (Multer)
+- Upload multiple task images (Multer)
+
+- Automatic image cleanup on delete
+
+- Image reordering with validation
 
 - Filter by:
+  - Priority
 
-- Priority
+  - Category
 
-- Category
+  - Status
 
-- Status
+  - Deadline
 
-- Date
+- Full-text search
 
-- Search tasks
+- Sort with whitelist validation
 
-- Sort tasks
-
-- Pagination
+- Pagination with max-limit protection
 
 #### 👤 User Features
 
@@ -86,6 +97,40 @@ This project demonstrates real-world fullstack development practices including t
 
 - Production-style separation of concerns
 
+- 401 vs 403 status code handling
+
+- Login rate limiter (anti brute-force)
+
+- Ownership validation on all task operations
+
+- Safe query handling (sort whitelist)
+
+- Defensive max-limit pagination
+
+- Image cleanup on task deletion (prevents orphan files)
+
+---
+
+### 🔐 Security Design
+
+- Access Token expiry: 15 minutes
+
+- Refresh Token expiry: 7 days
+
+- Refresh token rotation
+
+- Token verification middleware
+
+- Ownership-based authorization
+
+- Rate limiting on login route
+
+- Helmet security headers
+
+- Controlled CORS configuration
+
+- Input sanitization logic
+
 ---
 
 ### 🖥️ Tech Stack
@@ -101,8 +146,6 @@ This project demonstrates real-world fullstack development practices including t
 - Custom Hooks
 
 - React Toastify
-
-- jwt-decode
 
 #### Backend
 
@@ -121,6 +164,10 @@ This project demonstrates real-world fullstack development practices including t
 - CORS
 
 - dotenv
+
+- Helmet (security headers)
+
+- express-rate-limit (brute force protection)
 
 ---
 
@@ -303,10 +350,19 @@ npm install
 Create `env` inside `/server`:
 
 ```bash
+# Server
 PORT=5001
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_access_secret
-JWT_REFRESH_SECRET=your_refresh_secret
+NODE_ENV=development
+
+# Database
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/workhub?retryWrites=true&w=majority
+
+# JWT
+JWT_SECRET=your_super_secure_access_token_secret
+JWT_REFRESH_SECRET=your_super_secure_refresh_token_secret
+
+# Frontend URL (for CORS)
+CLIENT_URL=http://localhost:5173
 ```
 
 Start backend:
@@ -335,7 +391,7 @@ npm install
 Install required frontend dependencies:
 
 ```bash
-npm install react react-dom react-router-dom react-toastify jwt-decode
+npm install react react-dom react-router-dom react-toastify
 ```
 
 Create `.env` inside `/client`:
@@ -355,6 +411,26 @@ Frontend runs on:
 ```bash
 http://localhost:5173
 ```
+
+---
+
+### 🌐 Deployment
+
+Recommended deployment stack:
+
+Frontend:
+
+- Vercel / Netlify
+
+Backend:
+
+- Render / Railway / Fly.io
+
+Database:
+
+- MongoDB Atlas
+
+Environment variables handled via platform secrets.
 
 ---
 
@@ -474,6 +550,14 @@ This project demonstrates:
 
 - Practical fullstack development skills
 
+- Demonstrates secure token lifecycle handling
+
+- Shows defensive backend design decisions
+
+- Implements production-style separation of concerns
+
+- Reflects scalable REST API structure
+
 It reflects how a real SaaS-style dashboard would be structured.
 
 ---
@@ -504,7 +588,7 @@ It reflects how a real SaaS-style dashboard would be structured.
 
 Web Developer (E-commerce specialization)
 
-Junior Fullstack Developer
+Fullstack Developer (MERN)
 
 ---
 

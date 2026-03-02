@@ -4,7 +4,7 @@ import TaskSort from "../TaskSort/TaskSort";
 import TaskSearch from "../TaskSearch/TaskSearch";
 import "./TaskControl.scss";
 
-function TaskControls({
+function TaskControl({
     filters,
     setFilters,
     categories,
@@ -142,4 +142,4 @@ function TaskControls({
     );
 }
 
-export default TaskControls;
+export default TaskControl;

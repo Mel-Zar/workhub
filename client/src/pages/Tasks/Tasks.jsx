@@ -4,7 +4,7 @@ import { useTasks } from "../../hooks/useTasks";
 import { useAuth } from "../../context/AuthContext/AuthContext";
 
 import TaskItem from "../../components/TaskItem/TaskItem";
-import TaskControls from "../../components/TaskControl/TaskControl";
+import TaskControl from "../../components/TaskControl/TaskControl";
 
 import "./Tasks.scss";
 
@@ -80,7 +80,7 @@ function Tasks() {
 
                 <div className="tasks-controls">
 
-                    <TaskControls
+                    <TaskControl
                         filters={filters}
                         setFilters={(data) => {
                             setPage(1);

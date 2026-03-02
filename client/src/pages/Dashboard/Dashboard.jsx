@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext/AuthContext";
 import { taskService } from "../../services/taskService";
 
 import TaskItem from "../../components/TaskItem/TaskItem";
-import TaskControls from "../../components/TaskControl/TaskControl";
+import TaskControl from "../../components/TaskControl/TaskControl";
 import TaskForm from "../../components/TaskForm/TaskForm";
 
 import "./Dashboard.scss";
@@ -151,7 +151,7 @@ function Dashboard() {
 
                 <div className="tasks-controls">
 
-                    <TaskControls
+                    <TaskControl
 
                         filters={filters}
 

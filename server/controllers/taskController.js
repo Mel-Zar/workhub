@@ -1,6 +1,8 @@
 import Task from "../models/Task.js";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
+import { fileURLToPath } from "url";
+
 
 /* ================= HELPERS ================= */
 const buildQuery = (userId, search, priority, completed, category) => {
@@ -43,8 +45,9 @@ export const getTasks = async (req, res) => {
         if (sortBy && allowedSortFields.includes(sortBy)) {
             sortOption = { [sortBy]: 1 };
         }
-        console.log("REQ QUERY:", req.query);
-
+        if (process.env.NODE_ENV === "development") {
+            console.log("REQ QUERY:", req.query);
+        }
         const total = await Task.countDocuments(query);
 
         const tasks = await Task.find(query)
@@ -109,19 +112,33 @@ export const updateTask = async (req, res) => {
             user: req.user.id
         });
 
-        if (!task) {
+        if (!task)
             return res.status(404).json({ error: "Task not found" });
-        }
 
-        Object.assign(task, req.body);
+        const allowedFields = [
+            "title",
+            "description",
+            "category",
+            "priority",
+            "deadline",
+            "completed"
+        ];
+
+        allowedFields.forEach(field => {
+            if (req.body[field] !== undefined) {
+                task[field] = req.body[field];
+            }
+        });
+
         await task.save();
-
         res.json(task);
+
     } catch (err) {
         console.error("UPDATE ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
+
 
 /* ================= IMAGES ================= */
 export const addImages = async (req, res) => {
@@ -179,7 +196,13 @@ export const removeImage = async (req, res) => {
         await task.save();
 
         const filePath = path.join(process.cwd(), "uploads", filename);
-        fs.unlink(filePath, () => { });
+        try {
+            await fs.unlink(filePath);
+        } catch (err) {
+            if (process.env.NODE_ENV === "development") {
+                console.error(err);
+            }
+        }
 
         res.json(task);
     } catch (err) {
@@ -188,10 +211,14 @@ export const removeImage = async (req, res) => {
     }
 };
 
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 /* ================= OTHER ================= */
 export const deleteTask = async (req, res) => {
     try {
-        const task = await Task.findOneAndDelete({
+        const task = await Task.findOne({
             _id: req.params.id,
             user: req.user.id
         });
@@ -200,62 +227,81 @@ export const deleteTask = async (req, res) => {
             return res.status(404).json({ error: "Task not found" });
         }
 
+        // 🔥 Radera bilder från disk om de finns
+        if (task.images && task.images.length > 0) {
+            for (const imagePath of task.images) {
+                try {
+                    const fullPath = path.join(
+                        process.cwd(),
+                        imagePath.replace(/^\/+/, "")
+                    );
+
+                    await fs.unlink(fullPath);
+                } catch (err) {
+                    console.warn("Could not delete file:", imagePath);
+                }
+            }
+        }
+
+        await task.deleteOne();
+
         res.json({ message: "Task deleted" });
+
     } catch (err) {
+        console.error("DELETE TASK ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
 
+
 /* ================= REORDER IMAGES ================= */
-
 export const reorderImages = async (req, res) => {
-
     try {
-
         const { images } = req.body;
 
-        if (!images || !Array.isArray(images)) {
-
+        if (!Array.isArray(images)) {
             return res.status(400).json({
                 error: "Images array required"
             });
-
         }
 
         const task = await Task.findOne({
-
             _id: req.params.id,
             user: req.user.id
-
         });
 
         if (!task) {
-
             return res.status(404).json({
                 error: "Task not found"
             });
+        }
 
+        // 🔥 Validera att alla skickade bilder redan finns på tasken
+        const existingImages = task.images.map(img => img.toString());
+
+        const isValid = images.every(img =>
+            existingImages.includes(img)
+        );
+
+        if (!isValid) {
+            return res.status(400).json({
+                error: "Invalid image order data"
+            });
         }
 
         task.images = images;
-
         await task.save();
 
         res.json(task);
 
-    }
-
-    catch (err) {
-
+    } catch (err) {
         console.error("REORDER ERROR:", err);
-
         res.status(500).json({
             error: "Server error"
         });
-
     }
-
 };
+
 
 export const toggleComplete = async (req, res) => {
     try {

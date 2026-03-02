@@ -31,7 +31,7 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ error: "All fields are required" });
 
         const emailRegex = /\S+@\S+\.\S+/;
-        if (!emailRegex.test(email))
+        if (!emailRegex.test(normalizedEmail))
             return res.status(400).json({ error: "Invalid email format" });
 
         if (password.length < 6)
@@ -60,16 +60,19 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const normalizedEmail = email.toLowerCase().trim();
 
         if (!email || !password)
             return res.status(400).json({ error: "Email and password required" });
 
+        const normalizedEmail = email.toLowerCase().trim();
+
         const user = await User.findOne({ email: normalizedEmail });
-        if (!user) return res.status(400).json({ error: "Invalid credentials" });
+        if (!user)
+            return res.status(401).json({ error: "Invalid credentials" });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+        if (!isMatch)
+            return res.status(401).json({ error: "Invalid credentials" });
 
         const accessToken = createAccessToken(user);
         const refreshToken = createRefreshToken(user);
@@ -86,11 +89,13 @@ const loginUser = async (req, res) => {
                 email: user.email
             }
         });
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });
     }
 };
+
 
 // ================= UPDATE PROFILE =================
 const updateUser = async (req, res) => {
@@ -115,7 +120,16 @@ const updateUser = async (req, res) => {
 
         // Uppdatera fält
         if (name) user.name = name;
-        if (email) user.email = email;
+        if (email) {
+            const normalizedEmail = email.toLowerCase().trim();
+
+            const existingUser = await User.findOne({ email: normalizedEmail });
+
+            if (existingUser && existingUser._id.toString() !== userId)
+                return res.status(400).json({ error: "Email already in use" });
+
+            user.email = normalizedEmail;
+        }
 
         if (newPassword) {
             if (newPassword.length < 6)
@@ -192,14 +206,23 @@ const refreshAccessToken = async (req, res) => {
         if (!user || user.refreshToken !== refreshToken)
             return res.status(403).json({ error: "Invalid refresh token" });
 
+        // 🔥 ROTATE refresh token
+        const newRefreshToken = createRefreshToken(user);
+        user.refreshToken = newRefreshToken;
+        await user.save();
+
         const newAccessToken = createAccessToken(user);
-        res.json({ accessToken: newAccessToken });
+
+        res.json({
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken
+        });
 
     } catch (err) {
-        console.error(err);
-        res.status(403).json({ error: "Invalid refresh token" });
+        return res.status(403).json({ error: "Invalid refresh token" });
     }
 };
+
 
 // ================= LOGOUT =================
 const logout = async (req, res) => {
@@ -209,19 +232,43 @@ const logout = async (req, res) => {
         if (!refreshToken)
             return res.status(400).json({ error: "Refresh token required" });
 
-        const user = await User.findOne({ refreshToken });
+        try {
+            // Försök verifiera normalt
+            const payload = jwt.verify(
+                refreshToken,
+                process.env.JWT_REFRESH_SECRET
+            );
 
-        if (user) {
-            user.refreshToken = null;
-            await user.save();
+            const user = await User.findById(payload.id);
+
+            if (user) {
+                user.refreshToken = null;
+                await user.save();
+            }
+
+        } catch (err) {
+            // Om expired eller invalid – försök hitta user ändå
+            const decoded = jwt.decode(refreshToken);
+
+            if (decoded?.id) {
+                const user = await User.findById(decoded.id);
+                if (user) {
+                    user.refreshToken = null;
+                    await user.save();
+                }
+            }
         }
 
+        // 🔥 Logout ska alltid vara idempotent
         res.json({ message: "Logged out" });
+
     } catch (err) {
-        console.error(err);
+        console.error("LOGOUT ERROR:", err);
         res.status(500).json({ error: "Server error" });
     }
 };
+
+
 
 export {
     registerUser,
